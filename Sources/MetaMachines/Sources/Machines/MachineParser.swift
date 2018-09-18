@@ -1,9 +1,9 @@
 /*
- * Transition.swift 
- * Machines 
+ * MachineParser.swift
+ * Machines
  *
- * Created by Callum McColl on 19/02/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 18/9/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,23 +56,37 @@
  *
  */
 
- public struct Transition {
+import Foundation
+import SwiftMachines
 
-    public let target: String
-
-    public let condition: String?
-
-    public init(target: String, condition: String?) {
-        self.target = target
-        self.condition = condition
+public final class MachineParser {
+    
+    public fileprivate(set) var errors: [String] = []
+    
+    public var lastError: String? {
+        return self.errors.last
     }
-
- }
-
- extension Transition: Equatable {}
-
- public func == (lhs: Transition, rhs: Transition) -> Bool {
-     return
-        lhs.target == rhs.target &&
-        lhs.condition == rhs.condition
- }
+    
+    fileprivate let swiftParser: SwiftMachines.MachineParser
+    
+    public init(swiftParser: SwiftMachines.MachineParser = SwiftMachines.MachineParser()) {
+        self.swiftParser = swiftParser
+    }
+    
+    public func parseMachine(atPath path: String) -> Machine? {
+        self.errors = []
+        let machineDir = URL(fileURLWithPath: path, isDirectory: true)
+        let swiftFile = machineDir.appendingPathComponent("SwiftIncludePath", isDirectory: false)
+        let exists = (try? swiftFile.checkResourceIsReachable()) ?? false
+        if false == exists {
+            self.errors.append("C++ Machines are currently not supported.")
+            return nil
+        }
+        guard let swiftMachine = self.swiftParser.parseMachine(atPath: path) else {
+            self.errors = self.swiftParser.errors
+            return nil
+        }
+        return .swiftMachine(swiftMachine)
+    }
+    
+}
