@@ -1,9 +1,9 @@
 /*
- * MachineParser.swift
+ * AttributeGroup.swift
  * Machines
  *
- * Created by Callum McColl on 18/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 29/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,37 +56,15 @@
  *
  */
 
-import Foundation
-import SwiftMachines
-
-public final class MachineParser {
+public struct AttributeGroup: Hashable, Codable {
     
-    public fileprivate(set) var errors: [String] = []
+    public var name: String
     
-    public var lastError: String? {
-        return self.errors.last
-    }
+    public var attributes: [String: Attribute]
     
-    fileprivate let swiftParser: SwiftMachines.MachineParser
-    
-    public init(swiftParser: SwiftMachines.MachineParser = SwiftMachines.MachineParser()) {
-        self.swiftParser = swiftParser
-    }
-    
-    public func parseMachine(atPath path: String) -> Machine? {
-        self.errors = []
-        let machineDir = URL(fileURLWithPath: path, isDirectory: true)
-        let swiftFile = machineDir.appendingPathComponent("SwiftIncludePath", isDirectory: false)
-        let exists = (try? swiftFile.checkResourceIsReachable()) ?? false
-        if false == exists {
-            self.errors.append("Machine at path \(path) is using an unsupported semantics.")
-            return nil
-        }
-        guard let swiftMachine = self.swiftParser.parseMachine(atPath: path) else {
-            self.errors = self.swiftParser.errors
-            return nil
-        }
-        return Machine(from: swiftMachine)
+    public init(name: String, attributes: [String: Attribute]) {
+        self.name = name
+        self.attributes = attributes
     }
     
 }
