@@ -1,8 +1,8 @@
 /*
- * AttributePath.swift
+ * TransitionPath.swift
  * Machines
  *
- * Created by Callum McColl on 3/11/20.
+ * Created by Callum McColl on 4/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,8 +56,28 @@
  *
  */
 
-struct AttributePath: MachinePathProtocol {
+import Attributes
+
+extension Path where Value == Transition {
     
-    var path: WritableKeyPath<Machine, Attribute>
+    var condition: OptionalPath<Root, Expression> {
+        OptionalPath<Root, String>(path: path.appending(path: \.condition))
+    }
+    
+    var source: OptionalPath<Root, String> {
+        OptionalPath<Root, String>(path: path.appending(path: \.source))
+    }
+    
+    var target: OptionalPath<Root, String> {
+        OptionalPath<Root, String>(path: path.appending(path: \.target))
+    }
+    
+    var attributes: Path<Root, [AttributeGroup]> {
+        return Path<Root, [AttributeGroup]>(path: path.appending(path: \.attributes))
+    }
+    
+    var metaData: Path<Root, [AttributeGroup]> {
+        return Path<Root, [AttributeGroup]>(path: path.appending(path: \.metaData))
+    }
     
 }

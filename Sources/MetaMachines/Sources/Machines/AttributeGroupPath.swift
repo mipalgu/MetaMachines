@@ -1,8 +1,8 @@
 /*
- * LineAttributeValidator.swift
- * Machines
+ * AttributeGroupPath.swift
+ * Attributes
  *
- * Created by Callum McColl on 3/11/20.
+ * Created by Callum McColl on 4/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,28 @@
  *
  */
 
-public struct LineAttributeValidator {
+import Attributes
+
+extension Path where Value == AttributeGroup {
     
-    public let path: [String]
+    var name: Path<Root, String> {
+        return Path<Root, String>(path: path.appending(path: \.name))
+    }
     
-    public func validate(_ attribute: Attribute) throws {
-        
-        
-        
+    var variables: OptionalPath<Root, VariableList> {
+        return OptionalPath<Root, VariableList>(path: path.appending(path: \.variables))
+    }
+    
+    var fields: Path<Root, [String: AttributeType]> {
+        return Path<Root, [String: AttributeType]>(path: path.appending(path: \.fields))
+    }
+    
+    var attributes: Path<Root, [String: Attribute]> {
+        return Path<Root, [String: Attribute]>(path: path.appending(path: \.attributes))
+    }
+    
+    var metaData: Path<Root, [String: Attribute]> {
+        return Path<Root, [String: Attribute]>(path: path.appending(path: \.metaData))
     }
     
 }
