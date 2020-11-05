@@ -1,8 +1,8 @@
 /*
- * Language.swift
- * Machines
+ * MachinePathProtocol.swift
+ * Attributes
  *
- * Created by Callum McColl on 2/11/20.
+ * Created by Callum McColl on 4/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,11 +56,6 @@
  *
  */
 
-public enum Language: String, Hashable, Codable {
-    
-    case c
-    case cxx
-    case swift
-    case other
-    
-}
+import Attributes
+
+public protocol MachinePathProtocol: PathProtocol where Root == Machine {}
