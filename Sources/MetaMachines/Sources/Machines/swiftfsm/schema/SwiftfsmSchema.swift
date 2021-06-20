@@ -66,7 +66,6 @@ public struct SwiftfsmSchema: SchemaProtocol {
     
     var variables: SwiftfsmVariables
     
-    
 }
 
 public struct SwiftfsmVariables: GroupProtocol {
@@ -77,11 +76,12 @@ public struct SwiftfsmVariables: GroupProtocol {
         label: "external_variables",
         columns: [
             .enumerated(label: "access_type", validValues: ["sensor", "actuator", "environment"]),
-            .line(label: "label", validation: .required()),
-            .expression(label: "type", language: .swift, validation: .required()),
+            .line(label: "label", validation: .required().alphaunderscore().notEmpty()),
+            .expression(label: "type", language: .swift, validation: .required().alphaunderscore().notEmpty()),
             .expression(label: "value", language: .swift, validation: .required())
         ],
-        available: true
+        available: true,
+        validation: .required()
     )
     var externalVariables
     
@@ -89,11 +89,12 @@ public struct SwiftfsmVariables: GroupProtocol {
         label: "machine_variables",
         columns: [
             .enumerated(label: "access_type", validValues: ["let", "var"]),
-            .line(label: "label", validation: .required()),
-            .expression(label: "type", language: .swift, validation: .required()),
+            .line(label: "label", validation: .required().alphaunderscore().notEmpty()),
+            .expression(label: "type", language: .swift, validation: .required().alphaunderscore().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: .required())
         ],
-        available: true
+        available: true,
+        validation: .required()
     )
     var machineVariables
     
@@ -112,8 +113,8 @@ public struct SwiftfsmParameters: ComplexProtocol {
     @TableProperty(
         label: "parameters",
         columns: [
-            .line(label: "label", validation: .required()),
-            .expression(label: "type", language: .swift, validation: .required()),
+            .line(label: "label", validation: .required().alphaunderscore().notEmpty()),
+            .expression(label: "type", language: .swift, validation: .required().alphaunderscore().notEmpty()),
             .expression(label: "default_value", language: .swift, validation: .required())
         ],
         available: false
