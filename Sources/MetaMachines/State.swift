@@ -83,7 +83,7 @@ public struct State: Hashable, Codable, Identifiable {
         self.metaData = metaData
     }
     
-    public func targetTransitions(in machine: Machine) -> [Transition] {
+    public func targetTransitions(in machine: MetaMachine) -> [Transition] {
         return machine.states.flatMap{ $0.transitions.filter { $0.target == name } }
     }
     

@@ -75,9 +75,9 @@ public struct SwiftfsmSchema: MachineSchema {
 
 public struct SwiftfsmVariables: GroupProtocol {
     
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
-    public let path = Machine.path.attributes[0]
+    public let path = MetaMachine.path.attributes[0]
 
     @TableProperty(
         label: "external_variables",
@@ -110,11 +110,11 @@ public struct SwiftfsmVariables: GroupProtocol {
 
 public struct SwiftfsmParameters: ComplexProtocol {
     
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
-    public let path = Machine.path.attributes[0].attributes["parameters"].wrappedValue
+    public let path = MetaMachine.path.attributes[0].attributes["parameters"].wrappedValue
     
-    @TriggerBuilder<Machine>
+    @TriggerBuilder<MetaMachine>
     public var triggers: some TriggerProtocol {
         WhenTrue(enableParameters, makeAvailable: parameters)
         WhenFalse(enableParameters, makeUnavailable: parameters)
@@ -137,10 +137,10 @@ public struct SwiftfsmParameters: ComplexProtocol {
 
 public struct SwiftfsmRinglet: GroupProtocol {
     
-    public let path = Machine.path.attributes[1]
+    public let path = MetaMachine.path.attributes[1]
     
-    @TriggerBuilder<Machine>
-    public var triggers: AnyTrigger<Machine> {
+    @TriggerBuilder<MetaMachine>
+    public var triggers: AnyTrigger<MetaMachine> {
         WhenTrue(useCustomRinglet, makeAvailable: actions)
         WhenTrue(useCustomRinglet, makeAvailable: ringletVariables)
         WhenTrue(useCustomRinglet, makeAvailable: imports)
@@ -179,9 +179,9 @@ public struct SwiftfsmRinglet: GroupProtocol {
 
 public struct SwiftfsmSettings: GroupProtocol {
     
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
-    public let path = Machine.path.attributes[2]
+    public let path = MetaMachine.path.attributes[2]
     
     @EnumeratedProperty(label: "suspend_state", validValues: [])
     var suspendState
@@ -193,9 +193,9 @@ public struct SwiftfsmSettings: GroupProtocol {
 
 public struct SwiftfsmModuleDependencies: ComplexProtocol {
     
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
-    public let path = Machine.path.attributes[2].attributes["module_dependencies"].wrappedValue
+    public let path = MetaMachine.path.attributes[2].attributes["module_dependencies"].wrappedValue
     
     @ComplexCollectionProperty(base: SwiftfsmPackage(), label: "packages")
     var packages
@@ -204,10 +204,10 @@ public struct SwiftfsmModuleDependencies: ComplexProtocol {
 
 public struct SwiftfsmPackage: ComplexProtocol {
     
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
     public let path = CollectionSearchPath(
-        Machine.path
+        MetaMachine.path
             .attributes[2]
             .attributes["module_dependencies"]
             .wrappedValue

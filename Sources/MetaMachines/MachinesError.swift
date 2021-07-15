@@ -58,12 +58,12 @@
 
 import Attributes
 
-public typealias MachinesError = AttributeError<Machine>
+public typealias MachinesError = AttributeError<MetaMachine>
 
-extension AttributeError where Root == Machine {
+extension AttributeError where Root == MetaMachine {
     
-    public static func unsupportedSemantics(_ semantics: Machine.Semantics) -> AttributeError<Machine> {
-        return AttributeError(message: "Unsupported semantics \(semantics)", path: Machine.path.semantics)
+    public static func unsupportedSemantics(_ semantics: MetaMachine.Semantics) -> AttributeError<MetaMachine> {
+        return AttributeError(message: "Unsupported semantics \(semantics)", path: MetaMachine.path.semantics)
     }
     
 }

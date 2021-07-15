@@ -61,41 +61,41 @@ import Foundation
 
 public protocol MachineMutator: DependencyLayoutContainer {
     
-    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T]
+    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T]
     
-    func moveItems<Path: PathProtocol, T>(attribute: Path, machine: inout Machine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine, Path.Value == [T]
+    func moveItems<Path: PathProtocol, T>(attribute: Path, machine: inout MetaMachine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T]
     
-    func newDependency(_ dependency: MachineDependency, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func newDependency(_ dependency: MachineDependency, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func newState(machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func newState(machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func newTransition(source: StateName, target: StateName, condition: Expression?, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func newTransition(source: StateName, target: StateName, condition: Expression?, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func delete(dependencies: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func delete(dependencies: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func delete(states: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func delete(states: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func deleteDependency(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func deleteDependency(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func deleteState(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func deleteState(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>>
+    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
     
-    func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine, Path.Value == [T]
+    func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T]
     
-    func deleteItem<Path: PathProtocol, T>(attribute: Path, atIndex: Int, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine, Path.Value == [T]
+    func deleteItem<Path: PathProtocol, T>(attribute: Path, atIndex: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T]
     
-    func modify<Path: PathProtocol>(attribute: Path, value: Path.Value, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine
+    func modify<Path: PathProtocol>(attribute: Path, value: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine
     
-    func validate(machine: Machine) throws
+    func validate(machine: MetaMachine) throws
     
 }
 
 extension MachineMutator {
     
-    public func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine, Path.Value == [T] {
+    public func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
         var triggers: Bool = false
         for index in items.sorted(by: >) {
             switch self.deleteItem(attribute: attribute, atIndex: index, machine: &machine) {

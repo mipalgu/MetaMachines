@@ -49,12 +49,12 @@ class VHDLMachinesValidator: MachineValidator {
         dataTypes.union(vhdlTypes).union(reservedWords)
     }
     
-    private lazy var validator: AnyValidator<Machine> = {
-        Machine.path.validate { validator in
+    private lazy var validator: AnyValidator<MetaMachine> = {
+        MetaMachine.path.validate { validator in
             validator.name.alphadash().notEmpty().maxLength(64)
-            validator.initialState.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+            validator.initialState.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
             validator.states.maxLength(128)
-            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<Machine, State>>) in
+            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<MetaMachine, State>>) in
                 state.name
                     .notEmpty()
                     .alphafirst()
@@ -71,7 +71,7 @@ class VHDLMachinesValidator: MachineValidator {
                 }
                 state.transitions.maxLength(128)
                 state.transitions.each { (_, transition) in
-                    transition.target.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+                    transition.target.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
                     transition.condition.if { $0 != nil } then: {
                         transition.condition.wrappedValue.maxLength(1024)
                     }
@@ -81,7 +81,7 @@ class VHDLMachinesValidator: MachineValidator {
                 state.attributes[0].validate { variables in
                     variables.attributes["externals"].required()
                     variables.attributes["externals"].wrappedValue.blockAttribute.enumerableCollectionValue.each { (_, external) in
-                        external.in(Machine.path.attributes[0].attributes["externals"].wrappedValue.tableValue) {
+                        external.in(MetaMachine.path.attributes[0].attributes["externals"].wrappedValue.tableValue) {
                             Set($0.map { $0[1].lineValue })
                         }
                     }
@@ -246,7 +246,7 @@ class VHDLMachinesValidator: MachineValidator {
         }
     }()
     
-    func validate(machine: Machine) throws {
+    func validate(machine: MetaMachine) throws {
         if machine.semantics != .vhdl {
             throw MachinesError.unsupportedSemantics(machine.semantics)
         }

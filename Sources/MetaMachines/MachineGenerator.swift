@@ -75,14 +75,14 @@ public final class MachineGenerator {
         self.swiftGenerator = swiftGenerator
     }
     
-    public func generate(_ machine: Machine) -> (URL, [URL])? {
+    public func generate(_ machine: MetaMachine) -> (URL, [URL])? {
         self.errors = []
         switch machine.semantics {
         case .swiftfsm:
             let swiftMachine: SwiftMachines.Machine
             do {
                 swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
+            } catch let e as ConversionError<MetaMachine> {
                 self.errors.append(e.message)
                 return nil
             } catch let e {
@@ -98,7 +98,7 @@ public final class MachineGenerator {
             let cxxMachine: CXXBase.Machine
             do {
                 cxxMachine = try CXXBaseConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
+            } catch let e as ConversionError<MetaMachine> {
                 self.errors.append(e.message)
                 return nil
             } catch let e {
@@ -114,7 +114,7 @@ public final class MachineGenerator {
             let vhdlMachine: VHDLMachines.Machine
             do {
                 vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
+            } catch let e as ConversionError<MetaMachine> {
                 self.errors.append(e.message)
                 return nil
             } catch let e {

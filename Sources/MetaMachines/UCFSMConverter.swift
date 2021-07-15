@@ -18,7 +18,7 @@ struct UCFSMConverter {
         ]
     }
     
-    func initialUCFSMMachine(filePath: URL) -> Machine {
+    func initialUCFSMMachine(filePath: URL) -> MetaMachine {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let ucfsmMachine = CXXBase.Machine(
             name: name,

@@ -60,20 +60,20 @@ import Attributes
 
 struct SwiftfsmMachineValidator: MachineValidator {
     
-    private let validator: AnyValidator<Machine> = {
-        Machine.path.validate { validator in
+    private let validator: AnyValidator<MetaMachine> = {
+        MetaMachine.path.validate { validator in
             validator.name.alphadash().notEmpty().maxLength(64)
-            validator.initialState.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+            validator.initialState.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
             //validator.suspendState.in(machine.path.states, transform: { Set($0.map { $0.name }) })
             validator.states.maxLength(128)
-            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<Machine, State>>) in
+            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<MetaMachine, State>>) in
                 state.name
                     .alphadash()
                     .notEmpty()
                     .maxLength(64)
                 state.transitions.maxLength(128)
                 state.transitions.each { (_, transition) in
-                    transition.target.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+                    transition.target.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
                     transition.condition.if { $0 != nil } then: {
                         transition.condition.wrappedValue.maxLength(1024)
                     }
@@ -98,7 +98,7 @@ struct SwiftfsmMachineValidator: MachineValidator {
                         .if { $0.boolValue } then: {
                             settings.attributes["external_variables"].required()
                             settings.attributes["external_variables"].wrappedValue.blockAttribute.enumerableCollectionValue.each { (_, external) in
-                                external.in(Machine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue) {
+                                external.in(MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue) {
                                     Set($0.map { $0[1].lineValue })
                                 }
                             }
@@ -178,7 +178,7 @@ struct SwiftfsmMachineValidator: MachineValidator {
                 attributes[2].validate { settings in
                     settings.attributes["suspend_state"].required()
                     settings.attributes["suspend_state"].wrappedValue.lineAttribute.enumeratedValue.validate { suspendState in
-                        suspendState.in(Machine.path.states, transform: { Set($0.map {$0.name} + [""]) })
+                        suspendState.in(MetaMachine.path.states, transform: { Set($0.map {$0.name} + [""]) })
                     }
                     settings.attributes["module_dependencies"].required()
                     settings.attributes["module_dependencies"].wrappedValue.blockAttribute.complexValue.validate { moduleDependencies in
@@ -231,7 +231,7 @@ struct SwiftfsmMachineValidator: MachineValidator {
         }
     }()
     
-    func validate(machine: Machine) throws {
+    func validate(machine: MetaMachine) throws {
         if machine.semantics != .swiftfsm {
             throw MachinesError.unsupportedSemantics(machine.semantics)
         }

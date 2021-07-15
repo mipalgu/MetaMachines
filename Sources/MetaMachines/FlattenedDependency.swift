@@ -61,7 +61,7 @@ public struct FlattenedDependency {
     
     public var name: String
     
-    public var machine: Machine
+    public var machine: MetaMachine
     
     public var dependencies: [FlattenedDependency]
     

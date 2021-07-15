@@ -58,6 +58,6 @@
 
 struct NullMachineValidator: MachineValidator {
     
-    func validate(machine _: Machine) throws {}
+    func validate(machine _: MetaMachine) throws {}
     
 }

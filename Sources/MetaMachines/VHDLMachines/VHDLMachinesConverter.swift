@@ -11,7 +11,7 @@ import Attributes
 
 struct VHDLMachinesConverter {
     
-    public func initialVHDLMachine(filePath: URL) -> Machine {
+    public func initialVHDLMachine(filePath: URL) -> MetaMachine {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let defaultActions = [
             "OnEntry": "",
@@ -290,8 +290,8 @@ struct VHDLMachinesConverter {
         return attributes
     }
     
-    func toMachine(machine: VHDLMachines.Machine) -> Machine {
-        Machine(
+    func toMachine(machine: VHDLMachines.Machine) -> MetaMachine {
+        MetaMachine(
             semantics: .vhdl,
             filePath: machine.path,
             initialState: machine.states[machine.initialState].name,
@@ -539,7 +539,7 @@ struct VHDLMachinesConverter {
         )
     }
     
-    func getIncludes(machine: Machine) -> [String] {
+    func getIncludes(machine: MetaMachine) -> [String] {
         guard
             machine.attributes.count == 4,
             let includes = machine.attributes[1].attributes["includes"]?.codeValue
@@ -551,7 +551,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getExternalSignals(machine: Machine) -> [ExternalSignal] {
+    func getExternalSignals(machine: MetaMachine) -> [ExternalSignal] {
         guard
             machine.attributes.count == 4,
             let signals = machine.attributes[0].attributes["external_signals"]?.tableValue
@@ -568,7 +568,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getVHDLVariables(machine: Machine, key: String) -> [VHDLVariable] {
+    func getVHDLVariables(machine: MetaMachine, key: String) -> [VHDLVariable] {
         guard
             machine.attributes.count == 4,
             let variables = machine.attributes[0].attributes[key]?.tableValue
@@ -586,7 +586,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getExternalVariables(machine: Machine) -> [ExternalVariable] {
+    func getExternalVariables(machine: MetaMachine) -> [ExternalVariable] {
         guard
             machine.attributes.count == 4,
             let variables = machine.attributes[0].attributes["external_variables"]?.tableValue
@@ -605,7 +605,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getParameters(machine: Machine, key: String) -> [Parameter] {
+    func getParameters(machine: MetaMachine, key: String) -> [Parameter] {
         guard
             machine.attributes.count == 4,
             let variables = machine.attributes[1].attributes[key]?.tableValue
@@ -622,7 +622,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getClocks(machine: Machine) -> [Clock] {
+    func getClocks(machine: MetaMachine) -> [Clock] {
         guard
             machine.attributes.count == 4,
             let clocks = machine.attributes[0].attributes["clocks"]?.tableValue
@@ -637,7 +637,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getDrivingClock(machine: Machine) -> Int {
+    func getDrivingClock(machine: MetaMachine) -> Int {
         guard
             machine.attributes.count == 4,
             let clock = machine.attributes[0].attributes["driving_clock"]?.enumeratedValue,
@@ -648,7 +648,7 @@ struct VHDLMachinesConverter {
         return index
     }
     
-    func getDependentMachines(machine: Machine) -> [MachineName: URL] {
+    func getDependentMachines(machine: MetaMachine) -> [MachineName: URL] {
         var machines: [MachineName: URL] = [:]
         machine.dependencies.forEach {
             machines[$0.name] = $0.filePath
@@ -656,7 +656,7 @@ struct VHDLMachinesConverter {
         return machines
     }
     
-    func getMachineVariables(machine: Machine) -> [VHDLVariable] {
+    func getMachineVariables(machine: MetaMachine) -> [VHDLVariable] {
         guard
             machine.attributes.count == 4,
             let variables = machine.attributes[0].attributes["machine_variables"]?.tableValue
@@ -674,7 +674,7 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getMachineSignals(machine: Machine) -> [MachineSignal] {
+    func getMachineSignals(machine: MetaMachine) -> [MachineSignal] {
         guard
             machine.attributes.count == 4,
             let signals = machine.attributes[0].attributes["machine_signals"]?.tableValue
@@ -691,7 +691,7 @@ struct VHDLMachinesConverter {
         }
     }
 
-    func getTransitions(machine: Machine) -> [VHDLMachines.Transition] {
+    func getTransitions(machine: MetaMachine) -> [VHDLMachines.Transition] {
         machine.states.indices.flatMap { stateIndex in
             machine.states[stateIndex].transitions.map { transition in
                 guard let targetIndex = machine.states.firstIndex(where: { transition.target == $0.name }) else {
@@ -702,14 +702,14 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func getCodeIncludes(machine: Machine, key: String) -> String? {
+    func getCodeIncludes(machine: MetaMachine, key: String) -> String? {
         guard let val = machine.attributes[1].attributes[key]?.codeValue else {
             return nil
         }
         return val == "" ? nil : val
     }
     
-    func getOutputs(machine: Machine, key: String) -> [ReturnableVariable] {
+    func getOutputs(machine: MetaMachine, key: String) -> [ReturnableVariable] {
         guard
             machine.attributes.count == 4,
             let returns = machine.attributes[1].attributes[key]?.tableValue
@@ -722,14 +722,14 @@ struct VHDLMachinesConverter {
         }
     }
     
-    func isParameterised(machine: Machine) -> Bool {
+    func isParameterised(machine: MetaMachine) -> Bool {
         guard let isParameterised = machine.attributes[1].attributes["is_parameterised"]?.boolValue else {
             fatalError("Cannot discern if machine is parameterised")
         }
         return isParameterised
     }
 
-    func convert(machine: Machine) throws -> VHDLMachines.Machine {
+    func convert(machine: MetaMachine) throws -> VHDLMachines.Machine {
         let validator = VHDLMachinesValidator()
         try validator.validate(machine: machine)
         let vhdlStates = machine.states.map(toState)

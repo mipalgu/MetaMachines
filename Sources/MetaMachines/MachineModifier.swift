@@ -10,8 +10,8 @@ import Attributes
 
 public protocol MachineModifier {
     
-    func didModify<Path: PathProtocol>(attribute: Path, oldValue: Path.Value, newValue: Path.Value, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine
+    func didModify<Path: PathProtocol>(attribute: Path, oldValue: Path.Value, newValue: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine
     
-    func validate(machine: Machine) throws
+    func validate(machine: MetaMachine) throws
     
 }

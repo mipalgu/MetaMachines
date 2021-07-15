@@ -59,9 +59,9 @@
 import Foundation
 import SwiftMachines
 
-extension Machine: SwiftMachinesConvertible {
+extension MetaMachine: SwiftMachinesConvertible {
     
-    public static func initialSwiftMachine(filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)) -> Machine {
+    public static func initialSwiftMachine(filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)) -> MetaMachine {
         return SwiftfsmConverter().initial(filePath: filePath)
     }
     

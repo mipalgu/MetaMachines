@@ -21,7 +21,7 @@ struct CLFSMConverter {
         ]
     }
     
-    func initialCLFSMMachine(filePath: URL) -> Machine {
+    func initialCLFSMMachine(filePath: URL) -> MetaMachine {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let clfsmMachine = CXXBase.Machine(
             name: name,

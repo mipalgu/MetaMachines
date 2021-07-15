@@ -73,14 +73,14 @@ public final class MachineAssembler {
         self.swiftAssembler = swiftAssembler
     }
     
-    public func assemble(_ machine: Machine, inDirectory buildDir: URL) -> (URL, [URL])? {
+    public func assemble(_ machine: MetaMachine, inDirectory buildDir: URL) -> (URL, [URL])? {
         self.errors = []
         switch machine.semantics {
         case .swiftfsm:
             let swiftMachine: SwiftMachines.Machine
             do {
                 swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
+            } catch let e as ConversionError<MetaMachine> {
                 self.errors.append(e.message)
                 return nil
             } catch let e {

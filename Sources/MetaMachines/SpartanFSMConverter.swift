@@ -19,7 +19,7 @@ struct SpartanFSMConverter {
         ]
     }
     
-    func intialSpartanFSMMachine(filePath: URL) -> Machine {
+    func intialSpartanFSMMachine(filePath: URL) -> MetaMachine {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let machine = CXXBase.Machine(
             name: name,

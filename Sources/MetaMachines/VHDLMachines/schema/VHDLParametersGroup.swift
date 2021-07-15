@@ -10,11 +10,11 @@ import Attributes
 
 struct VHDLParametersGroup: GroupProtocol {
   
-    public typealias Root = Machine
+    public typealias Root = MetaMachine
     
-    let path = Machine.path.attributes[0]
+    let path = MetaMachine.path.attributes[0]
     
-    @TriggerBuilder<Machine>
+    @TriggerBuilder<MetaMachine>
     var triggers: some TriggerProtocol {
         WhenChanged(isParameterised).sync(target: path(for: somethingElse))
         WhenChanged(isParameterised).sync(target: path(for: somethingElse))

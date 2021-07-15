@@ -137,9 +137,9 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
     
     public var allMachineNames: Set<String> {
         var names: Set<String> = []
-        var machines: [URL: Machine] = [:]
+        var machines: [URL: MetaMachine] = [:]
         func process(_ url: URL, prefix: String, previous previousNames: [URL: String]) {
-            guard let machine = machines[url] ?? (try? Machine(filePath: url)) else {
+            guard let machine = machines[url] ?? (try? MetaMachine(filePath: url)) else {
                 return
             }
             machines[url] = machine
@@ -181,7 +181,7 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
     public init(loadAtFilePath url: URL) throws {
         let parser = SwiftMachines.MachineArrangementParser()
         guard let arrangement = parser.parseArrangement(atDirectory: url) else {
-            throw ConversionError(message: parser.errors.last ?? "Unable to parse arrangement at \(url.path)", path: Machine.path)
+            throw ConversionError(message: parser.errors.last ?? "Unable to parse arrangement at \(url.path)", path: MetaMachine.path)
         }
         self = SwiftfsmConverter().metaArrangement(of: arrangement)
     }
@@ -205,7 +205,7 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
         let allMachines = try self.allMachines()
         func process(_ dependency: MachineDependency) throws -> FlattenedDependency {
             guard let machine = allMachines[dependency.filePath] else {
-                throw ConversionError(message: "Unable to parse all dependent machines", path: Machine.path.dependencies)
+                throw ConversionError(message: "Unable to parse all dependent machines", path: MetaMachine.path.dependencies)
             }
             let dependencies = try machine.dependencies.map(process)
             return FlattenedDependency(name: dependency.name, machine: machine, dependencies: dependencies)
@@ -213,14 +213,14 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
         return try dependencies.map(process)
     }
     
-    public func allMachines() throws -> [URL: Machine] {
-        var dict: [URL: Machine] = [:]
+    public func allMachines() throws -> [URL: MetaMachine] {
+        var dict: [URL: MetaMachine] = [:]
         dict.reserveCapacity(dependencies.count)
         func recurse(_ dependency: MachineDependency) throws {
             if nil != dict[dependency.filePath.resolvingSymlinksInPath().absoluteURL] {
                 return
             }
-            let machine = try Machine(filePath: dependency.filePath.resolvingSymlinksInPath().absoluteURL)
+            let machine = try MetaMachine(filePath: dependency.filePath.resolvingSymlinksInPath().absoluteURL)
             dict[dependency.filePath.resolvingSymlinksInPath().absoluteURL] = machine
             try machine.dependencies.forEach(recurse)
         }
@@ -232,7 +232,7 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
         let swiftArrangement = try SwiftfsmConverter().convert(self)
         let generator = SwiftMachines.MachineArrangementGenerator()
         guard nil != generator.generateArrangement(swiftArrangement) else {
-            throw ConversionError(message: generator.errors.last ?? "Unable to save arrangement", path: Machine.path)
+            throw ConversionError(message: generator.errors.last ?? "Unable to save arrangement", path: MetaMachine.path)
         }
     }
     

@@ -10,12 +10,12 @@ import Attributes
 
 struct CXXBaseMachineValidator: MachineValidator {
     
-    private var validator: AnyValidator<Machine> = {
-        Machine.path.validate { validator in
+    private var validator: AnyValidator<MetaMachine> = {
+        MetaMachine.path.validate { validator in
             validator.name.alphadash().notEmpty().maxLength(64)
-            validator.initialState.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+            validator.initialState.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
             validator.states.maxLength(128)
-            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<Machine, State>>) in
+            validator.states.each { (stateIndex, state: ValidationPath<ReadOnlyPath<MetaMachine, State>>) in
                 state.name
                     .alphadash()
                     .notEmpty()
@@ -39,7 +39,7 @@ struct CXXBaseMachineValidator: MachineValidator {
                 }
                 state.transitions.maxLength(128)
                 state.transitions.each { (_, transition) in
-                    transition.target.in(Machine.path.states, transform: { Set($0.map { $0.name }) })
+                    transition.target.in(MetaMachine.path.states, transform: { Set($0.map { $0.name }) })
                     transition.condition.if { $0 != nil } then: {
                         transition.condition.wrappedValue.maxLength(1024)
                     }
@@ -79,12 +79,12 @@ struct CXXBaseMachineValidator: MachineValidator {
                 attributes[2].attributes["include_paths"].wrappedValue.textValue.maxLength(2048)
                 attributes[2].attributes["includes"].required()
                 attributes[2].attributes["includes"].wrappedValue.codeValue.maxLength(2048)
-                attributes[3].attributes["suspended_state"].wrappedValue.enumeratedValue.in(Machine.path.states, transform: { Set([""] + $0.map { $0.name }) })
+                attributes[3].attributes["suspended_state"].wrappedValue.enumeratedValue.in(MetaMachine.path.states, transform: { Set([""] + $0.map { $0.name }) })
             }
         }
     }()
     
-    func validate(machine: Machine) throws {
+    func validate(machine: MetaMachine) throws {
         if machine.semantics != .ucfsm && machine.semantics != .clfsm && machine.semantics != .spartanfsm {
             throw MachinesError.unsupportedSemantics(machine.semantics)
         }

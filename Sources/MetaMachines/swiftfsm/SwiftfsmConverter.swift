@@ -75,7 +75,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         )
     }
     
-    func initial(filePath: URL) -> Machine {
+    func initial(filePath: URL) -> MetaMachine {
         let swiftMachine = SwiftMachines.Machine(
             name: filePath.lastPathComponent.hasSuffix(".machine") ? filePath.lastPathComponent.components(separatedBy: ".").dropLast().joined(separator: ".") : filePath.lastPathComponent,
             filePath: filePath,
@@ -178,7 +178,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         return Arrangement(semantics: .swiftfsm, filePath: swiftArrangement.filePath, dependencies: rootFsms, attributes: [group], metaData: [])
     }
     
-    func metaMachine(of swiftMachine: SwiftMachines.Machine) -> Machine {
+    func metaMachine(of swiftMachine: SwiftMachines.Machine) -> MetaMachine {
         var attributes: [AttributeGroup] = []
         let variables = AttributeGroup(
             name: "variables",
@@ -483,7 +483,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
                 metaData: [:]
             )
         }
-        return Machine(
+        return MetaMachine(
             semantics: .swiftfsm,
             filePath: swiftMachine.filePath,
             initialState: swiftMachine.initialState.name,
@@ -497,14 +497,14 @@ struct SwiftfsmConverter: Converter, MachineValidator {
     func convert(_ arrangement: Arrangement) throws -> SwiftMachines.Arrangement {
         let dependencies = try arrangement.dependencies.map { (dep: MachineDependency) -> SwiftMachines.Machine.Dependency in
             guard let dependency = SwiftMachines.Machine.Dependency(name: dep.name, filePath: dep.filePath) else {
-                throw ConversionError(message: "Unable to create dependency", path: Machine.path)
+                throw ConversionError(message: "Unable to create dependency", path: MetaMachine.path)
             }
             return dependency
         }
         return SwiftMachines.Arrangement(name: arrangement.name, filePath: arrangement.filePath, dependencies: dependencies)
     }
     
-    func convert(_ machine: Machine) throws -> SwiftMachines.Machine {
+    func convert(_ machine: MetaMachine) throws -> SwiftMachines.Machine {
         try self.validator.validate(machine: machine)
         let ringletGroup = machine.attributes[1]
         let actions = Set(ringletGroup.attributes["actions"]?.collectionLines ?? ["onEntry", "onExit", "main"]).sorted().filter {
@@ -513,13 +513,13 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         let model: SwiftMachines.Model?
         if (ringletGroup.attributes["use_custom_ringlet"]?.boolValue ?? false) {
             guard let imports = ringletGroup.attributes["imports"]?.codeValue else {
-                throw ConversionError(message: "Missing required attribute ringlet.imports", path: Machine.path.attributes[1].attributes["imports"].wrappedValue)
+                throw ConversionError(message: "Missing required attribute ringlet.imports", path: MetaMachine.path.attributes[1].attributes["imports"].wrappedValue)
             }
             guard let execute = ringletGroup.attributes["executes"]?.codeValue else {
-                throw ConversionError(message: "Missing required attribute ringlet.execute", path: Machine.path.attributes[1].attributes["executes"].wrappedValue)
+                throw ConversionError(message: "Missing required attribute ringlet.execute", path: MetaMachine.path.attributes[1].attributes["executes"].wrappedValue)
             }
-            guard let vars = try ringletGroup.attributes["ringlet_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: Machine.path.attributes[1].attributes["ringlet_variables"].wrappedValue.tableValue[$0]) }) else {
-                throw ConversionError(message: "Missing required variable list ringlet_variables", path: Machine.path.attributes[1].attributes["ringlet_variables"].wrappedValue)
+            guard let vars = try ringletGroup.attributes["ringlet_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: MetaMachine.path.attributes[1].attributes["ringlet_variables"].wrappedValue.tableValue[$0]) }) else {
+                throw ConversionError(message: "Missing required variable list ringlet_variables", path: MetaMachine.path.attributes[1].attributes["ringlet_variables"].wrappedValue)
             }
             model = SwiftMachines.Model(
                 actions: actions,
@@ -529,20 +529,20 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             model = nil
         }
         let resultType: String? = machine.attributes[1].attributes["result_type"]?.expressionValue
-        guard let externalVariables = try machine.attributes[0].attributes["external_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: Machine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue[$0]) }) else {
-            throw ConversionError(message: "Missing required variable list external_variables", path: Machine.path.attributes[0].attributes["external_variables"].wrappedValue)
+        guard let externalVariables = try machine.attributes[0].attributes["external_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue[$0]) }) else {
+            throw ConversionError(message: "Missing required variable list external_variables", path: MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue)
         }
         let parameters: [SwiftMachines.Variable]? = (machine.attributes[0].attributes["parameters"]?.complexValue["enable_parameters"]?.boolValue ?? false)
-            ? try machine.attributes[0].attributes["parameters"]?.complexValue["parameters"]?.tableValue.enumerated().map({ try self.parseParameters($1, path: Machine.path.attributes[0].attributes["parameters"].wrappedValue.complexValue["parameters"].wrappedValue.tableValue[$0]) })
+            ? try machine.attributes[0].attributes["parameters"]?.complexValue["parameters"]?.tableValue.enumerated().map({ try self.parseParameters($1, path: MetaMachine.path.attributes[0].attributes["parameters"].wrappedValue.complexValue["parameters"].wrappedValue.tableValue[$0]) })
             : nil
-        guard let fsmVars = try machine.attributes[0].attributes["machine_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: Machine.path.attributes[0].attributes["machine_variables"].wrappedValue.tableValue[$0]) }) else {
-            throw ConversionError(message: "Missing required variable list machine_variables", path: Machine.path.attributes[0].attributes["machine_variables"].wrappedValue)
+        guard let fsmVars = try machine.attributes[0].attributes["machine_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: MetaMachine.path.attributes[0].attributes["machine_variables"].wrappedValue.tableValue[$0]) }) else {
+            throw ConversionError(message: "Missing required variable list machine_variables", path: MetaMachine.path.attributes[0].attributes["machine_variables"].wrappedValue)
         }
         let states = try machine.states.enumerated().map { (index, state) -> SwiftMachines.State in
             let actions = state.actions.map { SwiftMachines.Action(name: $0.name, implementation: String($0.implementation)) }
             let settings = state.attributes[1]
-            guard let vars = try state.attributes[0].attributes["state_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: Machine.path.states[index].attributes[0].attributes["state_variables"].wrappedValue.tableValue[$0]) }) else {
-                throw ConversionError(message: "Missing required variable list state_variables", path: Machine.path.states[index].attributes[0].attributes["state_variables"].wrappedValue)
+            guard let vars = try state.attributes[0].attributes["state_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: MetaMachine.path.states[index].attributes[0].attributes["state_variables"].wrappedValue.tableValue[$0]) }) else {
+                throw ConversionError(message: "Missing required variable list state_variables", path: MetaMachine.path.states[index].attributes[0].attributes["state_variables"].wrappedValue)
             }
             let externalVariablesSet: Set<String>? = settings.attributes["external_variables"]?.enumerableCollectionValue
             let externalVariables: [SwiftMachines.Variable]? = externalVariablesSet?.compactMap { label in externalVariables.first { $0.label == label } }
@@ -559,14 +559,14 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             )
         }
         guard let initialState = states.first(where: { $0.name == String(machine.initialState) }) else {
-            throw ConversionError(message: "Initial state does not exist in the states array", path: Machine.path.initialState)
+            throw ConversionError(message: "Initial state does not exist in the states array", path: MetaMachine.path.initialState)
         }
         let suspendState = (machine.attributes[2].attributes["suspend_state"]?.enumeratedValue).map { stateName in
             return states.first(where: { stateName == $0.name })
         } ?? nil
         let moduleDependencies = machine.attributes[2].attributes["module_dependencies"]!.complexValue
         let packageDependencies = try (moduleDependencies["packages"]?.collectionComplex.enumerated().map {
-            try self.parsePackageDependencies($1, attributePath: Machine.path.attributes[2].attributes["module_dependencies"].wrappedValue.complexValue)
+            try self.parsePackageDependencies($1, attributePath: MetaMachine.path.attributes[2].attributes["module_dependencies"].wrappedValue.complexValue)
         }) ?? []
         let submachines = machine.dependencies.filter {
             $0.attributes["relationship"]?.enumeratedValue == "submachine"
@@ -617,7 +617,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
     }
     
-    private func parsePackageDependencies<Path: ReadOnlyPathProtocol>(_ attributes: [String: Attribute], attributePath: Path) throws -> SwiftMachines.PackageDependency where Path.Root == Machine, Path.Value == [String: Attribute] {
+    private func parsePackageDependencies<Path: ReadOnlyPathProtocol>(_ attributes: [String: Attribute], attributePath: Path) throws -> SwiftMachines.PackageDependency where Path.Root == MetaMachine, Path.Value == [String: Attribute] {
         let products = attributes["products"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
         let qualifiers = attributes["qualifiers"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
         let targets = attributes["targets_to_import"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
@@ -637,7 +637,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         return SwiftMachines.PackageDependency(products: products, targets: targets, url: url, qualifiers: qualifiers)
     }
     
-    private func parseParameters<Path: ReadOnlyPathProtocol>(_ variable: [LineAttribute], path: Path) throws -> SwiftMachines.Variable where Path.Root == Machine, Path.Value == [LineAttribute] {
+    private func parseParameters<Path: ReadOnlyPathProtocol>(_ variable: [LineAttribute], path: Path) throws -> SwiftMachines.Variable where Path.Root == MetaMachine, Path.Value == [LineAttribute] {
         return try self.parseVariable(
             [
                 LineAttribute.enumerated(
@@ -649,7 +649,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         )
     }
     
-    private func parseVariable<Path: ReadOnlyPathProtocol>(_ variable: [LineAttribute], path: Path) throws -> SwiftMachines.Variable where Path.Root == Machine, Path.Value == [LineAttribute] {
+    private func parseVariable<Path: ReadOnlyPathProtocol>(_ variable: [LineAttribute], path: Path) throws -> SwiftMachines.Variable where Path.Root == MetaMachine, Path.Value == [LineAttribute] {
         guard variable.count == 4 else {
             throw ConversionError(message: "Missing required fields", path: path)
         }
@@ -742,16 +742,16 @@ extension SwiftfsmConverter: MachineMutator {
         ]
     }
 
-    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T] {
+    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T] {
         switch attribute.path {
-        case Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
-             Machine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
+        case MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
+             MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
             guard let action = (item as? Attribute)?.lineValue ?? (item as? LineAttribute)?.lineValue ?? (item as? String) else {
                 return .failure(ValidationError(message: "Invalid value \(item)", path: attribute))
             }
             do {
                 try self.addNewAction(action: action, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to create new action.", path: attribute))
@@ -763,13 +763,13 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    func moveItems<Path: PathProtocol, T>(attribute: Path, machine: inout Machine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Machine, Path.Value == [T] {
+    func moveItems<Path: PathProtocol, T>(attribute: Path, machine: inout MetaMachine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
         switch attribute.path {
-        case Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
-             Machine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
+        case MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
+             MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
             do {
                 try self.moveActions(from: source, to: destination, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to reorder actions.", path: attribute))
@@ -781,23 +781,23 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    func newDependency(_ dependency: MachineDependency, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func newDependency(_ dependency: MachineDependency, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if machine.dependencies.contains(where: { $0.name == dependency.name }) {
-            return .failure(AttributeError<Machine>(message: "The dependency '\(dependency.name)' already exists.", path: machine.path.dependencies[machine.dependencies.count]))
+            return .failure(AttributeError<MetaMachine>(message: "The dependency '\(dependency.name)' already exists.", path: machine.path.dependencies[machine.dependencies.count]))
         }
         machine.dependencies.append(dependency)
         return .success(false)
     }
     
-    func newState(machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func newState(machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         let name = "State"
         if nil == machine.states.first(where: { $0.name == name }) {
             do {
                 try machine.states.append(self.createState(named: name, forMachine: machine))
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
-                return .failure(AttributeError(message: "Unable to create new state.", path: Machine.path.states))
+                return .failure(AttributeError(message: "Unable to create new state.", path: MetaMachine.path.states))
             }
         }
         var num = 0
@@ -808,40 +808,40 @@ extension SwiftfsmConverter: MachineMutator {
         } while (nil != machine.states.reversed().first(where: { $0.name == stateName }))
         do {
             try machine.states.append(self.createState(named: stateName, forMachine: machine))
-        } catch let e as AttributeError<Machine> {
+        } catch let e as AttributeError<MetaMachine> {
             return .failure(e)
         } catch {
-            return .failure(AttributeError(message: "Unable to create new state.", path: Machine.path.states))
+            return .failure(AttributeError(message: "Unable to create new state.", path: MetaMachine.path.states))
         }
         self.syncSuspendState(machine: &machine)
         return .success(true)
     }
     
-    func newTransition(source: StateName, target: StateName, condition: Expression? = nil, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func newTransition(source: StateName, target: StateName, condition: Expression? = nil, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard
             let index = machine.states.indices.first(where: { machine.states[$0].name == source }),
             nil != machine.states.first(where: { $0.name == target })
         else {
-            return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: Machine.path))
+            return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: MetaMachine.path))
         }
         machine.states[index].transitions.append(Transition(condition: condition, target: target))
         return .success(false)
     }
     
-    func deleteItem<Path, T>(attribute: Path, atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T] {
+    func deleteItem<Path, T>(attribute: Path, atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T] {
         if machine[keyPath: attribute.path].count <= index || index < 0 {
             return .failure(ValidationError(message: "Invalid index '\(index)'", path: attribute))
         }
         switch attribute.path {
-        case Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
-             Machine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
+        case MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue.path,
+             MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue.path:
             let item = machine[keyPath: attribute.keyPath][index]
             guard let action = (item as? Attribute)?.lineValue ?? (item as? LineAttribute)?.lineValue ?? (item as? String) else {
                 return .failure(ValidationError(message: "Invalid value \(item)", path: attribute))
             }
             do {
                 try self.deleteAction(action: action, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to delete action.", path: attribute))
@@ -853,17 +853,17 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    func delete(dependencies: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func delete(dependencies: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         machine.dependencies = machine.dependencies.enumerated().filter { !dependencies.contains($0.0) }.map(\.element)
         return .success(false)
     }
     
-    func delete(states: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func delete(states: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if
             let initialIndex = machine.states.enumerated().first(where: { $0.1.name == machine.initialState })?.0,
             states.contains(initialIndex)
         {
-            return .failure(ValidationError(message: "You cannot delete the initial state", path: Machine.path.states[initialIndex]))
+            return .failure(ValidationError(message: "You cannot delete the initial state", path: MetaMachine.path.states[initialIndex]))
         }
         let deletedStates = Set(machine.states.enumerated().filter { states.contains($0.0)  }.map(\.element.name))
         machine.states = machine.states.enumerated().filter { !states.contains($0.0) }.map(\.element)
@@ -876,29 +876,29 @@ extension SwiftfsmConverter: MachineMutator {
         return .success(true)
     }
     
-    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard let stateIndex = machine.states.firstIndex(where: { $0.name == sourceState }) else {
-            return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: Machine.path.states))
+            return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states))
         }
         machine.states[stateIndex].transitions = machine.states[stateIndex].transitions.enumerated().filter { !transitions.contains($0.0) }.map { $1 }
         return .success(false)
     }
     
-    func deleteDependency(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func deleteDependency(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if index < 0 || index >= machine.dependencies.count {
-            return .failure(AttributeError<Machine>(message: "Invalid index \(index) for deleting a dependency.", path: machine.path.dependencies))
+            return .failure(AttributeError<MetaMachine>(message: "Invalid index \(index) for deleting a dependency.", path: machine.path.dependencies))
         }
         machine.dependencies.remove(at: index)
         return .success(false)
     }
     
-    func deleteState(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func deleteState(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if index >= machine.states.count  {
-            return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: Machine.path.states))
+            return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: MetaMachine.path.states))
         }
         let name = machine.states[index].name
         if name == machine.initialState {
-            return .failure(ValidationError(message: "Can't delete the initial state", path: Machine.path.states[index]))
+            return .failure(ValidationError(message: "Can't delete the initial state", path: MetaMachine.path.states[index]))
         }
         machine.states.remove(at: index)
         self.syncSuspendState(machine: &machine)
@@ -910,45 +910,45 @@ extension SwiftfsmConverter: MachineMutator {
         return .success(true)
     }
     
-    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard let stateIndex = machine.states.indices.first(where: { machine.states[$0].name == sourceState }) else {
-            return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: Machine.path.states))
+            return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: MetaMachine.path.states))
         }
         guard machine.states[stateIndex].transitions.count >= index else {
-            return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: Machine.path.states[stateIndex].transitions))
+            return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: MetaMachine.path.states[stateIndex].transitions))
         }
         machine.states[stateIndex].transitions.remove(at: index)
         return .success(false)
     }
     
-    func modify<Path>(attribute: Path, value: Path.Value, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine {
+    func modify<Path>(attribute: Path, value: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine {
         if let index = machine.attributes[1].attributes["actions"]?.collectionValue.indices.first(where: { (index: Int) -> Bool in
-            Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].path == attribute.path
-                || Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineValue.path == attribute.path
-                || Machine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineValue.path == attribute.path
-                || Machine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineAttribute.lineValue.path == attribute.path
-                || Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.path == attribute.path
-                || Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.lineValue.path == attribute.path
+            MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].path == attribute.path
+                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineValue.path == attribute.path
+                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineValue.path == attribute.path
+                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineAttribute.lineValue.path == attribute.path
+                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.path == attribute.path
+                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.lineValue.path == attribute.path
         }) {
             guard let actionName = (value as? Attribute)?.lineValue ?? (value as? LineAttribute)?.lineValue ?? (value as? String) else {
                 return .failure(ValidationError(message: "Invalid value \(value)", path: attribute))
             }
             do {
                 try self.changeName(ofAction: index, to: actionName, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to change name of action.", path: attribute))
             }
             return .success(true)
         }
-        if let index = machine.states.indices.first(where: { Machine.path.states[$0].name.path == attribute.path }) {
+        if let index = machine.states.indices.first(where: { MetaMachine.path.states[$0].name.path == attribute.path }) {
             guard let stateName = value as? StateName else {
                 return .failure(ValidationError(message: "Invalid value \(value)", path: attribute))
             }
             do {
                 try self.changeName(ofState: index, to: stateName, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to change name of state.", path: attribute))
@@ -966,7 +966,7 @@ extension SwiftfsmConverter: MachineMutator {
             return .success(true)
         }
         if let index = machine.attributes[0].attributes["external_variables"].wrappedValue.tableValue.indices.first(where: { (index) -> Bool in
-            let externalsPath = Machine.path.attributes[0].attributes["external_variables"].wrappedValue
+            let externalsPath = MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue
             return externalsPath.tableValue[index][1].path == attribute.path
                 || externalsPath.tableValue[index][1].lineValue.path == attribute.path
                 || externalsPath.blockAttribute.tableValue[index][1].path == attribute.path
@@ -977,7 +977,7 @@ extension SwiftfsmConverter: MachineMutator {
             }
             do {
                 try self.changeName(ofExternal: index, to: name, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to change name of external variable.", path: attribute))
@@ -1004,7 +1004,7 @@ extension SwiftfsmConverter: MachineMutator {
             }
             do {
                 try self.toggleEnableParameters(boolValue: boolValue, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to toggle enabling parameters.", path: attribute))
@@ -1019,7 +1019,7 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func whitelist(forMachine machine: Machine) -> [AnyPath<Machine>] {
+    private func whitelist(forMachine machine: MetaMachine) -> [AnyPath<MetaMachine>] {
         let machinePaths = [
             AnyPath(machine.path.filePath),
             AnyPath(machine.path.initialState),
@@ -1027,7 +1027,7 @@ extension SwiftfsmConverter: MachineMutator {
             AnyPath(machine.path.attributes[1].attributes),
             AnyPath(machine.path.attributes[2].attributes)
         ]
-        let statePaths: [AnyPath<Machine>] = machine.states.indices.flatMap { (stateIndex) -> [AnyPath<Machine>] in
+        let statePaths: [AnyPath<MetaMachine>] = machine.states.indices.flatMap { (stateIndex) -> [AnyPath<MetaMachine>] in
             let attributes = [
                 AnyPath(machine.path.states[stateIndex].name),
                 AnyPath(machine.path.states[stateIndex].attributes[0].attributes),
@@ -1047,13 +1047,13 @@ extension SwiftfsmConverter: MachineMutator {
         return machinePaths + statePaths
     }
     
-    private func addNewAction(action: String, machine: inout Machine) throws {
+    private func addNewAction(action: String, machine: inout MetaMachine) throws {
         guard let useCustomRinglet = machine.attributes[1].attributes["use_custom_ringlet"]?.boolValue, useCustomRinglet == true else {
-            throw ValidationError(message: "You can only add actions when custom ringlets have been enabled", path: Machine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
+            throw ValidationError(message: "You can only add actions when custom ringlets have been enabled", path: MetaMachine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
         }
         let actions = machine.attributes[1].attributes["actions"]?.collectionValue.map(\.lineValue) ?? ["onEntry", "onExit", "main"]
         if Set(actions).contains(action) {
-            throw ValidationError(message: "Cannot add new action '\(action)' since an action with that name already exists", path: Machine.path.attributes[1].attributes["actions"].wrappedValue)
+            throw ValidationError(message: "Cannot add new action '\(action)' since an action with that name already exists", path: MetaMachine.path.attributes[1].attributes["actions"].wrappedValue)
         }
         machine.attributes[1].attributes["actions"] = .collection(lines: actions + [action])
         machine.states.indices.forEach {
@@ -1061,13 +1061,13 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func deleteAction(action: String, machine: inout Machine) throws {
+    private func deleteAction(action: String, machine: inout MetaMachine) throws {
         guard let useCustomRinglet = machine.attributes[1].attributes["use_custom_ringlet"]?.boolValue, useCustomRinglet == true else {
-            throw ValidationError(message: "You can only delete actions when custom ringlets have been enabled", path: Machine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
+            throw ValidationError(message: "You can only delete actions when custom ringlets have been enabled", path: MetaMachine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
         }
         var actions = machine.attributes[1].attributes["actions"]?.collectionValue.map(\.lineValue) ?? ["onEntry", "onExit", "main"]
         guard let index = actions.firstIndex(of: action) else {
-            throw ValidationError(message: "Cannot delete action '\(action)' since it is not in the actions list", path: Machine.path.attributes[1].attributes["actions"].wrappedValue)
+            throw ValidationError(message: "Cannot delete action '\(action)' since it is not in the actions list", path: MetaMachine.path.attributes[1].attributes["actions"].wrappedValue)
         }
         actions.remove(at: index)
         machine.attributes[1].attributes["actions"] = .collection(lines: actions)
@@ -1076,13 +1076,13 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func moveActions(from source: IndexSet, to destination: Int, machine: inout Machine) throws {
+    private func moveActions(from source: IndexSet, to destination: Int, machine: inout MetaMachine) throws {
         guard let useCustomRinglet = machine.attributes[1].attributes["use_custom_ringlet"]?.boolValue, useCustomRinglet == true else {
-            throw ValidationError(message: "You can only re-order actions when custom ringlets have been enabled", path: Machine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
+            throw ValidationError(message: "You can only re-order actions when custom ringlets have been enabled", path: MetaMachine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
         }
         var actions = machine.attributes[1].attributes["actions"]?.collectionValue.map(\.lineValue) ?? ["onEntry", "onExit", "main"]
         if destination > actions.count {
-            throw ValidationError(message: "Invalid index for actions", path: Machine.path.attributes[1].attributes["actions"].wrappedValue)
+            throw ValidationError(message: "Invalid index for actions", path: MetaMachine.path.attributes[1].attributes["actions"].wrappedValue)
         }
         actions.move(fromOffsets: source, toOffset: destination)
         machine.attributes[1].attributes["actions"] = .collection(lines: actions)
@@ -1091,16 +1091,16 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func changeName(ofAction index: Int, to actionName: StateName, machine: inout Machine) throws {
+    private func changeName(ofAction index: Int, to actionName: StateName, machine: inout MetaMachine) throws {
         guard let useCustomRinglet = machine.attributes[1].attributes["use_custom_ringlet"]?.boolValue, useCustomRinglet == true else {
-            throw ValidationError(message: "You can only change the name of actions when custom ringlets have been enabled", path: Machine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
+            throw ValidationError(message: "You can only change the name of actions when custom ringlets have been enabled", path: MetaMachine.path.attributes[1].attributes["use_custom_ringlet"].wrappedValue)
         }
         var actions = machine.attributes[1].attributes["actions"]?.collectionValue.map(\.lineValue) ?? ["onEntry", "onExit", "main"]
         if index >= actions.count {
-            throw ValidationError(message: "Invalid index for action", path: Machine.path.attributes[1].attributes["actions"].wrappedValue)
+            throw ValidationError(message: "Invalid index for action", path: MetaMachine.path.attributes[1].attributes["actions"].wrappedValue)
         }
         if Set(actions).contains(actionName) {
-            throw ValidationError(message: "Cannot change the action to '\(actionName)' since an action with that name already exists", path: Machine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index])
+            throw ValidationError(message: "Cannot change the action to '\(actionName)' since an action with that name already exists", path: MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index])
         }
         actions[index] = actionName
         machine.attributes[1].attributes["actions"] = .collection(lines: actions)
@@ -1109,7 +1109,7 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func changeName(ofState index: Int, to stateName: StateName, machine: inout Machine) throws {
+    private func changeName(ofState index: Int, to stateName: StateName, machine: inout MetaMachine) throws {
         let currentName = machine.states[index].name
         if currentName == stateName {
             return
@@ -1127,7 +1127,7 @@ extension SwiftfsmConverter: MachineMutator {
         self.syncSuspendState(machine: &machine)
     }
     
-    private func changeName(ofExternal index: Int, to externalName: String, machine: inout Machine) throws {
+    private func changeName(ofExternal index: Int, to externalName: String, machine: inout MetaMachine) throws {
         let currentName = machine.attributes[0].attributes["external_variables"]!.tableValue[index][1].lineValue
         if currentName == externalName {
             return
@@ -1156,7 +1156,7 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func syncSuspendState(machine: inout Machine) {
+    private func syncSuspendState(machine: inout MetaMachine) {
         let validValues = Set(machine.states.map(\.name) + [""])
         let currentValue = machine.attributes[2].attributes["suspend_state"]?.enumeratedValue ?? ""
         let newValue = validValues.contains(currentValue) ? currentValue : ""
@@ -1164,7 +1164,7 @@ extension SwiftfsmConverter: MachineMutator {
         machine.attributes[2].attributes["suspend_state"] = .enumerated(newValue, validValues: validValues)
     }
     
-    private func toggleAccessExternalVariables(boolValue: Bool, forState stateIndex: Int, machine: inout Machine) {
+    private func toggleAccessExternalVariables(boolValue: Bool, forState stateIndex: Int, machine: inout MetaMachine) {
         if !boolValue {
             machine.states[stateIndex].attributes[1].fields = machine.states[stateIndex].attributes[1].fields.filter { $0.name == "access_external_variables" }
             machine.states[stateIndex].attributes[1].attributes["access_external_variables"] = .bool(true)
@@ -1180,7 +1180,7 @@ extension SwiftfsmConverter: MachineMutator {
         machine.states[stateIndex].attributes[1].attributes["imports"] = machine.states[stateIndex].attributes[1].attributes["imports"] ?? .code("", language: .swift)
     }
     
-    private func toggleUseCustomRinglet(boolValue: Bool, machine: inout Machine) {
+    private func toggleUseCustomRinglet(boolValue: Bool, machine: inout MetaMachine) {
         machine.attributes[1].attributes["use_custom_ringlet"] = .bool(boolValue)
         if !boolValue {
             machine.attributes[1].fields = machine.attributes[1].fields.filter { $0.name == "use_custom_ringlet" }
@@ -1214,7 +1214,7 @@ extension SwiftfsmConverter: MachineMutator {
         machine.attributes[1].attributes = attributes
     }
     
-    private func toggleEnableParameters(boolValue: Bool, machine: inout Machine) throws {
+    private func toggleEnableParameters(boolValue: Bool, machine: inout MetaMachine) throws {
         machine.attributes[0].attributes["parameters"].wrappedValue.complexValue["enable_parameters"] = .bool(boolValue)
         guard let fields = machine.attributes[0].attributes["parameters"]?.complexFields else {
             throw ValidationError(message: "Unable to fetch fields of parameters", path: machine.path.attributes[0].attributes["parameters"].wrappedValue.complexFields)
@@ -1233,7 +1233,7 @@ extension SwiftfsmConverter: MachineMutator {
             "result_type": .expression(language: .swift)
         ]
         guard var attributes = machine.attributes[0].attributes["parameters"]?.complexValue else {
-            throw ValidationError(message: "Unable to fetch attributes of parameters", path: Machine.path.attributes[0].attributes["parameters"].wrappedValue.complexValue)
+            throw ValidationError(message: "Unable to fetch attributes of parameters", path: MetaMachine.path.attributes[0].attributes["parameters"].wrappedValue.complexValue)
         }
         attributes["parameters"] = attributes["parameters"] ?? .table([], columns: [
             ("label", .line),
@@ -1244,7 +1244,7 @@ extension SwiftfsmConverter: MachineMutator {
         machine.attributes[0].attributes["parameters"]!.complexValue = attributes
     }
     
-    private func perform(on machine: inout Machine, _ f: (inout Machine) throws -> Void) throws {
+    private func perform(on machine: inout MetaMachine, _ f: (inout MetaMachine) throws -> Void) throws {
         let backup = machine
         do {
             try f(&machine)
@@ -1255,9 +1255,9 @@ extension SwiftfsmConverter: MachineMutator {
         }
     }
     
-    private func createState(named name: String, forMachine machine: Machine) throws -> State {
+    private func createState(named name: String, forMachine machine: MetaMachine) throws -> State {
         guard machine.attributes.count >= 3 else {
-            throw ValidationError(message: "Missing attributes in machine", path: Machine.path.attributes)
+            throw ValidationError(message: "Missing attributes in machine", path: MetaMachine.path.attributes)
         }
         let actions = machine.attributes[2].attributes["actions"]?.collectionValue.failMap { $0.lineValue } ?? ["onEntry", "onExit", "main"]
         return State(
@@ -1300,7 +1300,7 @@ extension SwiftfsmConverter: MachineMutator {
         )
     }
     
-    func validate(machine: Machine) throws {
+    func validate(machine: MetaMachine) throws {
         try self.validator.validate(machine: machine)
     }
     

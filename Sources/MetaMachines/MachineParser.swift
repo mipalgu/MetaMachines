@@ -76,7 +76,7 @@ public final class MachineParser {
         self.swiftParser = swiftParser
     }
     
-    public func parseMachine(atPath path: String) -> Machine? {
+    public func parseMachine(atPath path: String) -> MetaMachine? {
         self.errors = []
         let machineDir = URL(fileURLWithPath: path, isDirectory: true)
         let name = machineDir.lastPathComponent.components(separatedBy: ".machine")[0]
@@ -114,7 +114,7 @@ public final class MachineParser {
             self.errors = self.swiftParser.errors
             return nil
         }
-        return Machine(from: swiftMachine)
+        return MetaMachine(from: swiftMachine)
     }
     
 }

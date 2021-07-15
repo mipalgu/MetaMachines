@@ -63,10 +63,10 @@ protocol Converter {
     
     associatedtype ConcreteMachine
     
-    func initial(filePath: URL) -> Machine
+    func initial(filePath: URL) -> MetaMachine
     
-    func metaMachine(of: ConcreteMachine) -> Machine
+    func metaMachine(of: ConcreteMachine) -> MetaMachine
     
-    func convert(_: Machine) throws -> ConcreteMachine
+    func convert(_: MetaMachine) throws -> ConcreteMachine
     
 }

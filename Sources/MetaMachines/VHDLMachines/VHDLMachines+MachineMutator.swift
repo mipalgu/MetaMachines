@@ -16,7 +16,7 @@ extension VHDLMachinesConverter: MachineMutator {
         []
     }
 
-    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T] {
+    func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T] {
         if attribute.path == machine.path.attributes[0].attributes["clocks"].wrappedValue.blockAttribute.tableValue.path {
             machine[keyPath: attribute.path].append(item)
             guard
@@ -48,7 +48,7 @@ extension VHDLMachinesConverter: MachineMutator {
                     fatalError("Cannot find externals for state \(machine.states[$0].name)")
                 }
                 let _ = machine.modify(
-                    attribute: Machine.path.states[$0].attributes[0].attributes["externals"],
+                    attribute: MetaMachine.path.states[$0].attributes[0].attributes["externals"],
                     value: Attribute(blockAttribute: .enumerableCollection(currentValues, validValues: validValues))
                 )
             }
@@ -59,21 +59,21 @@ extension VHDLMachinesConverter: MachineMutator {
         return .success(false)
     }
 
-    func moveItems<Path, T>(attribute: Path, machine: inout Machine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T] {
+    func moveItems<Path, T>(attribute: Path, machine: inout MetaMachine, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T] {
         machine[keyPath: attribute.path].move(fromOffsets: source, toOffset: destination)
         return .success(false)
     }
     
-    func newDependency(_ dependency: MachineDependency, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
-        .failure(AttributeError<Machine>(message: "Currently not supported.", path: machine.path.dependencies))
+    func newDependency(_ dependency: MachineDependency, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
+        .failure(AttributeError<MetaMachine>(message: "Currently not supported.", path: machine.path.dependencies))
     }
 
-    private func createState(named name: String, forMachine machine: Machine) throws -> State {
+    private func createState(named name: String, forMachine machine: MetaMachine) throws -> State {
         guard
             machine.attributes.count == 3,
             machine.semantics == .vhdl
         else {
-            throw ValidationError(message: "Missing attributes in machine", path: Machine.path.attributes)
+            throw ValidationError(message: "Missing attributes in machine", path: MetaMachine.path.attributes)
         }
         let actions = ["OnEntry", "OnExit", "Internal", "OnSuspend", "OnResume"]
         guard
@@ -163,15 +163,15 @@ extension VHDLMachinesConverter: MachineMutator {
         )
     }
 
-    func newState(machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func newState(machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         let name = "State"
         if nil == machine.states.first(where: { $0.name == name }) {
             do {
                 machine.states.append(try self.createState(named: name, forMachine: machine))
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
-                return .failure(AttributeError(message: "Unable to create new state", path: Machine.path.states))
+                return .failure(AttributeError(message: "Unable to create new state", path: MetaMachine.path.states))
             }
             self.syncSuspendState(machine: &machine)
             return .success(true)
@@ -184,16 +184,16 @@ extension VHDLMachinesConverter: MachineMutator {
         } while (nil != machine.states.reversed().first(where: { $0.name == stateName }))
         do {
             try machine.states.append(self.createState(named: stateName, forMachine: machine))
-        } catch let e as AttributeError<Machine> {
+        } catch let e as AttributeError<MetaMachine> {
             return .failure(e)
         } catch {
-            return .failure(AttributeError(message: "Unable to create new state", path: Machine.path.states))
+            return .failure(AttributeError(message: "Unable to create new state", path: MetaMachine.path.states))
         }
         self.syncSuspendState(machine: &machine)
         return .success(true)
     }
 
-    private func syncSuspendState(machine: inout Machine) {
+    private func syncSuspendState(machine: inout MetaMachine) {
         let validValues = Set(machine.states.map(\.name) + [""])
         let currentValue = machine.attributes[3].attributes["suspended_state"]?.enumeratedValue ?? ""
         let newValue = validValues.contains(currentValue) ? currentValue : ""
@@ -201,69 +201,69 @@ extension VHDLMachinesConverter: MachineMutator {
         machine.attributes[3].attributes["suspended_state"] = .enumerated(newValue, validValues: validValues)
     }
 
-    func newTransition(source: StateName, target: StateName, condition: Expression?, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func newTransition(source: StateName, target: StateName, condition: Expression?, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard
             let index = machine.states.indices.first(where: { machine.states[$0].name == source }),
             nil != machine.states.first(where: { $0.name == target })
         else {
-            return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: Machine.path))
+            return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: MetaMachine.path))
         }
         machine.states[index].transitions.append(Transition(condition: condition, target: target))
         return .success(false)
     }
     
-    func delete(dependencies: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
-        .failure(AttributeError<Machine>(message: "Currently not supported.", path: machine.path.dependencies))
+    func delete(dependencies: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
+        .failure(AttributeError<MetaMachine>(message: "Currently not supported.", path: machine.path.dependencies))
     }
 
-    func delete(states: IndexSet, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func delete(states: IndexSet, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if
             let initialIndex = machine.states.enumerated().first(where: { $0.1.name == machine.initialState })?.0,
             states.contains(initialIndex)
         {
-            return .failure(ValidationError(message: "You cannot delete the initial state", path: Machine.path.states[initialIndex]))
+            return .failure(ValidationError(message: "You cannot delete the initial state", path: MetaMachine.path.states[initialIndex]))
         }
         machine.states = machine.states.enumerated().filter { !states.contains($0.0) }.map { $1 }
         self.syncSuspendState(machine: &machine)
         return .success(true)
     }
     
-    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func delete(transitions: IndexSet, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard let stateIndex = machine.states.firstIndex(where: { $0.name == sourceState }) else {
-            return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: Machine.path.states))
+            return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states))
         }
         machine.states[stateIndex].transitions = machine.states[stateIndex].transitions.enumerated().filter { !transitions.contains($0.0) }.map { $1 }
         return .success(false)
     }
     
-    func deleteDependency(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
-        .failure(AttributeError<Machine>(message: "Currently not supported.", path: machine.path.dependencies))
+    func deleteDependency(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
+        .failure(AttributeError<MetaMachine>(message: "Currently not supported.", path: machine.path.dependencies))
     }
 
-    func deleteState(atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func deleteState(atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         if machine.states.count >= index {
-            return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: Machine.path.states))
+            return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: MetaMachine.path.states))
         }
         if machine.states[index].name == machine.initialState {
-            return .failure(ValidationError(message: "Can't delete the initial state", path: Machine.path.states[index]))
+            return .failure(ValidationError(message: "Can't delete the initial state", path: MetaMachine.path.states[index]))
         }
         machine.states.remove(at: index)
         self.syncSuspendState(machine: &machine)
         return .success(true)
     }
 
-    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout Machine) -> Result<Bool, AttributeError<Machine>> {
+    func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName, machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
         guard let index = machine.states.indices.first(where: { machine.states[$0].name == sourceState }) else {
-            return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: Machine.path.states))
+            return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: MetaMachine.path.states))
         }
         guard machine.states[index].transitions.count >= index else {
-            return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: Machine.path.states[index].transitions))
+            return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: MetaMachine.path.states[index].transitions))
         }
         machine.states[index].transitions.remove(at: index)
         return .success(false)
     }
 
-    func deleteItem<Path, T>(attribute: Path, atIndex index: Int, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine, Path.Value == [T] {
+    func deleteItem<Path, T>(attribute: Path, atIndex index: Int, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T] {
         if machine[keyPath: attribute.path].count <= index || index < 0 {
             return .failure(ValidationError(message: "Invalid index '\(index)'", path: attribute))
         }
@@ -308,7 +308,7 @@ extension VHDLMachinesConverter: MachineMutator {
         return .success(false)
     }
 
-    private func changeName(ofState index: Int, to stateName: StateName, machine: inout Machine) throws {
+    private func changeName(ofState index: Int, to stateName: StateName, machine: inout MetaMachine) throws {
         let currentName = machine.states[index].name
         if currentName == stateName {
             return
@@ -326,7 +326,7 @@ extension VHDLMachinesConverter: MachineMutator {
         self.syncSuspendState(machine: &machine)
     }
 
-    private func whitelist(forMachine machine: Machine) -> [AnyPath<Machine>] {
+    private func whitelist(forMachine machine: MetaMachine) -> [AnyPath<MetaMachine>] {
         let machinePaths = [
             AnyPath(machine.path.filePath),
             AnyPath(machine.path.initialState),
@@ -335,7 +335,7 @@ extension VHDLMachinesConverter: MachineMutator {
             AnyPath(machine.path.attributes[2].attributes),
             AnyPath(machine.path.attributes[3].attributes)
         ]
-        let statePaths: [AnyPath<Machine>] = machine.states.indices.flatMap { (stateIndex) -> [AnyPath<Machine>] in
+        let statePaths: [AnyPath<MetaMachine>] = machine.states.indices.flatMap { (stateIndex) -> [AnyPath<MetaMachine>] in
             let attributes = [
                 AnyPath(machine.path.states[stateIndex].name),
                 AnyPath(machine.path.states[stateIndex].attributes[0].attributes),
@@ -355,14 +355,14 @@ extension VHDLMachinesConverter: MachineMutator {
         return machinePaths + statePaths
     }
 
-    func modify<Path>(attribute: Path, value: Path.Value, machine: inout Machine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Machine {
-        if let index = machine.states.indices.first(where: { Machine.path.states[$0].name.path == attribute.path }) {
+    func modify<Path>(attribute: Path, value: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine {
+        if let index = machine.states.indices.first(where: { MetaMachine.path.states[$0].name.path == attribute.path }) {
             guard let stateName = value as? StateName else {
                 return .failure(ValidationError(message: "Invalid value \(value)", path: attribute))
             }
             do {
                 try self.changeName(ofState: index, to: stateName, machine: &machine)
-            } catch let e as AttributeError<Machine> {
+            } catch let e as AttributeError<MetaMachine> {
                 return .failure(e)
             } catch {
                 return .failure(AttributeError(message: "Unable to change name of state", path: attribute))
@@ -371,7 +371,7 @@ extension VHDLMachinesConverter: MachineMutator {
             return .success(true)
         }
         if let _ = machine.attributes[0].attributes["clocks"].wrappedValue.tableValue.indices.first(where: { (index) -> Bool in
-            let clocksPath = Machine.path.attributes[0].attributes["clocks"].wrappedValue.blockAttribute.tableValue
+            let clocksPath = MetaMachine.path.attributes[0].attributes["clocks"].wrappedValue.blockAttribute.tableValue
             return clocksPath[index][0].path == attribute.path ||
                 clocksPath[index][0].lineValue.path == attribute.path
         }) {
@@ -457,7 +457,7 @@ extension VHDLMachinesConverter: MachineMutator {
         return .success(false)
     }
 
-    func validate(machine: Machine) throws {
+    func validate(machine: MetaMachine) throws {
         try VHDLMachinesValidator().validate(machine: machine)
     }
 

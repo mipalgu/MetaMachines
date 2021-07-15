@@ -76,7 +76,7 @@ public struct Transition: Hashable, Codable {
         self.metaData = metaData
     }
     
-    public func targetState(in machine: Machine) -> State {
+    public func targetState(in machine: MetaMachine) -> State {
         return machine.states.first { $0.name == target }!
     }
     
