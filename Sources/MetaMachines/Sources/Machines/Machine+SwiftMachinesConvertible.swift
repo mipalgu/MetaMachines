@@ -1,9 +1,9 @@
 /*
- * MachineGenerator.swift
+ * Machine+SwiftMachinesConvertible.swift
  * Machines
  *
- * Created by Callum McColl on 18/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 3/11/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,78 +58,21 @@
 
 import Foundation
 import SwiftMachines
-import CXXBase
-import VHDLMachines
 
-public final class MachineGenerator {
+extension Machine: SwiftMachinesConvertible {
     
-    public fileprivate(set) var errors: [String] = []
-    
-    fileprivate let swiftGenerator: SwiftMachines.MachineGenerator
-    
-    public var lastError: String? {
-        return self.errors.last
+    public static func initialSwiftMachine(filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)) -> Machine {
+        return SwiftfsmConverter().initial(filePath: filePath)
     }
     
-    public init(swiftGenerator: SwiftMachines.MachineGenerator = SwiftMachines.MachineGenerator()) {
-        self.swiftGenerator = swiftGenerator
+    /// Convert a `SwiftMachines.Machine` to a `Machine`.
+    public init(from swiftMachine: SwiftMachines.Machine) {
+        self = SwiftfsmConverter().metaMachine(of: swiftMachine)
     }
     
-    public func generate(_ machine: Machine) -> (URL, [URL])? {
-        self.errors = []
-        switch machine.semantics {
-        case .swiftfsm:
-            let swiftMachine: SwiftMachines.Machine
-            do {
-                swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard let results = self.swiftGenerator.generate(swiftMachine) else {
-                self.errors = []
-                return nil
-            }
-            return results
-        case .clfsm, .ucfsm:
-            let cxxMachine: CXXBase.Machine
-            do {
-                cxxMachine = try CXXBaseConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard CXXGenerator().generate(machine: cxxMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (cxxMachine.path, [])
-        case .vhdl:
-            let vhdlMachine: VHDLMachines.Machine
-            do {
-                vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard VHDLGenerator().generate(machine: vhdlMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (vhdlMachine.path, [])
-        default:
-            self.errors.append("\(machine.semantics) Machines are currently not supported")
-            return nil
-        }
+    /// Convert the meta model machine to a `SwiftMachines.Machine`.
+    public func swiftMachine() throws -> SwiftMachines.Machine {
+        return try SwiftfsmConverter().convert(self)
     }
     
 }

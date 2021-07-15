@@ -1,9 +1,9 @@
 /*
- * MachineGenerator.swift
- * Machines
+ * DependenciesContainer.swift
+ * 
  *
- * Created by Callum McColl on 18/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 29/4/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,79 +56,37 @@
  *
  */
 
-import Foundation
-import SwiftMachines
-import CXXBase
-import VHDLMachines
+public protocol DependenciesContainer {
+    
+    var dependencies: [MachineDependency] { get set }
+    
+    var dependencyAttributeType: AttributeType { get }
+    
+    var dependencyAttributes: [Attribute] { get set }
+    
+}
 
-public final class MachineGenerator {
+import Attributes
+
+extension DependenciesContainer where Self: MutatorContainer, Mutator: DependencyLayoutContainer {
     
-    public fileprivate(set) var errors: [String] = []
-    
-    fileprivate let swiftGenerator: SwiftMachines.MachineGenerator
-    
-    public var lastError: String? {
-        return self.errors.last
+    public var dependencyAttributeType: AttributeType {
+        return .complex(layout: [
+            "name": .line,
+            "filePath": .line,
+            "attributes": .complex(layout: mutator.dependencyLayout)
+        ])
     }
     
-    public init(swiftGenerator: SwiftMachines.MachineGenerator = SwiftMachines.MachineGenerator()) {
-        self.swiftGenerator = swiftGenerator
-    }
-    
-    public func generate(_ machine: Machine) -> (URL, [URL])? {
-        self.errors = []
-        switch machine.semantics {
-        case .swiftfsm:
-            let swiftMachine: SwiftMachines.Machine
-            do {
-                swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
+    public var dependencyAttributes: [Attribute] {
+        get {
+            self.dependencies.map(\.complexAttribute)
+        } set {
+            self.dependencies = zip(self.dependencies, newValue).map {
+                var dep = $0
+                dep.complexAttribute = $1
+                return dep
             }
-            guard let results = self.swiftGenerator.generate(swiftMachine) else {
-                self.errors = []
-                return nil
-            }
-            return results
-        case .clfsm, .ucfsm:
-            let cxxMachine: CXXBase.Machine
-            do {
-                cxxMachine = try CXXBaseConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard CXXGenerator().generate(machine: cxxMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (cxxMachine.path, [])
-        case .vhdl:
-            let vhdlMachine: VHDLMachines.Machine
-            do {
-                vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard VHDLGenerator().generate(machine: vhdlMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (vhdlMachine.path, [])
-        default:
-            self.errors.append("\(machine.semantics) Machines are currently not supported")
-            return nil
         }
     }
     

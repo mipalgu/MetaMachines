@@ -1,9 +1,9 @@
 /*
- * MachineAssembler.swift
+ * MachineValidator.swift
  * Machines
  *
- * Created by Callum McColl on 18/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 3/11/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,46 +56,8 @@
  *
  */
 
-import Foundation
-import SwiftMachines
-
-public final class MachineAssembler {
+protocol MachineValidator {
     
-    public fileprivate(set) var errors: [String] = []
-    
-    public var lastError: String? {
-        return self.errors.last
-    }
-    
-    fileprivate let swiftAssembler: SwiftMachines.MachineAssembler
-    
-    public init(swiftAssembler: SwiftMachines.MachineAssembler = SwiftMachines.MachineAssembler()) {
-        self.swiftAssembler = swiftAssembler
-    }
-    
-    public func assemble(_ machine: Machine, inDirectory buildDir: URL) -> (URL, [URL])? {
-        self.errors = []
-        switch machine.semantics {
-        case .swiftfsm:
-            let swiftMachine: SwiftMachines.Machine
-            do {
-                swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard let results = self.swiftAssembler.assemble(swiftMachine, inDirectory: buildDir) else {
-                self.errors = self.swiftAssembler.errors
-                return nil
-            }
-            return results
-        default:
-            self.errors.append("\(machine.semantics) Machines are currently not supported.")
-            return nil
-        }
-    }
+    func validate(machine: Machine) throws
     
 }

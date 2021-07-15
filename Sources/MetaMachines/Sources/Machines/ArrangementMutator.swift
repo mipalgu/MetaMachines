@@ -1,9 +1,9 @@
 /*
- * MachineGenerator.swift
+ * ArrangementMutator.swift
  * Machines
  *
- * Created by Callum McColl on 18/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 27/4/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,80 +56,38 @@
  *
  */
 
+import Attributes
 import Foundation
-import SwiftMachines
-import CXXBase
-import VHDLMachines
 
-public final class MachineGenerator {
+public protocol ArrangementMutator: DependencyLayoutContainer {
     
-    public fileprivate(set) var errors: [String] = []
+    func addItem<Path, T>(_ item: T, to attribute: Path, in: inout Arrangement) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == Arrangement, Path.Value == [T]
     
-    fileprivate let swiftGenerator: SwiftMachines.MachineGenerator
+    func moveItems<Path: PathProtocol, T>(attribute: Path, in: inout Arrangement, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Arrangement, Path.Value == [T]
     
-    public var lastError: String? {
-        return self.errors.last
-    }
+    func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, in: inout Arrangement) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Arrangement, Path.Value == [T]
     
-    public init(swiftGenerator: SwiftMachines.MachineGenerator = SwiftMachines.MachineGenerator()) {
-        self.swiftGenerator = swiftGenerator
-    }
+    func deleteItem<Path: PathProtocol, T>(attribute: Path, atIndex: Int, in: inout Arrangement) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Arrangement, Path.Value == [T]
     
-    public func generate(_ machine: Machine) -> (URL, [URL])? {
-        self.errors = []
-        switch machine.semantics {
-        case .swiftfsm:
-            let swiftMachine: SwiftMachines.Machine
-            do {
-                swiftMachine = try machine.swiftMachine()
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
+    func modify<Path: PathProtocol>(attribute: Path, value: Path.Value, in: inout Arrangement) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == Arrangement
+    
+    func validate(arrangement: Arrangement) throws
+    
+}
+
+extension ArrangementMutator {
+    
+    public func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet, in arrangement: inout Arrangement) -> Result<Bool, AttributeError<Arrangement>> where Path.Root == Arrangement, Path.Value == [T] {
+        var triggers: Bool = false
+        for index in items.sorted(by: >) {
+            switch self.deleteItem(attribute: attribute, atIndex: index, in: &arrangement) {
+            case .failure(let error):
+                return .failure(error)
+            case .success(let triggersActivated):
+                triggers = triggers || triggersActivated
             }
-            guard let results = self.swiftGenerator.generate(swiftMachine) else {
-                self.errors = []
-                return nil
-            }
-            return results
-        case .clfsm, .ucfsm:
-            let cxxMachine: CXXBase.Machine
-            do {
-                cxxMachine = try CXXBaseConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard CXXGenerator().generate(machine: cxxMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (cxxMachine.path, [])
-        case .vhdl:
-            let vhdlMachine: VHDLMachines.Machine
-            do {
-                vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
-            } catch let e as ConversionError<Machine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
-            guard VHDLGenerator().generate(machine: vhdlMachine) else {
-                self.errors = []
-                return nil
-            }
-            return (vhdlMachine.path, [])
-        default:
-            self.errors.append("\(machine.semantics) Machines are currently not supported")
-            return nil
         }
+        return .success(triggers)
     }
     
 }
