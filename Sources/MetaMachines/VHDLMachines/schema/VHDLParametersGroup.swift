@@ -14,11 +14,23 @@ struct VHDLParametersGroup: GroupProtocol {
     
     let path = MetaMachine.path.attributes[1]
     
+    @BoolProperty(label: "is_parameterised", validation: .required())
+    var isParameterised
+    
     @TableProperty(
         label: "parameters",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes)),
-            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.reservedWords)),
+            .line(
+                label: "name",
+                validation:
+                    .required()
+                    .alphaunderscore()
+                    .alphaunderscorefirst()
+                    .minLength(1)
+                    .maxLength(255)
+                    .blacklist(VHDLReservedWords.allReservedWords)
+            ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ]
@@ -28,8 +40,8 @@ struct VHDLParametersGroup: GroupProtocol {
     @TableProperty(
         label: "returns",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes)),
-            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.reservedWords)),
+            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255).blacklist(VHDLReservedWords.allReservedWords)),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ]
@@ -43,8 +55,5 @@ struct VHDLParametersGroup: GroupProtocol {
         WhenFalse(isParameterised, makeUnavailable: parameters)
         WhenFalse(isParameterised, makeUnavailable: returns)
     }
-    
-    @BoolProperty(label: "is_parameterised", validation: .required())
-    var isParameterised
     
 }
