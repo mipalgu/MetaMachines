@@ -234,8 +234,8 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
 //            self.mutator = CXXBaseConverter()
 //        case .spartanfsm:
 //            self.mutator = CXXBaseConverter()
-//        case .vhdl:
-//            self.mutator = VHDLMachinesConverter()
+        case .vhdl:
+            self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
         case .swiftfsm:
             self.mutator = SchemaMutator(schema: SwiftfsmSchema(dependencyLayout: []))
         case .other:

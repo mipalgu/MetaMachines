@@ -10,7 +10,7 @@ import Attributes
 
 struct VHDLSchema: MachineSchema {
     
-    var dependencyLayout: [Field] = []
+    var dependencyLayout: [Field]
     
     @Group
     var variables = VHDLVariablesGroup()
