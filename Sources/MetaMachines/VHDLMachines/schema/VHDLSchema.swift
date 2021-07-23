@@ -12,11 +12,11 @@ struct VHDLSchema: MachineSchema {
     
     var dependencyLayout: [Field] = []
     
-//    @Group
-//    var parameters = VHDLParametersGroup()
-    
     @Group
     var variables = VHDLVariablesGroup()
+    
+    @Group
+    var parameters = VHDLParametersGroup()
     
     @Group
     var settings = VHDLSettings()

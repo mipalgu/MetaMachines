@@ -15,7 +15,7 @@ struct VHDLParametersGroup: GroupProtocol {
     let path = MetaMachine.path.attributes[1]
     
     @TableProperty(
-        label: "Parameters",
+        label: "parameters",
         columns: [
             .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes)),
             .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
@@ -25,16 +25,26 @@ struct VHDLParametersGroup: GroupProtocol {
     )
     var parameters
     
+    @TableProperty(
+        label: "returns",
+        columns: [
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes)),
+            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
+            .expression(label: "value", language: .vhdl),
+            .line(label: "comment")
+        ]
+    )
+    var returns
+    
     @TriggerBuilder<MetaMachine>
     var triggers: some TriggerProtocol {
-        WhenChanged(isParameterised).sync(target: path(for: somethingElse))
-        WhenChanged(isParameterised).sync(target: path(for: somethingElse))
+        WhenTrue(isParameterised, makeAvailable: parameters)
+        WhenTrue(isParameterised, makeAvailable: returns)
+        WhenFalse(isParameterised, makeUnavailable: parameters)
+        WhenFalse(isParameterised, makeUnavailable: returns)
     }
     
     @BoolProperty(label: "is_parameterised", validation: .required())
     var isParameterised
-    
-    @BoolProperty(label: "something_else", validation: .required())
-    var somethingElse
     
 }
