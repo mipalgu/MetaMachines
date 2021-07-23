@@ -18,4 +18,7 @@ struct VHDLSchema: MachineSchema {
     @Group
     var variables = VHDLVariablesGroup()
     
+    @Group
+    var settings = VHDLSettings()
+    
 }
