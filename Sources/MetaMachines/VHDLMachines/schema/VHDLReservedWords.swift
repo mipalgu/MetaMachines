@@ -20,4 +20,11 @@ struct VHDLReservedWords {
         "bit_vector",
     ]
     
+    static var variableTypes: Set<String> = [
+        "boolean",
+        "integer",
+        "natural",
+        "positive"
+    ]
+    
 }
