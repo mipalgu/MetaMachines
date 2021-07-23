@@ -26,6 +26,9 @@ struct VHDLVariablesGroup: GroupProtocol {
     )
     var clocks
     
+    @EnumeratedProperty(label: "driving_clock", validValues: [], validation: .required().notEmpty())
+    var drivingClock
+    
     @TableProperty(
         label: "external_variables",
         columns: [
