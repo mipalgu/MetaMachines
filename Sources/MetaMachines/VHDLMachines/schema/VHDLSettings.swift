@@ -14,10 +14,18 @@ struct VHDLSettings: GroupProtocol {
     
     let path = MetaMachine.path.attributes[3]
     
-    @EnumeratedProperty(label: "suspended_state", validValues: [], validation: .required())
+    @EnumeratedProperty(
+        label: "suspended_state",
+        validValues: [],
+        validation: .required()
+    )
     var suspendedState
     
-    @EnumeratedProperty(label: "initial_state", validValues: [], validation: .required().notEmpty())
+    @EnumeratedProperty(
+        label: "initial_state",
+        validValues: [],
+        validation: .required().notEmpty()
+    )
     var initialState
     
 }

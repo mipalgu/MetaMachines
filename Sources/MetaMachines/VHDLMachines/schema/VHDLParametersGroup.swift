@@ -20,7 +20,15 @@ struct VHDLParametersGroup: GroupProtocol {
     @TableProperty(
         label: "parameters",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.reservedWords)),
+            .expression(
+                label: "type",
+                language: .vhdl,
+                validation:
+                    .required()
+                    .greylist(VHDLReservedWords.signalTypes)
+                    .blacklist(VHDLReservedWords.variableTypes)
+                    .blacklist(VHDLReservedWords.reservedWords)
+            ),
             .line(
                 label: "name",
                 validation:
@@ -40,8 +48,25 @@ struct VHDLParametersGroup: GroupProtocol {
     @TableProperty(
         label: "returns",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes).blacklist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.reservedWords)),
-            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255).blacklist(VHDLReservedWords.allReservedWords)),
+            .expression(
+                label: "type",
+                language: .vhdl,
+                validation:
+                    .required()
+                    .greylist(VHDLReservedWords.signalTypes)
+                    .blacklist(VHDLReservedWords.variableTypes)
+                    .blacklist(VHDLReservedWords.reservedWords)
+            ),
+            .line(
+                label: "name",
+                validation:
+                    .required()
+                    .alphaunderscore()
+                    .alphaunderscorefirst()
+                    .minLength(1)
+                    .maxLength(255)
+                    .blacklist(VHDLReservedWords.allReservedWords)
+            ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ]
