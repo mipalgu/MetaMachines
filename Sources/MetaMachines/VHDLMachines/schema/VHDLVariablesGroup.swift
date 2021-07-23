@@ -73,13 +73,4 @@ struct VHDLVariablesGroup: GroupProtocol {
     )
     var machineSignals
     
-    @CodeProperty(label: "architecture_head", language: .vhdl)
-    var architectureHead
-    
-    @CodeProperty(label: "architecture_body", language: .vhdl)
-    var architectureBody
-    
-    @CodeProperty(label: "includes", language: .vhdl)
-    var includes
-    
 }

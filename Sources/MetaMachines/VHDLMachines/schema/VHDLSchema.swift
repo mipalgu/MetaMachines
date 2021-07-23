@@ -19,6 +19,9 @@ struct VHDLSchema: MachineSchema {
     var parameters = VHDLParametersGroup()
     
     @Group
+    var includes = VHDLIncludes()
+    
+    @Group
     var settings = VHDLSettings()
     
 }
