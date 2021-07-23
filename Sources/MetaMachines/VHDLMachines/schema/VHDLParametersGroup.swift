@@ -14,6 +14,17 @@ struct VHDLParametersGroup: GroupProtocol {
     
     let path = MetaMachine.path.attributes[0]
     
+    @TableProperty(
+        label: "Parameters",
+        columns: [
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.signalTypes)),
+            .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
+            .expression(label: "value", language: .vhdl),
+            .line(label: "comment")
+        ]
+    )
+    var parameters
+    
     @TriggerBuilder<MetaMachine>
     var triggers: some TriggerProtocol {
         WhenChanged(isParameterised).sync(target: path(for: somethingElse))
