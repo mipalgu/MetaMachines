@@ -22,7 +22,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             .integer(label: "frequency", validation: .required().between(min: 0, max: 999)),
             .enumerated(label: "unit", validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue }), validation: .required())
         ],
-        validation: .required()
+        validation: .required().notEmpty()
     )
     var clocks
     
@@ -42,7 +42,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     @TableProperty(
         label: "generics",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.variableTypes)),
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.signalTypes)),
             .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
@@ -53,7 +53,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     @TableProperty(
         label: "machine_variables",
         columns: [
-            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.variableTypes)),
+            .expression(label: "type", language: .vhdl, validation: .required().greylist(VHDLReservedWords.variableTypes).blacklist(VHDLReservedWords.signalTypes)),
             .line(label: "name", validation: .required().alphaunderscore().alphaunderscorefirst().minLength(1).maxLength(255)),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
@@ -72,5 +72,14 @@ struct VHDLVariablesGroup: GroupProtocol {
         validation: .required()
     )
     var machineSignals
+    
+    @CodeProperty(label: "architecture_head", language: .vhdl)
+    var architectureHead
+    
+    @CodeProperty(label: "architecture_body", language: .vhdl)
+    var architectureBody
+    
+    @CodeProperty(label: "includes", language: .vhdl)
+    var includes
     
 }
