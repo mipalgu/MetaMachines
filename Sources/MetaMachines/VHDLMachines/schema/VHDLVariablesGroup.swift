@@ -15,10 +15,16 @@ struct VHDLVariablesGroup: GroupProtocol {
     
     let path = MetaMachine.path.attributes[0]
     
-//    @TriggerBuilder<MetaMachine>
-//    var trigger: AnyTrigger<MetaMachine> {
-//        WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue.enumeratedValidValues)
-//    }
+    @TriggerBuilder<MetaMachine>
+    var trigger: AnyTrigger<MetaMachine> {
+        AnyTrigger<MetaMachine>(
+            WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue, transform: { clocksAttribute in
+            let validValues = Set(clocksAttribute.tableValue.map { clockLine in
+                clockLine[0].lineValue
+            })
+            return Attribute.enumerated(validValues.first ?? "", validValues: validValues)
+        }))
+    }
     
     @TableProperty(
         label: "clocks",
