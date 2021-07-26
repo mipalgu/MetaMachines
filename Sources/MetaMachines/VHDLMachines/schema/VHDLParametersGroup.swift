@@ -18,7 +18,7 @@ struct VHDLParametersGroup: GroupProtocol {
     var isParameterised
     
     @TableProperty(
-        label: "parameters",
+        label: "parameter_signals",
         columns: [
             .expression(
                 label: "type",
@@ -46,7 +46,7 @@ struct VHDLParametersGroup: GroupProtocol {
     var parameters
     
     @TableProperty(
-        label: "returns",
+        label: "returnable_signals",
         columns: [
             .expression(
                 label: "type",
