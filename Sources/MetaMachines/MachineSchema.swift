@@ -8,7 +8,17 @@
 import Foundation
 import Attributes
 
-public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Root == MetaMachine {}
+public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Root == MetaMachine {
+    
+    associatedtype StateSchema: SchemaProtocol where StateSchema.Root == Root
+    
+    associatedtype TransitionSchema: SchemaProtocol where TransitionSchema.Root == Root
+    
+    var stateSchema: StateSchema { get }
+    
+    var transitionSchema: TransitionSchema { get }
+    
+}
 
 public extension MachineSchema {
     

@@ -62,6 +62,10 @@ public struct SwiftfsmSchema: MachineSchema {
     
     public var dependencyLayout: [Field]
     
+    public var stateSchema = EmptySchema<MetaMachine>()
+    
+    public var transitionSchema = EmptySchema<MetaMachine>()
+    
     @Group(wrappedValue: SwiftfsmVariables())
     var variables
     
