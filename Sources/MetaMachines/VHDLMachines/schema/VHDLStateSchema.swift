@@ -11,5 +11,10 @@ import Attributes
 struct VHDLStateSchema: SchemaProtocol {
     
     typealias Root = MetaMachine
-        
+    
+    @Group
+    var variables = VHDLStateVariables()
+    
+    @Group
+    var actions = VHDLStateActions()
 }
