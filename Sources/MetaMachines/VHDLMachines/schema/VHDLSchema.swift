@@ -12,6 +12,10 @@ struct VHDLSchema: MachineSchema {
     
     var dependencyLayout: [Field]
     
+    var stateSchema = VHDLStateSchema()
+    
+    var transitionSchema = VHDLTransitionsSchema()
+    
     @Group
     var variables = VHDLVariablesGroup()
     
