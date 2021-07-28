@@ -12,9 +12,12 @@ struct VHDLStateSchema: SchemaProtocol {
     
     typealias Root = MetaMachine
     
+    //Need to create triggers for state CUD operations
+    
     @Group
     var variables = VHDLStateVariables()
     
     @Group
     var actions = VHDLStateActions()
+    
 }

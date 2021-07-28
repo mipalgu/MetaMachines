@@ -17,12 +17,16 @@ struct VHDLVariablesGroup: GroupProtocol {
     
     @TriggerBuilder<MetaMachine>
     var trigger: some TriggerProtocol {
+        //Trigger for adding and deleting clocks
         WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue, transform: { clocksAttribute in
             let validValues = Set(clocksAttribute.tableValue.map { clockLine in
                 clockLine[0].lineValue
             })
             return Attribute.enumerated(validValues.first ?? "", validValues: validValues)
         })
+        //Need to add trigger for renaming clock
+        
+        //Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
     
     @TableProperty(
