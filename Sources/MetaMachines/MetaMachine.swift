@@ -345,6 +345,13 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// Add a new empty state to the machine.
     public mutating func newState() -> Result<Bool, AttributeError<MetaMachine>> {
         // NEED TO CREATE STATE HERE
+        let newName = generateNewStateName()
+        let newInitialMachine = MetaMachine.initialMachine(forSemantics: semantics)
+        guard let firstState = newInitialMachine.states.first else {
+            fatalError("Cannot create new state from blueprint")
+        }
+        let appendingState = State(name: newName, actions: firstState.actions, transitions: [], attributes: firstState.attributes, metaData: firstState.metaData)
+        states.append(appendingState)
         guard let newState = self.states.last, let index = self.states.lastIndex(of: newState) else {
             return .failure(AttributeError(message: "Failed to find added state", path: MetaMachine.path.states))
         }
@@ -503,6 +510,17 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         try perform { machine in
             try self.mutator.validate(machine: machine)
         }
+    }
+                      
+    private func generateNewStateName() -> String {
+        let stateNames = Set(states.map(\.name))
+        var newName = "State"
+        var count = 0
+        repeat {
+            newName = "State\(count)"
+            count += 1
+        } while (stateNames.contains(newName))
+        return newName
     }
     
     private func perform(_ f: (MetaMachine) throws -> Void) throws {

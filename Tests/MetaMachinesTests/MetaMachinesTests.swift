@@ -2,10 +2,32 @@ import XCTest
 @testable import MetaMachines
 
 final class MetaMachinesTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        //XCTAssertEqual(MetaMachines().text, "Hello, World!")
+    
+    var machine: MetaMachine?
+    
+    public override func setUp() {
+        machine = MetaMachine.initialMachine(forSemantics: .swiftfsm)
+        super.setUp()
+    }
+    
+    public static var allTests: [(String, (MetaMachinesTests) -> () throws -> Void)] {
+        return [
+            ("test_newStateCreatesState", testNewStateCreatesState)
+        ]
+    }
+    
+    func testNewStateCreatesState() throws {
+        let stateLength = machine?.states.count
+        let result = machine?.newState()
+        let stateLengthAfterNewState = machine?.states.count
+        switch result {
+        case .success:
+            XCTAssertNotEqual(stateLength, stateLengthAfterNewState)
+        case .failure(let error):
+            print(error)
+            XCTAssertTrue(false)
+        default:
+            XCTAssertTrue(false)
+        }
     }
 }
