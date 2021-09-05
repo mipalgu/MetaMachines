@@ -87,6 +87,9 @@ public struct SwiftfsmSchema: MachineSchema {
     }
     
     public func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+        if machine.attributes[2].attributes["suspend_state"]?.enumeratedValue == oldName {
+            machine.attributes[2].attributes["suspend_state"]?.enumeratedValue = state.name
+        }
         syncSuspendList(machine: &machine)
         return .success(true)
     }
