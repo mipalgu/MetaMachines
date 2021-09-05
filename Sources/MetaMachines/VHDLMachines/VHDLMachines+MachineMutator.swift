@@ -328,7 +328,7 @@ extension VHDLMachinesConverter: MachineMutator {
 
     private func whitelist(forMachine machine: MetaMachine) -> [AnyPath<MetaMachine>] {
         let machinePaths = [
-            AnyPath(machine.path.filePath),
+            AnyPath(machine.path.name),
             AnyPath(machine.path.initialState),
             AnyPath(machine.path.attributes[0].attributes),
             AnyPath(machine.path.attributes[1].attributes),

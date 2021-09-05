@@ -97,16 +97,11 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
         return Arrangement.path
     }
     
-    /// The name of the arrangement.
-    public var name: String {
-        return self.filePath.lastPathComponent.components(separatedBy: ".")[0]
-    }
-    
     /// The underlying semantics which this meta machine follows.
     public var semantics: Semantics
     
-    /// The location of the arrangement on the file system.
-    public var filePath: URL
+    /// The name of the arrangement.
+    public var name: String
     
     /// The root machines of the arrangement.
     public var dependencies: [MachineDependency]
@@ -135,44 +130,21 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
     
     public var metaData: [AttributeGroup]
     
-    public var allMachineNames: Set<String> {
-        var names: Set<String> = []
-        var machines: [URL: MetaMachine] = [:]
-        func process(_ url: URL, prefix: String, previous previousNames: [URL: String]) {
-            guard let machine = machines[url] ?? (try? MetaMachine(filePath: url)) else {
-                return
-            }
-            machines[url] = machine
-            if nil != previousNames[url] {
-                return
-            }
-            let name = prefix + machine.name
-            names.insert(name)
-            var newPreviousNames = previousNames
-            newPreviousNames[url] = name
-            machine.dependencies.forEach { process($0.filePath, prefix: name + ".", previous: newPreviousNames) }
-        }
-        self.dependencies.forEach {
-            process($0.filePath, prefix: "", previous: [:])
-        }
-        return names
-    }
-    
     public init(
         semantics: Semantics,
-        filePath: URL,
+        name: String,
         dependencies: [MachineDependency] = [],
         attributes: [AttributeGroup],
         metaData: [AttributeGroup]
     ) {
         self.semantics = semantics
+        self.name = name
         switch semantics {
         case .swiftfsm:
             self.mutator = SwiftfsmConverter()
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
         }
-        self.filePath = filePath
         self.dependencies = dependencies
         self.attributes = attributes
         self.metaData = metaData
@@ -183,7 +155,30 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
         guard let arrangement = parser.parseArrangement(atDirectory: url) else {
             throw ConversionError(message: parser.errors.last ?? "Unable to parse arrangement at \(url.path)", path: MetaMachine.path)
         }
-        self = SwiftfsmConverter().metaArrangement(of: arrangement)
+        self = SwiftfsmConverter().metaArrangement(of: arrangement, atDirectory: url)
+    }
+    
+    public func allMachineNames(relativeTo arrangementDir: URL) -> Set<String> {
+        var names: Set<String> = []
+        var machines: [URL: MetaMachine] = [:]
+        func process(_ url: URL, prefix: String, previous previousNames: [URL: String]) {
+            guard let machine = machines[url] ?? (try? MetaMachine(filePath: url)) else {
+                return
+            }
+            machines[url] = machine
+            if nil != previousNames[url] {
+                return
+            }
+            let name = prefix + (url.lastPathComponent.components(separatedBy: ".").first ?? "")
+            names.insert(name)
+            var newPreviousNames = previousNames
+            newPreviousNames[url] = name
+            machine.dependencies.forEach { process($0.filePath(relativeTo: url), prefix: name + ".", previous: newPreviousNames) }
+        }
+        self.dependencies.forEach {
+            process($0.filePath(relativeTo: arrangementDir), prefix: "", previous: [:])
+        }
+        return names
     }
     
     /// Setup an initial machine for a specific semantics.
@@ -195,43 +190,51 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
     public static func initialArrangement(forSemantics semantics: Arrangement.Semantics, filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.arrangement", isDirectory: true)) -> Arrangement {
         switch semantics {
         case .swiftfsm:
-            return SwiftfsmConverter().initialArrangement(filePath: filePath)
+            return SwiftfsmConverter().initialArrangement
         case .other:
             fatalError("You cannot create an initial machine for an unknown semantics")
         }
     }
     
-    public func flattenedDependencies() throws -> [FlattenedDependency] {
-        let allMachines = try self.allMachines()
-        func process(_ dependency: MachineDependency) throws -> FlattenedDependency {
-            guard let machine = allMachines[dependency.filePath] else {
+    public func flattenedDependencies(relativeTo arrangementDir: URL) throws -> [FlattenedDependency] {
+        let allMachines = try self.allMachines(relativeTo: arrangementDir)
+        func process(_ dependency: MachineDependency, relativeTo parent: URL) throws -> FlattenedDependency {
+            guard let machine = allMachines[dependency.filePath(relativeTo: parent)] else {
                 throw ConversionError(message: "Unable to parse all dependent machines", path: MetaMachine.path.dependencies)
             }
-            let dependencies = try machine.dependencies.map(process)
+            let dependencies = try machine.dependencies.map {
+                try process($0, relativeTo: dependency.filePath(relativeTo: parent))
+            }
             return FlattenedDependency(name: dependency.name, machine: machine, dependencies: dependencies)
         }
-        return try dependencies.map(process)
+        return try dependencies.map {
+            try process($0, relativeTo: arrangementDir)
+        }
     }
     
-    public func allMachines() throws -> [URL: MetaMachine] {
+    public func allMachines(relativeTo arrangementDir: URL) throws -> [URL: MetaMachine] {
         var dict: [URL: MetaMachine] = [:]
         dict.reserveCapacity(dependencies.count)
-        func recurse(_ dependency: MachineDependency) throws {
-            if nil != dict[dependency.filePath.resolvingSymlinksInPath().absoluteURL] {
+        func recurse(_ dependency: MachineDependency, relativeTo parent: URL) throws {
+            if nil != dict[dependency.filePath(relativeTo: parent).resolvingSymlinksInPath().absoluteURL] {
                 return
             }
-            let machine = try MetaMachine(filePath: dependency.filePath.resolvingSymlinksInPath().absoluteURL)
-            dict[dependency.filePath.resolvingSymlinksInPath().absoluteURL] = machine
-            try machine.dependencies.forEach(recurse)
+            let machine = try MetaMachine(filePath: dependency.filePath(relativeTo: parent).resolvingSymlinksInPath().absoluteURL)
+            dict[dependency.filePath(relativeTo: parent).resolvingSymlinksInPath().absoluteURL] = machine
+            try machine.dependencies.forEach {
+                try recurse($0, relativeTo: dependency.filePath(relativeTo: parent))
+            }
         }
-        try dependencies.forEach(recurse)
+        try dependencies.forEach {
+            try recurse($0, relativeTo: arrangementDir)
+        }
         return dict
     }
     
-    public func save() throws {
+    public func save(at directory: URL) throws {
         let swiftArrangement = try SwiftfsmConverter().convert(self)
         let generator = SwiftMachines.MachineArrangementGenerator()
-        guard nil != generator.generateArrangement(swiftArrangement) else {
+        guard nil != generator.generateArrangement(swiftArrangement, atDirectory: directory) else {
             throw ConversionError(message: generator.errors.last ?? "Unable to save arrangement", path: MetaMachine.path)
         }
     }
@@ -330,7 +333,7 @@ extension Arrangement: Equatable {
     
     public static func == (lhs: Arrangement, rhs: Arrangement) -> Bool {
         return lhs.semantics == rhs.semantics
-            && lhs.filePath == rhs.filePath
+            && lhs.name == rhs.name
             && lhs.dependencies == rhs.dependencies
             && lhs.attributes == rhs.attributes
             && lhs.metaData == rhs.metaData
@@ -342,7 +345,7 @@ extension Arrangement: Hashable {
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.semantics)
-        hasher.combine(self.filePath)
+        hasher.combine(self.name)
         hasher.combine(self.dependencies)
         hasher.combine(self.attributes)
         hasher.combine(self.metaData)
@@ -355,7 +358,7 @@ extension Arrangement: Codable {
     public enum CodingKeys: CodingKey {
         
         case semantics
-        case filePath
+        case name
         case dependencies
         case attributes
         case metaData
@@ -365,13 +368,13 @@ extension Arrangement: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let semantics = try container.decode(Semantics.self, forKey: .semantics)
-        let filePath = try container.decode(URL.self, forKey: .filePath)
+        let name = try container.decode(String.self, forKey: .name)
         let dependencies = try container.decode([MachineDependency].self, forKey: .dependencies)
         let attributes = try container.decode([AttributeGroup].self, forKey: .attributes)
         let metaData = try container.decode([AttributeGroup].self, forKey: .metaData)
         self.init(
             semantics: semantics,
-            filePath: filePath,
+            name: name,
             dependencies: dependencies,
             attributes: attributes,
             metaData: metaData
@@ -381,7 +384,7 @@ extension Arrangement: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.semantics, forKey: .semantics)
-        try container.encode(self.filePath, forKey: .filePath)
+        try container.encode(self.name, forKey: .name)
         try container.encode(self.dependencies, forKey: .dependencies)
         try container.encode(self.attributes, forKey: .attributes)
         try container.encode(self.metaData, forKey: .metaData)

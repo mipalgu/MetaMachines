@@ -76,6 +76,45 @@ public final class MachineParser {
         self.swiftParser = swiftParser
     }
     
+    public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
+        self.errors = []
+        if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
+//            let hFile = machineDir.appendingPathComponent(name + ".h", isDirectory: false)
+//            let statesFile = machineDir.appendingPathComponent("States", isDirectory: false)
+//            let cxxConverter = CXXBaseConverter()
+//            guard
+//                let _ = try? hFile.checkResourceIsReachable(),
+//                let states = try? String(contentsOf: statesFile)
+//            else {
+//                self.errors.append("Machine at path \(path) is using an unsupported semantics.")
+//                return nil
+//            }
+//            let initialStateName = states.components(separatedBy: .newlines)[0]
+//            let initialOnSuspend = machineDir.appendingPathComponent("State_" + initialStateName + "_OnSuspend.mm", isDirectory: false)
+//            let initialOnEntry = machineDir.appendingPathComponent("State_" + initialStateName + "_OnEntry.mm", isDirectory: false)
+//            guard let _ = try? initialOnSuspend.checkResourceIsReachable() else {
+//                guard
+//                    let _ = try? initialOnEntry.checkResourceIsReachable(),
+//                    let ucfsmMachine = UCFSMParser().parseMachine(location: machineDir)
+//                else {
+//                    return nil
+//                }
+//                return cxxConverter.toMachine(machine: ucfsmMachine, semantics: .ucfsm)
+//            }
+//            guard let clfsmMachine = CLFSMParser().parseMachine(location: machineDir) else {
+//                return nil
+//            }
+//            return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
+            self.errors.append("Machine is not a swift machine.")
+            return nil
+        }
+        guard let swiftMachine = self.swiftParser.parseMachine(wrapper) else {
+            self.errors = self.swiftParser.errors
+            return nil
+        }
+        return MetaMachine(from: swiftMachine)
+    }
+    
     public func parseMachine(atPath path: String) -> MetaMachine? {
         self.errors = []
         let machineDir = URL(fileURLWithPath: path, isDirectory: true)

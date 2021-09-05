@@ -80,7 +80,7 @@ struct CXXBaseConverter {
     func toMachine(machine: CXXBase.Machine, semantics: MetaMachine.Semantics) -> MetaMachine {
         MetaMachine(
             semantics: semantics,
-            filePath: machine.path,
+            name: machine.name,
             initialState: machine.states[machine.initialState].name,
             states: machine.states.map { state in toState(state: state, transitionsForState: machine.transitions.filter { $0.source == state.name }.sorted(by: { $0.priority < $1.priority }), actionOrder: machine.actionDisplayOrder ) },
             dependencies: [],
@@ -217,7 +217,7 @@ struct CXXBaseConverter {
         }
         return CXXBase.Machine(
             name: machine.name,
-            path: machine.filePath,
+            path: URL(fileURLWithPath: "/tmp/Temp.machine", isDirectory: true), // fix later
             includes: machine.attributes.first { $0.name == "includes" }?.attributes["includes"]?.codeValue ?? "",
             includePaths: machine.attributes.first { $0.name == "includes" }?.attributes["include_paths"]?.textValue.components(separatedBy: .newlines) ?? [],
             funcRefs: machine.attributes.first { $0.name == "func_refs" }?.attributes["func_refs"]?.codeValue ?? "",
@@ -420,7 +420,7 @@ extension CXXBaseConverter: MachineMutator {
     
     private func whitelist(forMachine machine: MetaMachine) -> [AnyPath<MetaMachine>] {
         let machinePaths = [
-            AnyPath(machine.path.filePath),
+            AnyPath(machine.path.name),
             AnyPath(machine.path.initialState),
             AnyPath(machine.path.attributes[0].attributes),
             AnyPath(machine.path.attributes[1].attributes),

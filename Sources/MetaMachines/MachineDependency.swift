@@ -62,10 +62,10 @@ import Attributes
 public struct MachineDependency: Hashable, Codable {
     
     public var name: String {
-        return self.filePath.lastPathComponent.components(separatedBy: ".")[0]
+        return relativePath.components(separatedBy: ".")[0]
     }
     
-    public var filePath: URL
+    public var relativePath: String
     
     public var fields: [Field]
     
@@ -76,7 +76,7 @@ public struct MachineDependency: Hashable, Codable {
     public var complexAttributeType: AttributeType {
         return .complex(layout: [
             "name": .line,
-            "filePath": .line,
+            "relative_path": .line,
             "attributes": .complex(layout: fields)
         ])
     }
@@ -85,18 +85,18 @@ public struct MachineDependency: Hashable, Codable {
         get {
             return .complex(
                 [
-                    "filePath": .line(filePath.path),
+                    "relative_path": .line(relativePath),
                     "attributes": .complex(attributes, layout: fields)
                 ],
                 layout: [
-                    "filePath": .line,
+                    "relative_path": .line,
                     "attributes": .complex(layout: fields)
                 ]
             )
         } set {
             switch newValue {
             case .block(.complex(let values, _)):
-                self.filePath = (values["filePath"]?.lineValue).flatMap { URL(string: $0) } ?? self.filePath
+                self.relativePath = values["relative_path"]?.lineValue ?? self.relativePath
                 self.attributes = values["attributes"]?.complexValue ?? self.attributes
             default:
                 return
@@ -104,11 +104,21 @@ public struct MachineDependency: Hashable, Codable {
         }
     }
     
-    public init(filePath: URL, fields: [Field] = [], attributes: [Label: Attribute] = [:], metaData: [Label: Attribute] = [:]) {
-        self.filePath = filePath
+    public init(relativePath: String, fields: [Field] = [], attributes: [Label: Attribute] = [:], metaData: [Label: Attribute] = [:]) {
+        self.relativePath = relativePath
         self.fields = fields
         self.attributes = attributes
         self.metaData = metaData
+    }
+    
+    public func filePath(relativeTo parent: URL) -> URL {
+        let fileURL: URL
+        if #available(OSX 10.11, *) {
+            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: false, relativeTo: parent)
+        } else {
+            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: false)
+        }
+        return fileURL
     }
     
 }
