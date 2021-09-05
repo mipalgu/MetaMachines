@@ -556,6 +556,14 @@ extension MetaMachine {
         self = machine
     }
     
+    public init(from wrapper: FileWrapper) throws {
+        let parser = MachineParser()
+        guard let machine = parser.parseMachine(fromWrapper: wrapper) else {
+            throw ConversionError(message: parser.lastError ?? "Unable to load machine", path: MetaMachine.path)
+        }
+        self = machine
+    }
+    
     public func save() throws {
         try self.validate()
         let generator = MachineGenerator()
