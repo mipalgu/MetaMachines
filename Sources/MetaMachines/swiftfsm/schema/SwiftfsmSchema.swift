@@ -121,18 +121,6 @@ public struct SwiftfsmStateSettings: GroupProtocol {
         elementPath: Path(State.self).attributes[1]
     )
     
-    @TriggerBuilder<MetaMachine>
-    public var triggers: some TriggerProtocol {
-        WhenTrue(accessExternalVariables, makeAvailable: externalVariables)
-        WhenFalse(accessExternalVariables, makeUnavailable: externalVariables)
-    }
-    
-    @BoolProperty(
-        label: "access_external_variables",
-        validation: .required()
-    )
-    var accessExternalVariables
-    
     @EnumerableCollectionProperty(
         label: "external_variables",
         validValues: [],

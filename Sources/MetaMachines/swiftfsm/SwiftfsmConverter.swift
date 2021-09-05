@@ -384,12 +384,10 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         attributes.append(settings)
         let states = swiftMachine.states.map { (state) -> State in
             let settingsFields: [Field] = [
-                "access_external_variables": .bool,
                 "external_variables": .enumerableCollection(validValues: Set(swiftMachine.externalVariables.map { $0.label })),
                 "imports": .code(language: .swift)
             ]
             let settingsAttributes: [String: Attribute] = [
-                "access_external_variables": .bool(true),
                 "external_variables": .enumerableCollection(Set(state.externalVariables.map { $0.label }), validValues: Set(swiftMachine.externalVariables.map { $0.label })),
                 "imports": .code(Code(state.imports), language: .swift)
             ]
