@@ -564,6 +564,14 @@ extension MetaMachine {
         self = machine
     }
     
+    public func fileWrapper() throws -> FileWrapper {
+        let generator = MachineGenerator()
+        guard let fileWrapper = generator.generate(self) else {
+            throw ConversionError(message: generator.lastError ?? "Unable to create machine", path: MetaMachine.path)
+        }
+        return fileWrapper
+    }
+    
     public func save() throws {
         try self.validate()
         let generator = MachineGenerator()
