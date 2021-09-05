@@ -133,7 +133,7 @@ public struct SwiftfsmStateVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required()
+        validation: .required().unique({ $0.map { $0[1].lineValue } })
     )
     var stateVariables
     
@@ -195,7 +195,7 @@ public struct SwiftfsmVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required()
+        validation: .required().unique({ $0.map { $0[1].lineValue } })
     )
     var externalVariables
     
@@ -207,7 +207,7 @@ public struct SwiftfsmVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required()
+        validation: .required().unique({ $0.map { $0[1].lineValue } })
     )
     var machineVariables
     
