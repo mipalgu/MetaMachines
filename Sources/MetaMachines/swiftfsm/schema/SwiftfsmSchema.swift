@@ -62,7 +62,7 @@ public struct SwiftfsmSchema: MachineSchema {
     
     public var dependencyLayout: [Field]
     
-    public var stateSchema = EmptySchema<MetaMachine>()
+    public var stateSchema = SwiftfsmStateSchema()
     
     public var transitionSchema = EmptySchema<MetaMachine>()
     
@@ -74,6 +74,92 @@ public struct SwiftfsmSchema: MachineSchema {
     
     @Group(wrappedValue: SwiftfsmSettings())
     var settings
+    
+}
+
+public struct SwiftfsmStateSchema: SchemaProtocol {
+    
+    public typealias Root = MetaMachine
+    
+    @Group(wrappedValue: SwiftfsmStateVariables())
+    var variables
+    
+}
+
+public struct SwiftfsmStateVariables: GroupProtocol {
+    
+    public typealias Root = MetaMachine
+    
+    public let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states,
+        elementPath: Path(State.self).attributes[0]
+    )
+    
+    @TableProperty(
+        label: "state_variables",
+        columns: [
+            .enumerated(label: "access_type", validValues: ["let", "var"]),
+            .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
+            .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
+            .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required())
+        ],
+        validation: .required()
+    )
+    var stateVariables
+    
+}
+
+public struct SwiftfsmStateSettings: GroupProtocol {
+    
+    public typealias Root = MetaMachine
+    
+    public let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states,
+        elementPath: Path(State.self).attributes[1]
+    )
+    
+    @TriggerBuilder<MetaMachine>
+    public var triggers: some TriggerProtocol {
+        WhenTrue(accessExternalVariables, makeAvailable: externalVariables)
+        WhenFalse(accessExternalVariables, makeUnavailable: externalVariables)
+    }
+    
+    @BoolProperty(
+        label: "access_external_variables",
+        validation: .required()
+    )
+    var accessExternalVariables
+    
+    @EnumerableCollectionProperty(
+        label: "external_variables",
+        validValues: [],
+        validation: .required()
+    )
+    var externalVariables
+    
+    @ComplexProperty(
+        base: SwiftfsmStateImports(),
+        label: "imports"
+    )
+    var imports
+
+}
+
+public struct SwiftfsmStateImports: ComplexProtocol {
+    
+    public typealias Root = MetaMachine
+    
+    public let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states,
+        elementPath: Path(State.self).attributes[1].attributes["imports"].wrappedValue
+    )
+    
+    @CodeProperty(
+        label: "imports",
+        language: .swift,
+        validation: .required()
+    )
+    var imports
     
 }
 
