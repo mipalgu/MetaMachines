@@ -92,7 +92,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             initialState: SwiftMachines.State(
                 name: "Initial",
                 imports: "",
-                externalVariables: nil,
+                externalVariables: [],
                 vars: [],
                 actions: [SwiftMachines.Action(name: "onEntry", implementation: ""), SwiftMachines.Action(name: "onExit", implementation: ""), SwiftMachines.Action(name: "main", implementation: "")],
                 transitions: []
@@ -100,7 +100,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             suspendState: SwiftMachines.State(
                 name: "Suspend",
                 imports: "",
-                externalVariables: nil,
+                externalVariables: [],
                 vars: [],
                 actions: [SwiftMachines.Action(name: "onEntry", implementation: ""), SwiftMachines.Action(name: "onExit", implementation: ""), SwiftMachines.Action(name: "main", implementation: "")],
                 transitions: []
@@ -109,7 +109,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
                 SwiftMachines.State(
                     name: "Initial",
                     imports: "",
-                    externalVariables: nil,
+                    externalVariables: [],
                     vars: [],
                     actions: [SwiftMachines.Action(name: "onEntry", implementation: ""), SwiftMachines.Action(name: "onExit", implementation: ""), SwiftMachines.Action(name: "main", implementation: "")],
                     transitions: []
@@ -117,7 +117,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
                 SwiftMachines.State(
                     name: "Suspend",
                     imports: "",
-                    externalVariables: nil,
+                    externalVariables: [],
                     vars: [],
                     actions: [SwiftMachines.Action(name: "onEntry", implementation: ""), SwiftMachines.Action(name: "onExit", implementation: ""), SwiftMachines.Action(name: "main", implementation: "")],
                     transitions: []
@@ -383,27 +383,16 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         )
         attributes.append(settings)
         let states = swiftMachine.states.map { (state) -> State in
-            let settingsFields: [Field]
-            let settingsAttributes: [String: Attribute]
-            if let externals = state.externalVariables {
-                settingsFields = [
-                    "access_external_variables": .bool,
-                    "external_variables": .enumerableCollection(validValues: Set(swiftMachine.externalVariables.map { $0.label })),
-                    "imports": .code(language: .swift)
-                ]
-                settingsAttributes = [
-                    "access_external_variables": .bool(true),
-                    "external_variables": .enumerableCollection(Set(externals.map { $0.label }), validValues: Set(swiftMachine.externalVariables.map { $0.label })),
-                    "imports": .code(Code(state.imports), language: .swift)
-                ]
-            } else {
-                settingsFields = [
-                    "access_external_variables": .bool
-                ]
-                settingsAttributes = [
-                    "access_external_variables": .bool(false)
-                ]
-            }
+            let settingsFields: [Field] = [
+                "access_external_variables": .bool,
+                "external_variables": .enumerableCollection(validValues: Set(swiftMachine.externalVariables.map { $0.label })),
+                "imports": .code(language: .swift)
+            ]
+            let settingsAttributes: [String: Attribute] = [
+                "access_external_variables": .bool(true),
+                "external_variables": .enumerableCollection(Set(state.externalVariables.map { $0.label }), validValues: Set(swiftMachine.externalVariables.map { $0.label })),
+                "imports": .code(Code(state.imports), language: .swift)
+            ]
             return State(
                 name: state.name,
                 actions: state.actions.map { Action(name: $0.name, implementation: Code($0.implementation), language: .swift) },
@@ -557,7 +546,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             return SwiftMachines.State(
                 name: state.name,
                 imports: settings.attributes["imports"]?.codeValue ?? "",
-                externalVariables: externalVariables,
+                externalVariables: externalVariables ?? [],
                 vars: vars,
                 actions: actions,
                 transitions: transitions
