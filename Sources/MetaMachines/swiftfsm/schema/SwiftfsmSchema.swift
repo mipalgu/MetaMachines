@@ -177,12 +177,13 @@ public struct SwiftfsmVariables: GroupProtocol {
         WhenChanged(externalVariables).sync(
             target: CollectionSearchPath(
                 collectionPath: MetaMachine.path.states,
-                elementPath: Path(State.self).attributes[1].attributes["external_variables"].wrappedValue.enumeratedValidValues
+                elementPath: Path(State.self).attributes[1].attributes["external_variables"].wrappedValue
             ),
             transform: { attribute in
-                Set(attribute.tableValue.map { row in
+                let validValues = Set(attribute.tableValue.map { row in
                     row[1].lineValue
                 })
+                return .enumerableCollection([], validValues: validValues)
             }
         )
     }
