@@ -84,6 +84,9 @@ public struct SwiftfsmStateSchema: SchemaProtocol {
     @Group(wrappedValue: SwiftfsmStateVariables())
     var variables
     
+    @Group(wrappedValue: SwiftfsmStateSettings())
+    var settings
+    
 }
 
 public struct SwiftfsmStateVariables: GroupProtocol {
