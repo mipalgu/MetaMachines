@@ -77,7 +77,7 @@ public struct SwiftfsmSchema: MachineSchema {
     var settings
     
     public func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
-        syncSuspendList(root: &machine)
+        syncSuspendList(machine: &machine)
         return .success(true)
     }
     
