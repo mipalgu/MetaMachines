@@ -82,23 +82,16 @@ public struct SwiftfsmSchema: MachineSchema {
     }
     
     public func didDeleteStates(machine: inout MetaMachine, state: [State], at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
-        syncSuspendList(root: &machine)
+        syncSuspendList(machine: &machine)
         return .success(true)
     }
     
-    private func syncSuspendList(root: inout MetaMachine) {
-        guard let fieldIndex = root.attributes[2].fields.firstIndex(where: { $0.name == "suspend_state" }) else {
-            return
-        }
-        let validValues = Set(root.states.map { $0.name })
-        let value: String
-        if let currentValue = root.attributes[2].attributes["suspend_state"]?.enumeratedValue, validValues.contains(currentValue) {
-            value = currentValue
-        } else {
-            value = root.states.first { $0.name == "Suspend" }?.name ?? root.states.first?.name ?? "Suspend"
-        }
-        root.attributes[2].fields[fieldIndex].type = .enumerated(validValues: validValues)
-        root.attributes[2].attributes["suspend_state"] = .enumerated(value, validValues: validValues)
+    private func syncSuspendList(machine: inout MetaMachine) {
+        let validValues = Set(machine.states.map(\.name) + [""])
+        let currentValue = machine.attributes[2].attributes["suspend_state"]?.enumeratedValue ?? ""
+        let newValue = validValues.contains(currentValue) ? currentValue : ""
+        machine.attributes[2].fields[0].type = .enumerated(validValues: validValues)
+        machine.attributes[2].attributes["suspend_state"] = .enumerated(newValue, validValues: validValues)
     }
     
 }
