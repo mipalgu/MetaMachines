@@ -61,9 +61,9 @@ import Foundation
 
 public protocol SwiftArrangementConvertible {
     
-    static func initialSwiftArrangement(filePath: URL) -> Self
+    static var initialSwiftArrangement: Self { get }
     
-    init(from swiftArrangement: SwiftMachines.Arrangement)
+    init(from swiftArrangement: SwiftMachines.Arrangement, atDirectory arrangementDir: URL)
     
     func swiftArrangement() throws -> SwiftMachines.Arrangement
     

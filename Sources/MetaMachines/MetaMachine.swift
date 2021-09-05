@@ -115,12 +115,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     public var semantics: Semantics
     
     /// The name of the machine.
-    public var name: String {
-        return self.filePath.lastPathComponent.components(separatedBy: ".")[0]
-    }
-    
-    /// The path to the .machine directory on the file system.
-    public var filePath: URL
+    public var name: String
     
     /// The name of the initial state.
     ///
@@ -219,7 +214,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// particular scheduler.
     public init(
         semantics: Semantics,
-        filePath: URL,
+        name: String,
         initialState: StateName,
         states: [State] = [],
         dependencies: [MachineDependency] = [],
@@ -227,6 +222,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         metaData: [AttributeGroup]
     ) {
         self.semantics = semantics
+        self.name = name
         switch semantics {
 //        case .clfsm:
 //            self.mutator = CXXBaseConverter()
@@ -243,7 +239,6 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         default:
             fatalError("Semantics not supported")
         }
-        self.filePath = filePath
         self.initialState = initialState
         self.states = states
         self.dependencies = dependencies
@@ -272,7 +267,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// particular scheduler.
     public init(
         mutator: Mutator,
-        filePath: URL,
+        name: String,
         initialState: StateName,
         states: [State] = [],
         dependencies: [MachineDependency] = [],
@@ -281,7 +276,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     ) {
         self.semantics = .other
         self.mutator = mutator
-        self.filePath = filePath
+        self.name = name
         self.initialState = initialState
         self.states = states
         self.dependencies = dependencies
@@ -304,7 +299,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         case .spartanfsm:
             return SpartanFSMConverter().intialSpartanFSMMachine(filePath: filePath)
         case .swiftfsm:
-            return SwiftfsmConverter().initial(filePath: filePath)
+            return SwiftfsmConverter().initialMachine
         case .vhdl:
             return VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
         case .other:
@@ -575,7 +570,7 @@ extension MetaMachine: Equatable {
     
     public static func == (lhs: MetaMachine, rhs: MetaMachine) -> Bool {
         return lhs.semantics == rhs.semantics
-            && lhs.filePath == rhs.filePath
+            && lhs.name == rhs.name
             && lhs.initialState == rhs.initialState
             && lhs.states == rhs.states
             && lhs.attributes == rhs.attributes
@@ -588,7 +583,7 @@ extension MetaMachine: Hashable {
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.semantics)
-        hasher.combine(self.filePath)
+        hasher.combine(self.name)
         hasher.combine(self.initialState)
         hasher.combine(self.states)
         hasher.combine(self.attributes)
@@ -602,7 +597,7 @@ extension MetaMachine: Codable {
     public enum CodingKeys: CodingKey {
         
         case semantics
-        case filePath
+        case name
         case initialState
         case states
         case transitions
@@ -614,14 +609,14 @@ extension MetaMachine: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let semantics = try container.decode(Semantics.self, forKey: .semantics)
-        let filePath = try container.decode(URL.self, forKey: .filePath)
+        let name = try container.decode(String.self, forKey: .name)
         let initialState = try container.decode(StateName.self, forKey: .initialState)
         let states = try container.decode([State].self, forKey: .states)
         let attributes = try container.decode([AttributeGroup].self, forKey: .attributes)
         let metaData = try container.decode([AttributeGroup].self, forKey: .metaData)
         self.init(
             semantics: semantics,
-            filePath: filePath,
+            name: name,
             initialState: initialState,
             states: states,
             attributes: attributes,
@@ -632,7 +627,7 @@ extension MetaMachine: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.semantics, forKey: .semantics)
-        try container.encode(self.filePath, forKey: .filePath)
+        try container.encode(self.name, forKey: .name)
         try container.encode(self.initialState, forKey: .initialState)
         try container.encode(self.states, forKey: .states)
         try container.encode(self.attributes, forKey: .attributes)

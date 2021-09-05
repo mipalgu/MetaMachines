@@ -73,7 +73,7 @@ public final class MachineAssembler {
         self.swiftAssembler = swiftAssembler
     }
     
-    public func assemble(_ machine: MetaMachine, inDirectory buildDir: URL) -> (URL, [URL])? {
+    public func assemble(_ machine: MetaMachine, atDirectory machineDir: URL, inDirectory buildDir: URL) -> (URL, FileWrapper)? {
         self.errors = []
         switch machine.semantics {
         case .swiftfsm:
@@ -87,7 +87,7 @@ public final class MachineAssembler {
                 self.errors.append("\(e)")
                 return nil
             }
-            guard let results = self.swiftAssembler.assemble(swiftMachine, inDirectory: buildDir) else {
+            guard let results = self.swiftAssembler.assemble(swiftMachine, atDirectory: machineDir, inDirectory: buildDir) else {
                 self.errors = self.swiftAssembler.errors
                 return nil
             }

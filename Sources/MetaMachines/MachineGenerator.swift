@@ -75,7 +75,7 @@ public final class MachineGenerator {
         self.swiftGenerator = swiftGenerator
     }
     
-    public func generate(_ machine: MetaMachine) -> (URL, [URL])? {
+    public func generate(_ machine: MetaMachine) -> FileWrapper? {
         self.errors = []
         switch machine.semantics {
         case .swiftfsm:
@@ -109,7 +109,8 @@ public final class MachineGenerator {
                 self.errors = []
                 return nil
             }
-            return (cxxMachine.path, [])
+            //return (cxxMachine.path, [])
+            return nil
         case .vhdl:
             let vhdlMachine: VHDLMachines.Machine
             do {
@@ -125,7 +126,8 @@ public final class MachineGenerator {
                 self.errors = []
                 return nil
             }
-            return (vhdlMachine.path, [])
+            //return (vhdlMachine.path, [])
+            return nil
         default:
             self.errors.append("\(machine.semantics) Machines are currently not supported")
             return nil

@@ -61,7 +61,7 @@ import Foundation
 
 public protocol SwiftMachinesConvertible {
     
-    static func initialSwiftMachine(filePath: URL) -> Self
+    static var initialSwiftMachine: Self { get }
     
     init(from swiftMachine: SwiftMachines.Machine)
     

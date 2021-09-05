@@ -65,20 +65,19 @@ struct SwiftfsmConverter: Converter, MachineValidator {
     
     private let validator = SwiftfsmMachineValidator()
     
-    func initialArrangement(filePath: URL) -> Arrangement {
+    var initialArrangement: Arrangement {
         return Arrangement(
             semantics: .swiftfsm,
-            filePath: filePath,
+            name: "_Initial",
             dependencies: [],
             attributes: [],
             metaData: []
         )
     }
     
-    func initial(filePath: URL) -> MetaMachine {
+    var initialMachine: MetaMachine {
         let swiftMachine = SwiftMachines.Machine(
-            name: filePath.lastPathComponent.hasSuffix(".machine") ? filePath.lastPathComponent.components(separatedBy: ".").dropLast().joined(separator: ".") : filePath.lastPathComponent,
-            filePath: filePath,
+            name: "_Initial",
             externalVariables: [],
             packageDependencies: [],
             swiftIncludeSearchPaths: [],
@@ -131,11 +130,11 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         return metaMachine(of: swiftMachine)
     }
     
-    func metaArrangement(of swiftArrangement: SwiftMachines.Arrangement) -> Arrangement {
-        let rootFsms = swiftArrangement.dependencies.map { MachineDependency(filePath: $0.filePath) }
+    func metaArrangement(of swiftArrangement: SwiftMachines.Arrangement, atDirectory arrangementDir: URL) -> Arrangement {
+        let rootFsms = swiftArrangement.dependencies.map { MachineDependency(relativePath: $0.pathComponent) }
         let group: AttributeGroup
         if let table = swiftArrangement.dispatchTable {
-            let (names, _) = swiftArrangement.namespacedDependencies
+            let (names, _) = swiftArrangement.namespacedDependencies(relativeTo: arrangementDir)
             let accurateTable = DispatchTable(groups: table.groups.compactMap {
                 let items = $0.items.filter { names.contains($0.name) }
                 return items.isEmpty ? nil : DispatchGroup(items: items)
@@ -175,7 +174,13 @@ struct SwiftfsmConverter: Converter, MachineValidator {
                 metaData: [:]
             )
         }
-        return Arrangement(semantics: .swiftfsm, filePath: swiftArrangement.filePath, dependencies: rootFsms, attributes: [group], metaData: [])
+        return Arrangement(
+            semantics: .swiftfsm,
+            name: swiftArrangement.name,
+            dependencies: rootFsms,
+            attributes: [group],
+            metaData: []
+        )
     }
     
     func metaMachine(of swiftMachine: SwiftMachines.Machine) -> MetaMachine {
@@ -443,7 +448,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
         let submachines = swiftMachine.subs.map {
             MachineDependency(
-                filePath: $0.filePath,
+                relativePath: $0.pathComponent,
                 fields: dependencyLayout,
                 attributes: [
                     "alias": .line($0.name ?? ""),
@@ -457,7 +462,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
         let synchronous = swiftMachine.callables.map {
             MachineDependency(
-                filePath: $0.filePath,
+                relativePath: $0.pathComponent,
                 fields: dependencyLayout,
                 attributes: [
                     "alias": .line($0.name ?? ""),
@@ -471,7 +476,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
         let asynchronous = swiftMachine.invocables.map {
             MachineDependency(
-                filePath: $0.filePath,
+                relativePath: $0.pathComponent,
                 fields: dependencyLayout,
                 attributes: [
                     "alias": .line($0.name ?? ""),
@@ -485,7 +490,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
         return MetaMachine(
             semantics: .swiftfsm,
-            filePath: swiftMachine.filePath,
+            name: swiftMachine.name,
             initialState: swiftMachine.initialState.name,
             states: states,
             dependencies: (submachines + synchronous + asynchronous).sorted { $0.name < $1.name },
@@ -496,12 +501,12 @@ struct SwiftfsmConverter: Converter, MachineValidator {
     
     func convert(_ arrangement: Arrangement) throws -> SwiftMachines.Arrangement {
         let dependencies = try arrangement.dependencies.map { (dep: MachineDependency) -> SwiftMachines.Machine.Dependency in
-            guard let dependency = SwiftMachines.Machine.Dependency(name: dep.name, filePath: dep.filePath) else {
+            guard let dependency = SwiftMachines.Machine.Dependency(name: dep.name, pathComponent: dep.relativePath) else {
                 throw ConversionError(message: "Unable to create dependency", path: MetaMachine.path)
             }
             return dependency
         }
-        return SwiftMachines.Arrangement(name: arrangement.name, filePath: arrangement.filePath, dependencies: dependencies)
+        return SwiftMachines.Arrangement(name: arrangement.name, dependencies: dependencies)
     }
     
     func convert(_ machine: MetaMachine) throws -> SwiftMachines.Machine {
@@ -579,13 +584,12 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
         func convert(_ dependency: MachineDependency) -> SwiftMachines.Machine.Dependency? {
             guard let alias = dependency.attributes["alias"]?.lineValue, !alias.trimmingCharacters(in: .whitespaces).isEmpty else {
-                return SwiftMachines.Machine.Dependency(name: nil, filePath: dependency.filePath)
+                return SwiftMachines.Machine.Dependency(name: nil, pathComponent: dependency.relativePath)
             }
-            return SwiftMachines.Machine.Dependency(name: alias.trimmingCharacters(in: .whitespaces), filePath: dependency.filePath)
+            return SwiftMachines.Machine.Dependency(name: alias.trimmingCharacters(in: .whitespaces), pathComponent: dependency.relativePath)
         }
         return SwiftMachines.Machine(
             name: machine.name,
-            filePath: machine.filePath,
             externalVariables: externalVariables,
             packageDependencies: packageDependencies,
             swiftIncludeSearchPaths: moduleDependencies["swift_search_paths"]?.collectionLines ?? [],
@@ -720,7 +724,7 @@ extension SwiftfsmConverter: ArrangementMutator {
         if boolValue {
             arrangement.attributes[0].fields = [
                 Field(name: "use_dispatch_table", type: .bool),
-                Field(name: "dispatch_table", type: .collection(type: .table(columns: [("start_time", .integer), ("duration", .integer), ("FSM", .enumerated(validValues: arrangement.allMachineNames))])))
+                Field(name: "dispatch_table", type: .collection(type: .table(columns: [("start_time", .integer), ("duration", .integer), ("FSM", .enumerated(validValues: []))])))
             ]
         } else {
             arrangement.attributes[0].fields = [
@@ -1021,7 +1025,7 @@ extension SwiftfsmConverter: MachineMutator {
     
     private func whitelist(forMachine machine: MetaMachine) -> [AnyPath<MetaMachine>] {
         let machinePaths = [
-            AnyPath(machine.path.filePath),
+            AnyPath(machine.path.name),
             AnyPath(machine.path.initialState),
             AnyPath(machine.path.attributes[0].attributes),
             AnyPath(machine.path.attributes[1].attributes),

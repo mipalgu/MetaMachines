@@ -117,13 +117,12 @@ struct VHDLMachinesConverter {
     func toArrangement(arrangement: VHDLMachines.Arrangement) -> Arrangement {
         Arrangement(
             semantics: .swiftfsm,
-            filePath: arrangement.path,
+            name: arrangement.path.lastPathComponent.components(separatedBy: ".")[0],
             dependencies: arrangement.parents.compactMap {
                 guard let path = arrangement.machines[$0] else {
                     return nil
                 }
-                return MachineDependency(filePath: path)
-                
+                return MachineDependency(relativePath: path.relativePathString(relativeto: arrangement.path))
             },
             attributes: [],
             metaData: []
@@ -293,7 +292,7 @@ struct VHDLMachinesConverter {
     func toMachine(machine: VHDLMachines.Machine) -> MetaMachine {
         MetaMachine(
             semantics: .vhdl,
-            filePath: machine.path,
+            name: machine.name,
             initialState: machine.states[machine.initialState].name,
             states: machine.states.map { toState(state: $0, machine: machine) },
             dependencies: [],
@@ -648,10 +647,10 @@ struct VHDLMachinesConverter {
         return index
     }
     
-    func getDependentMachines(machine: MetaMachine) -> [MachineName: URL] {
+    func getDependentMachines(machine: MetaMachine, relativeto machineDir: URL) -> [MachineName: URL] {
         var machines: [MachineName: URL] = [:]
         machine.dependencies.forEach {
-            machines[$0.name] = $0.filePath
+            machines[$0.name] = $0.filePath(relativeTo: machineDir)
         }
         return machines
     }
@@ -738,13 +737,13 @@ struct VHDLMachinesConverter {
         let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
         return VHDLMachines.Machine(
             name: machine.name,
-            path: machine.filePath,
+            path: URL(fileURLWithPath: "/tmp/Temp.machine", isDirectory: true), //fix later
             includes: getIncludes(machine: machine),
             externalSignals: getExternalSignals(machine: machine),
             generics: getVHDLVariables(machine: machine, key: "generics"),
             clocks: getClocks(machine: machine),
             drivingClock: getDrivingClock(machine: machine),
-            dependentMachines: getDependentMachines(machine: machine),
+            dependentMachines: [:],//getDependentMachines(machine: machine),
             machineVariables: getMachineVariables(machine: machine),
             machineSignals: getMachineSignals(machine: machine),
             isParameterised: isParameterised(machine: machine),

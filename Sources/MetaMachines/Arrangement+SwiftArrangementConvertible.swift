@@ -61,12 +61,12 @@ import Foundation
 
 extension Arrangement: SwiftArrangementConvertible {
     
-    public static func initialSwiftArrangement(filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.arrangement", isDirectory: true)) -> Arrangement {
-        SwiftfsmConverter().initialArrangement(filePath: filePath)
+    public static var initialSwiftArrangement: Arrangement {
+        SwiftfsmConverter().initialArrangement
     }
     
-    public init(from swiftArrangement: SwiftMachines.Arrangement) {
-        self = SwiftfsmConverter().metaArrangement(of: swiftArrangement)
+    public init(from swiftArrangement: SwiftMachines.Arrangement, atDirectory arrangementDir: URL) {
+        self = SwiftfsmConverter().metaArrangement(of: swiftArrangement, atDirectory: arrangementDir)
     }
     
     public func swiftArrangement() throws -> SwiftMachines.Arrangement {
