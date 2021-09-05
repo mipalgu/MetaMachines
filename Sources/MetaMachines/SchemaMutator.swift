@@ -24,6 +24,10 @@ struct SchemaMutator<Schema: MachineSchema>: MachineMutatorResponder, MachineMod
         schema.didCreateNewState(machine: &machine, state: state, index: index)
     }
     
+    func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+        schema.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+    }
+    
     func didCreateNewTransition(machine: inout MetaMachine, transition: Transition, stateIndex: Int, transitionIndex: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         schema.didCreateNewTransition(machine: &machine, transition: transition, stateIndex: stateIndex, transitionIndex: transitionIndex)
     }

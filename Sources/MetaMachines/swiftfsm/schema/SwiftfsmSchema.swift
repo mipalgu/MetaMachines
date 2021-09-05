@@ -57,6 +57,7 @@
  */
 
 import Attributes
+import Foundation
 
 public struct SwiftfsmSchema: MachineSchema {
     
@@ -74,6 +75,31 @@ public struct SwiftfsmSchema: MachineSchema {
     
     @Group(wrappedValue: SwiftfsmSettings())
     var settings
+    
+    public func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(root: &machine)
+        return .success(true)
+    }
+    
+    public func didDeleteStates(machine: inout MetaMachine, state: [State], at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(root: &machine)
+        return .success(true)
+    }
+    
+    private func syncSuspendList(root: inout MetaMachine) {
+        guard let fieldIndex = root.attributes[2].fields.firstIndex(where: { $0.name == "suspend_state" }) else {
+            return
+        }
+        let validValues = Set(root.states.map { $0.name })
+        let value: String
+        if let currentValue = root.attributes[2].attributes["suspend_state"]?.enumeratedValue, validValues.contains(currentValue) {
+            value = currentValue
+        } else {
+            value = root.states.first { $0.name == "Suspend" }?.name ?? root.states.first?.name ?? "Suspend"
+        }
+        root.attributes[2].fields[fieldIndex].type = .enumerated(validValues: validValues)
+        root.attributes[2].attributes["suspend_state"] = .enumerated(value, validValues: validValues)
+    }
     
 }
 

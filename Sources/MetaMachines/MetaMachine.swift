@@ -491,6 +491,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
     
+    public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+        let oldName = self.states[index].name
+        self.states[index].name = newName
+        let state = self.states[index]
+        return perform { [mutator] machine in
+            mutator.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+        }
+    }
+    
     /// Modify a specific attributes value.
     public mutating func modify<Path: PathProtocol>(attribute: Path, value: Path.Value) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
         let oldValue = self[keyPath: attribute.keyPath]

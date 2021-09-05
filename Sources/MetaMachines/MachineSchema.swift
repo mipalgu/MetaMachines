@@ -30,6 +30,10 @@ public extension MachineSchema {
         return .success(false)
     }
     
+    func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+        return .success(false)
+    }
+    
     func didCreateNewTransition(machine: inout MetaMachine, transition: Transition, stateIndex: Int, transitionIndex: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         return .success(false)
     }
