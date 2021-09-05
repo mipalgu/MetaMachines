@@ -140,30 +140,13 @@ public struct SwiftfsmStateSettings: GroupProtocol {
     )
     var externalVariables
     
-    @ComplexProperty(
-        base: SwiftfsmStateImports(),
-        label: "imports"
-    )
-    var imports
-
-}
-
-public struct SwiftfsmStateImports: ComplexProtocol {
-    
-    public typealias Root = MetaMachine
-    
-    public let path = CollectionSearchPath(
-        collectionPath: MetaMachine.path.states,
-        elementPath: Path(State.self).attributes[1].attributes["imports"].wrappedValue
-    )
-    
     @CodeProperty(
         label: "imports",
         language: .swift,
         validation: .required()
     )
     var imports
-    
+
 }
 
 public struct SwiftfsmVariables: GroupProtocol {
