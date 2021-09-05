@@ -162,11 +162,12 @@ public struct SwiftfsmVariables: GroupProtocol {
                 collectionPath: MetaMachine.path.states,
                 elementPath: Path(State.self).attributes[1].attributes["external_variables"]
             ),
-            transform: { attribute in
+            transform: { (attribute, oldValue) in
                 let validValues = Set(attribute.tableValue.map { row in
                     row[1].lineValue
                 })
-                return .enumerableCollection([], validValues: validValues)
+                let currentValues = (oldValue?.enumerableCollectionValue ?? []).filter({ validValues.contains($0) })
+                return .enumerableCollection(currentValues, validValues: validValues)
             }
         )
     }

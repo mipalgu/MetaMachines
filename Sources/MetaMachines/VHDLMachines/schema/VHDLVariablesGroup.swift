@@ -18,11 +18,13 @@ struct VHDLVariablesGroup: GroupProtocol {
     @TriggerBuilder<MetaMachine>
     var trigger: some TriggerProtocol {
         //Trigger for adding and deleting clocks
-        WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue, transform: { clocksAttribute in
+        WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue, transform: { (clocksAttribute, oldValue) in
             let validValues = Set(clocksAttribute.tableValue.map { clockLine in
                 clockLine[0].lineValue
             })
-            return Attribute.enumerated(validValues.first ?? "", validValues: validValues)
+            let enumeratedOldValue = oldValue.enumeratedValue
+            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue : validValues.first ?? ""
+            return Attribute.enumerated(selected, validValues: validValues)
         })
         //Need to add trigger for renaming clock
         
