@@ -93,18 +93,14 @@ struct SwiftfsmMachineValidator: MachineValidator {
                     }
                 }
                 state.attributes[1].validate { settings in
-                    settings.attributes["access_external_variables"].required()
-                    settings.attributes["access_external_variables"].wrappedValue
-                        .if { $0.boolValue } then: {
-                            settings.attributes["external_variables"].required()
-                            settings.attributes["external_variables"].wrappedValue.blockAttribute.enumerableCollectionValue.each { (_, external) in
-                                external.in(MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue) {
-                                    Set($0.map { $0[1].lineValue })
-                                }
-                            }
-                            settings.attributes["imports"].required()
-                            settings.attributes["imports"].wrappedValue.blockAttribute.codeValue.maxLength(10240)
+                    settings.attributes["external_variables"].required()
+                    settings.attributes["external_variables"].wrappedValue.blockAttribute.enumerableCollectionValue.each { (_, external) in
+                        external.in(MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue) {
+                            Set($0.map { $0[1].lineValue })
                         }
+                    }
+                    settings.attributes["imports"].required()
+                    settings.attributes["imports"].wrappedValue.blockAttribute.codeValue.maxLength(10240)
                 }
             }
             validator.attributes.length(3)
