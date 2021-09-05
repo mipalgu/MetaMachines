@@ -160,7 +160,7 @@ public struct SwiftfsmVariables: GroupProtocol {
         WhenChanged(externalVariables).sync(
             target: CollectionSearchPath(
                 collectionPath: MetaMachine.path.states,
-                elementPath: Path(State.self).attributes[1].attributes["external_variables"].wrappedValue
+                elementPath: Path(State.self).attributes[1].attributes["external_variables"]
             ),
             transform: { attribute in
                 let validValues = Set(attribute.tableValue.map { row in
