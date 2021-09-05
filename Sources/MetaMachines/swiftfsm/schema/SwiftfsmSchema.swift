@@ -171,6 +171,21 @@ public struct SwiftfsmVariables: GroupProtocol {
     public typealias Root = MetaMachine
     
     public let path = MetaMachine.path.attributes[0]
+    
+    @TriggerBuilder<MetaMachine>
+    public var triggers: some TriggerProtocol {
+        WhenChanged(externalVariables).sync(
+            target: CollectionSearchPath(
+                collectionPath: MetaMachine.path.states,
+                elementPath: Path(State.self).attributes[1].attributes["external_variables"].wrappedValue.enumeratedValidValues
+            ),
+            transform: { attribute in
+                Set(attribute.tableValue.map { row in
+                    row[1].lineValue
+                })
+            }
+        )
+    }
 
     @TableProperty(
         label: "external_variables",
