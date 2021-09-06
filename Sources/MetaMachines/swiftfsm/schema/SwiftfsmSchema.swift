@@ -321,7 +321,7 @@ public struct SwiftfsmRinglet: GroupProtocol {
     @BoolProperty(label: "use_custom_ringlet")
     var useCustomRinglet
     
-    @CollectionProperty(label: "actions", lines: ValidatorFactory.required().alphaunderscore().notEmpty())
+    @CollectionProperty(label: "actions", lines: ValidatorFactory.optional().alphaunderscore().notEmpty())
     var actions
     
     @TableProperty(
