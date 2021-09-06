@@ -534,6 +534,9 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in
             let oldName = machine.states[index].name
+            if machine.initialState == oldName {
+                machine.initialState = newName
+            }
             machine.states[index].name = newName
             let state = machine.states[index]
             var mutator = machine.mutator
