@@ -280,23 +280,23 @@ public struct SwiftfsmParameters: ComplexProtocol {
             .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "default_value", language: .swift, validation: ValidatorFactory.required())
-        ],
-        validation: { table in
+        ]//,
+        /*validation: { table in
             table.unique() { $0.map { $0[0].lineValue } }
             table.each { (_, parameters) in
                 parameters[0].lineValue.notEmpty().maxLength(128)
                 parameters[1].expressionValue.notEmpty().maxLength(128)
                 parameters[2].expressionValue.maxLength(128)
             }
-        }
+        }*/
     )
     var parameters
     
     @LineProperty(
-        label: "result_type",
-        validation: { expression in
+        label: "result_type"//,
+        /*validation: { expression in
             expression.notEmpty().maxLength(128)
-        }
+        }*/
     )
     var resultType
     
@@ -331,8 +331,8 @@ public struct SwiftfsmRinglet: GroupProtocol {
             .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty())
-        ],
-        validation: { table in
+        ]//,
+        /*validation: { table in
             table.unique() { $0.map { $0[1].lineValue } }
             table.each { (_, ringletVariables) in
                 ringletVariables[0].enumeratedValue.in(["let", "var"])
@@ -340,25 +340,25 @@ public struct SwiftfsmRinglet: GroupProtocol {
                 ringletVariables[2].expressionValue.notEmpty().maxLength(128)
                 ringletVariables[3].expressionValue.maxLength(128)
             }
-        }
+        }*/
     )
     var ringletVariables
     
     @CodeProperty(
         label: "imports",
-        language: .swift,
-        validation: { code in
+        language: .swift//,
+        /*validation: { code in
             code.maxLength(10240)
-        }
+        }*/
     )
     var imports
     
     @CodeProperty(
         label: "execute",
-        language: .swift,
-        validation: { code in
+        language: .swift//,
+        /*validation: { code in
             code.maxLength(10240)
-        }
+        }*/
     )
     var execute
     
