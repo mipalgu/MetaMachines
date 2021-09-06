@@ -415,8 +415,8 @@ public struct SwiftfsmModuleDependencies: ComplexProtocol {
     
     public let path = MetaMachine.path.attributes[2].attributes["module_dependencies"].wrappedValue
     
-    @ComplexCollectionProperty(base: SwiftfsmPackage(), label: "packages")
-    var packages
+    //@ComplexCollectionProperty(base: SwiftfsmPackage(), label: "packages")
+    //var packages
     
     @CodeProperty(
         label: "system_imports",
