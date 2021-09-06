@@ -592,6 +592,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         let backup = self
         do {
             try f(&self)
+            try mutator.validate(machine: self)
             self.errorBag.empty()
         } catch let e as AttributeError<MetaMachine> {
             self = backup
@@ -617,6 +618,16 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.errorBag.insert(e)
             return result
         case .success:
+            do {
+                try mutator.validate(machine: self)
+            } catch let e as AttributeError<MetaMachine> {
+                self = backup
+                self.errorBag.remove(includingDescendantsForPath: e.path)
+                self.errorBag.insert(e)
+                return .failure(e)
+            } catch let e {
+                fatalError("Unsupported error: \(e)")
+            }
             self.errorBag.empty()
             return result
         }
