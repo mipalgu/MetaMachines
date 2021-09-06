@@ -309,7 +309,7 @@ public struct SwiftfsmParameters: ComplexProtocol {
     var resultType
     
     mutating func update(from metaMachine: MetaMachine) {
-        self.available = Set(metaMachine.attributes[0].fields.map(\.name))
+        self.available = Set((metaMachine.attributes[0].attributes["parameters"]?.complexFields ?? []).map(\.name))
     }
     
 }
