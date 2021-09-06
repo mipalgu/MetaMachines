@@ -601,6 +601,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.errorBag.insert(e)
             throw e
         } catch let e {
+            self = backup
             debugPrint("Unsupported error: \(e)")
             throw e
         }
@@ -628,6 +629,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                 self.errorBag.insert(e)
                 return .failure(e)
             } catch let e {
+                self = backup
                 debugPrint("Unsupported error: \(e)")
                 return .failure(AttributeError(message: "\(e)", path: AnyPath(MetaMachine.path)))
             }
