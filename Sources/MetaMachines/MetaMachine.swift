@@ -266,6 +266,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// but detail additional field for custom semantics provided by a
     /// particular scheduler.
     public init(
+        semantics: Semantics = .other,
         mutator: Mutator,
         name: String,
         initialState: StateName,
@@ -274,7 +275,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         attributes: [AttributeGroup],
         metaData: [AttributeGroup]
     ) {
-        self.semantics = .other
+        self.semantics = semantics
         self.mutator = mutator
         self.name = name
         self.initialState = initialState
