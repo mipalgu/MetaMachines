@@ -79,6 +79,8 @@ public struct SwiftfsmSchema: MachineSchema {
     
     public mutating func update(from metaMachine: MetaMachine) {
         self.stateSchema.update(from: metaMachine)
+        self.variables.update(from: metaMachine)
+        self.ringlet.update(from: metaMachine)
         self.settings.update(from: metaMachine)
     }
     
@@ -257,6 +259,10 @@ public struct SwiftfsmVariables: GroupProtocol {
     @ComplexProperty(base: SwiftfsmParameters(), label: "parameters")
     var parameters
     
+    mutating func update(from metaMachine: MetaMachine) {
+        self.parameters.update(from: metaMachine)
+    }
+    
 }
 
 public struct SwiftfsmParameters: ComplexProtocol {
@@ -264,6 +270,8 @@ public struct SwiftfsmParameters: ComplexProtocol {
     public typealias Root = MetaMachine
     
     public let path = MetaMachine.path.attributes[0].attributes["parameters"].wrappedValue
+    
+    public private(set) var available: Set<String> = ["enable_parameters"]
     
     @TriggerBuilder<MetaMachine>
     public var triggers: some TriggerProtocol {
@@ -280,31 +288,37 @@ public struct SwiftfsmParameters: ComplexProtocol {
             .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "default_value", language: .swift, validation: ValidatorFactory.required())
-        ]//,
-        /*validation: { table in
+        ],
+        validation: { table in
             table.unique() { $0.map { $0[0].lineValue } }
             table.each { (_, parameters) in
                 parameters[0].lineValue.notEmpty().maxLength(128)
                 parameters[1].expressionValue.notEmpty().maxLength(128)
                 parameters[2].expressionValue.maxLength(128)
             }
-        }*/
+        }
     )
     var parameters
     
     @LineProperty(
-        label: "result_type"//,
-        /*validation: { expression in
+        label: "result_type",
+        validation: { expression in
             expression.notEmpty().maxLength(128)
-        }*/
+        }
     )
     var resultType
+    
+    mutating func update(from metaMachine: MetaMachine) {
+        self.available = Set(metaMachine.attributes[0].fields.map(\.name))
+    }
     
 }
 
 public struct SwiftfsmRinglet: GroupProtocol {
     
     public let path = MetaMachine.path.attributes[1]
+    
+    public private(set) var available: Set<String> = ["use_custom_ringlet"]
     
     @TriggerBuilder<MetaMachine>
     public var triggers: AnyTrigger<MetaMachine> {
@@ -321,7 +335,7 @@ public struct SwiftfsmRinglet: GroupProtocol {
     @BoolProperty(label: "use_custom_ringlet")
     var useCustomRinglet
     
-    @CollectionProperty(label: "actions", lines: ValidatorFactory.optional().alphaunderscore().notEmpty())
+    @CollectionProperty(label: "actions", lines: ValidatorFactory.optional())//.alphaunderscore().notEmpty())
     var actions
     
     @TableProperty(
@@ -331,8 +345,8 @@ public struct SwiftfsmRinglet: GroupProtocol {
             .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty())
-        ]//,
-        /*validation: { table in
+        ],
+        validation: { table in
             table.unique() { $0.map { $0[1].lineValue } }
             table.each { (_, ringletVariables) in
                 ringletVariables[0].enumeratedValue.in(["let", "var"])
@@ -340,27 +354,31 @@ public struct SwiftfsmRinglet: GroupProtocol {
                 ringletVariables[2].expressionValue.notEmpty().maxLength(128)
                 ringletVariables[3].expressionValue.maxLength(128)
             }
-        }*/
+        }
     )
     var ringletVariables
     
     @CodeProperty(
         label: "imports",
-        language: .swift//,
-        /*validation: { code in
+        language: .swift,
+        validation: { code in
             code.maxLength(10240)
-        }*/
+        }
     )
     var imports
     
     @CodeProperty(
         label: "execute",
-        language: .swift//,
-        /*validation: { code in
+        language: .swift,
+        validation: { code in
             code.maxLength(10240)
-        }*/
+        }
     )
     var execute
+    
+    mutating func update(from metaMachine: MetaMachine) {
+        self.available = Set(metaMachine.attributes[1].fields.map(\.name))
+    }
     
 }
 
