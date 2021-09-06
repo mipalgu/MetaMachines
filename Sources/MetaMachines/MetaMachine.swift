@@ -105,7 +105,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         return MetaMachine.Semantics.allCases.filter { $0 != .other }
     }
     
-    public let mutator: Mutator
+    public private(set) var mutator: Mutator
     
     public private(set) var errorBag: ErrorBag<MetaMachine> = ErrorBag()
     
@@ -233,7 +233,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         case .vhdl:
             self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
         case .swiftfsm:
-            self.mutator = SchemaMutator(schema: SwiftfsmSchema(dependencyLayout: []))
+            self.mutator = SchemaMutator(schema: SwiftfsmSchema())
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
         default:
@@ -309,9 +309,12 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     
     /// Add a new item to a table attribute.
     public mutating func addItem<Path: PathProtocol, T>(_ item: T, to attribute: Path) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        self[keyPath: attribute.path].append(item)
-        return perform { [mutator] machine in
-            mutator.didAddItem(item, to: attribute, machine: &machine)
+        return perform { machine in
+            machine[keyPath: attribute.path].append(item)
+            var mutator = machine.mutator
+            let result = mutator.didAddItem(item, to: attribute, machine: &machine)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -319,8 +322,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         let indices = Array(source)
         let items = indices.map { self[keyPath: attribute.keyPath][$0] }
         self[keyPath: attribute.path].move(fromOffsets: source, toOffset: destination)
-        return perform { [mutator] machine in
-            mutator.didMoveItems(attribute: attribute, machine: &machine, from: source, to: destination, items: items)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didMoveItems(attribute: attribute, machine: &machine, from: source, to: destination, items: items)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -332,8 +338,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         guard let index = self.dependencies.firstIndex(where: { $0 == dependency }) else {
             return .failure(AttributeError(message: "Failed to find added dependency", path: MetaMachine.path.dependencies))
         }
-        return perform { [mutator] machine in
-            mutator.didCreateDependency(machine: &machine, dependency: dependency, index: index)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didCreateDependency(machine: &machine, dependency: dependency, index: index)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -350,8 +359,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         guard let newState = self.states.last, let index = self.states.lastIndex(of: newState) else {
             return .failure(AttributeError(message: "Failed to find added state", path: MetaMachine.path.states))
         }
-        return perform { [mutator] machine in
-            mutator.didCreateNewState(machine: &machine, state: newState, index: index)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didCreateNewState(machine: &machine, state: newState, index: index)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -372,8 +384,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         else {
             return .failure(AttributeError(message: "Failed to find added transition", path: MetaMachine.path.states[index].transitions))
         }
-        return perform { [mutator] machine in
-            mutator.didCreateNewTransition(machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didCreateNewTransition(machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -384,8 +399,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
         let item = self[keyPath: attribute.keyPath][index]
         self[keyPath: attribute.path].remove(at: index)
-        return perform { [mutator] machine in
-            mutator.didDeleteItem(attribute: attribute, atIndex: index, machine: &machine, item: item)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteItem(attribute: attribute, atIndex: index, machine: &machine, item: item)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -393,22 +411,28 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         if self[keyPath: attribute.path].count <= items.max() ?? -1 || (items.min() ?? -1) < 0 {
             return .failure(ValidationError(message: "Invalid indexes '\(items)'", path: attribute))
         }
-        let itemObjs = Array(items).map {
-            self[keyPath: attribute.keyPath][$0]
-        }
-        Array(items).sorted(by: >).forEach {
-            self[keyPath: attribute.path].remove(at: $0)
-        }
-        return perform { [mutator] machine in
-            mutator.didDeleteItems(table: attribute, indices: items, machine: &machine, items: itemObjs)
+        return perform { machine in
+            let itemObjs = Array(items).map {
+                machine[keyPath: attribute.keyPath][$0]
+            }
+            Array(items).sorted(by: >).forEach {
+                machine[keyPath: attribute.path].remove(at: $0)
+            }
+            var mutator = machine.mutator
+            let result = mutator.didDeleteItems(table: attribute, indices: items, machine: &machine, items: itemObjs)
+            machine.mutator = mutator
+            return result
         }
     }
     
     public mutating func delete(dependencies: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
         let deletedDependencies = self.dependencies.enumerated().filter { dependencies.contains($0.0) }.map(\.element)
         self.dependencies = self.dependencies.enumerated().filter { !dependencies.contains($0.0) }.map(\.element)
-        return perform { [mutator] machine in
-            mutator.didDeleteDependencies(machine: &machine, dependency: deletedDependencies, at: dependencies)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteDependencies(machine: &machine, dependency: deletedDependencies, at: dependencies)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -428,8 +452,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             state.transitions.removeAll(where: { deletedStates.contains($0.target) })
             return state
         }
-        return perform { [mutator] machine in
-            mutator.didDeleteStates(machine: &machine, state: deletedStatesArray, at: states)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteStates(machine: &machine, state: deletedStatesArray, at: states)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -439,8 +466,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
         let deletedTransitions = self.states[stateIndex].transitions.enumerated().filter { transitions.contains($0.0) }.map { $1 }
         self.states[stateIndex].transitions = self.states[stateIndex].transitions.enumerated().filter { !transitions.contains($0.0) }.map { $1 }
-        return perform { [mutator] machine in
-            mutator.didDeleteTransitions(machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteTransitions(machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -450,8 +480,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
         let dependency = self.dependencies[index]
         self.dependencies.remove(at: index)
-        return perform { [mutator] machine in
-            mutator.didDeleteDependency(machine: &machine, dependency: dependency, at: index)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteDependency(machine: &machine, dependency: dependency, at: index)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -471,8 +504,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             state.transitions.removeAll(where: { $0.target == name })
             return state
         }
-        return perform { [mutator] machine in
-            mutator.didDeleteState(machine: &machine, state: state, at: index)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteState(machine: &machine, state: state, at: index)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -486,8 +522,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
         let transition = self.states[stateIndex].transitions[index]
         self.states[stateIndex].transitions.remove(at: index)
-        return perform { [mutator] machine in
-            mutator.didDeleteTransition(machine: &machine, transition: transition, stateIndex: stateIndex, at: index)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didDeleteTransition(machine: &machine, transition: transition, stateIndex: stateIndex, at: index)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -495,8 +534,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         let oldName = self.states[index].name
         self.states[index].name = newName
         let state = self.states[index]
-        return perform { [mutator] machine in
-            mutator.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+            machine.mutator = mutator
+            return result
         }
     }
     
@@ -509,15 +551,18 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
         let oldValue = self[keyPath: attribute.keyPath]
         self[keyPath: attribute.path] = value
-        return perform { [mutator] machine in
-            mutator.didModify(attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine)
+        return perform { machine in
+            var mutator = machine.mutator
+            let result = mutator.didModify(attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine)
+            machine.mutator = mutator
+            return result
         }
     }
     
     /// Are there any errors with the machine?
     public func validate() throws {
-        try perform { machine in
-            try self.mutator.validate(machine: machine)
+        try nonMutatingPerform { machine in
+            try machine.mutator.validate(machine: machine)
         }
     }
                       
@@ -532,7 +577,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         return newName
     }
     
-    private func perform(_ f: (MetaMachine) throws -> Void) throws {
+    private func nonMutatingPerform(_ f: (MetaMachine) throws -> Void) throws {
         do {
             try f(self)
         } catch let e as AttributeError<MetaMachine> {
@@ -557,7 +602,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
     
-    private func perform(_ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
+    private func nonMutatingPerform(_ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
         return f(self)
     }
     

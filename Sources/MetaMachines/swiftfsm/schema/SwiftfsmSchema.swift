@@ -58,10 +58,11 @@
 
 import Attributes
 import Foundation
+import SwiftMachines
 
 public struct SwiftfsmSchema: MachineSchema {
     
-    public var dependencyLayout: [Field]
+    public var dependencyLayout: [Field] = []
     
     public var stateSchema = SwiftfsmStateSchema()
     
@@ -76,17 +77,22 @@ public struct SwiftfsmSchema: MachineSchema {
     @Group(wrappedValue: SwiftfsmSettings())
     var settings
     
-    public func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
+    public mutating func update(from swiftMachine: SwiftMachines.Machine) {
+        self.stateSchema.settings.update(from: swiftMachine)
+        self.settings.update(from: swiftMachine)
+    }
+    
+    public mutating func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         syncSuspendList(machine: &machine)
         return .success(true)
     }
     
-    public func didDeleteStates(machine: inout MetaMachine, state: [State], at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
+    public mutating func didDeleteStates(machine: inout MetaMachine, state: [State], at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
         syncSuspendList(machine: &machine)
         return .success(true)
     }
     
-    public func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+    public mutating func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
         if machine.attributes[2].attributes["suspend_state"]?.enumeratedValue == oldName {
             machine.attributes[2].attributes["suspend_state"]?.enumeratedValue = state.name
         }
@@ -94,12 +100,13 @@ public struct SwiftfsmSchema: MachineSchema {
         return .success(true)
     }
     
-    private func syncSuspendList(machine: inout MetaMachine) {
+    private mutating func syncSuspendList(machine: inout MetaMachine) {
         let validValues = Set(machine.states.map(\.name) + [""])
         let currentValue = machine.attributes[2].attributes["suspend_state"]?.enumeratedValue ?? ""
         let newValue = validValues.contains(currentValue) ? currentValue : ""
         machine.attributes[2].fields[0].type = .enumerated(validValues: validValues)
         machine.attributes[2].attributes["suspend_state"] = .enumerated(newValue, validValues: validValues)
+        self.settings.updateSuspendValues(validValues)
     }
     
 }
@@ -113,6 +120,10 @@ public struct SwiftfsmStateSchema: SchemaProtocol {
     
     @Group(wrappedValue: SwiftfsmStateSettings())
     var settings
+    
+    mutating func update(from swiftMachine: SwiftMachines.Machine) {
+        self.settings.update(from: swiftMachine)
+    }
     
 }
 
@@ -172,6 +183,11 @@ public struct SwiftfsmStateSettings: GroupProtocol {
         }
     )
     var imports
+    
+    mutating func update(from swiftMachine: SwiftMachines.Machine) {
+        let externals = Set(swiftMachine.externalVariables.map { $0.label })
+        self._externalVariables.wrappedValue.type = AttributeType.enumerableCollection(validValues: externals)
+    }
 
 }
 
@@ -362,6 +378,15 @@ public struct SwiftfsmSettings: GroupProtocol {
     
     @ComplexProperty(base: SwiftfsmModuleDependencies(), label: "module_dependencies")
     var moduleDependencies
+    
+    public mutating func update(from swiftMachine: SwiftMachines.Machine) {
+        let validValues = Set(swiftMachine.states.map(\.name) + [swiftMachine.initialState.name, (swiftMachine.suspendState?.name ?? ""), ""])
+        self.updateSuspendValues(validValues)
+    }
+    
+    public mutating func updateSuspendValues(_ validValues: Set<String>) {
+        self.suspendState.type = .enumerated(validValues: validValues)
+    }
     
 }
 
