@@ -30,4 +30,6 @@ public protocol MachineMutatorResponder: DependencyLayoutContainer {
     
     mutating func didDeleteTransitions(machine: inout MetaMachine, transition: [Transition], stateIndex: Int, at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>>
     
+    mutating func update(from metaMachine: MetaMachine)
+    
 }

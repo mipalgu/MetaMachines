@@ -62,4 +62,6 @@ public extension MachineSchema {
         return .success(false)
     }
     
+    mutating func update(from metaMachine: MetaMachine) {}
+    
 }

@@ -77,9 +77,9 @@ public struct SwiftfsmSchema: MachineSchema {
     @Group(wrappedValue: SwiftfsmSettings())
     var settings
     
-    public mutating func update(from swiftMachine: SwiftMachines.Machine) {
-        self.stateSchema.settings.update(from: swiftMachine)
-        self.settings.update(from: swiftMachine)
+    public mutating func update(from metaMachine: MetaMachine) {
+        self.stateSchema.update(from: metaMachine)
+        self.settings.update(from: metaMachine)
     }
     
     public mutating func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
@@ -121,8 +121,8 @@ public struct SwiftfsmStateSchema: SchemaProtocol {
     @Group(wrappedValue: SwiftfsmStateSettings())
     var settings
     
-    mutating func update(from swiftMachine: SwiftMachines.Machine) {
-        self.settings.update(from: swiftMachine)
+    mutating func update(from metaMachine: MetaMachine) {
+        self.settings.update(from: metaMachine)
     }
     
 }
@@ -184,8 +184,8 @@ public struct SwiftfsmStateSettings: GroupProtocol {
     )
     var imports
     
-    mutating func update(from swiftMachine: SwiftMachines.Machine) {
-        let externals = Set(swiftMachine.externalVariables.map { $0.label })
+    mutating func update(from metaMachine: MetaMachine) {
+        let externals = Set(metaMachine.attributes[0].attributes["external_variables"]?.tableValue.map { $0[1].lineValue } ?? [])
         self._externalVariables.wrappedValue.type = AttributeType.enumerableCollection(validValues: externals)
     }
 
@@ -379,8 +379,9 @@ public struct SwiftfsmSettings: GroupProtocol {
     @ComplexProperty(base: SwiftfsmModuleDependencies(), label: "module_dependencies")
     var moduleDependencies
     
-    public mutating func update(from swiftMachine: SwiftMachines.Machine) {
-        let validValues = Set(swiftMachine.states.map(\.name) + [swiftMachine.initialState.name, (swiftMachine.suspendState?.name ?? ""), ""])
+    public mutating func update(from metaMachine: MetaMachine) {
+        let externals = metaMachine.attributes[0].attributes["external_variables"]?.blockAttribute.tableValue.map { $0[1].lineValue } ?? []
+        let validValues = Set(externals)
         self.updateSuspendValues(validValues)
     }
     

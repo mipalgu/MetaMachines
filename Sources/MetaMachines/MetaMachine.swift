@@ -244,6 +244,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.dependencies = dependencies
         self.attributes = attributes
         self.metaData = metaData
+        self.mutator.update(from: self)
     }
     
     /// Create a new `Machine`.

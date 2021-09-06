@@ -475,12 +475,8 @@ struct SwiftfsmConverter: Converter, MachineValidator {
                 metaData: [:]
             )
         }
-        var schema = SwiftfsmSchema()
-        schema.update(from: swiftMachine)
-        let mutator = SchemaMutator(schema: schema)
         return MetaMachine(
             semantics: .swiftfsm,
-            mutator: mutator,
             name: swiftMachine.name,
             initialState: swiftMachine.initialState.name,
             states: states,

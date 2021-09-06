@@ -9,6 +9,7 @@ import Foundation
 import Attributes
 
 struct SchemaMutator<Schema: MachineSchema>: MachineMutatorResponder, MachineModifier, MachineAttributesMutator {
+    
 
     var schema: Schema
     
@@ -74,6 +75,10 @@ struct SchemaMutator<Schema: MachineSchema>: MachineMutatorResponder, MachineMod
     
     mutating func didModify<Path: PathProtocol>(attribute: Path, oldValue: Path.Value, newValue: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine {
         return schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
+    }
+    
+    mutating func update(from metaMachine: MetaMachine) {
+        schema.update(from: metaMachine)
     }
     
     func validate(machine: MetaMachine) throws {
