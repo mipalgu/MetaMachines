@@ -14,7 +14,7 @@ struct VHDLParametersGroup: GroupProtocol {
     
     let path = MetaMachine.path.attributes[1]
     
-    @BoolProperty(label: "is_parameterised", validation: .required())
+    @BoolProperty(label: "is_parameterised")
     var isParameterised
     
     @TableProperty(

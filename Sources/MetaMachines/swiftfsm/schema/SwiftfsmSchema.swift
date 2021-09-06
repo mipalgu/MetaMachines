@@ -133,7 +133,17 @@ public struct SwiftfsmStateVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required().unique({ $0.map { $0[1].lineValue } })
+        validation: { table in
+            table.unique {
+                $0.map { $0[1].lineValue }
+            }
+            table.each { (_, stateVariable) in
+                stateVariable[0].enumeratedValue.in(["let", "var"])
+                stateVariable[1].lineValue.notEmpty().maxLength(128)
+                stateVariable[2].expressionValue.notEmpty().maxLength(128)
+                stateVariable[3].expressionValue.maxLength(128)
+            }
+        }
     )
     var stateVariables
     
@@ -150,15 +160,16 @@ public struct SwiftfsmStateSettings: GroupProtocol {
     
     @EnumerableCollectionProperty(
         label: "external_variables",
-        validValues: [],
-        validation: .required()
+        validValues: []
     )
     var externalVariables
     
     @CodeProperty(
         label: "imports",
         language: .swift,
-        validation: .required()
+        validation: { code in
+            code.maxLength(10240)
+        }
     )
     var imports
 
@@ -195,7 +206,15 @@ public struct SwiftfsmVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required().unique({ $0.map { $0[1].lineValue } })
+        validation: { table in
+            table.unique({ $0.map { $0[1].lineValue } })
+            table.each { (_, externalVariables) in
+                externalVariables[0].enumeratedValue.in(["actuator", "sensor", "external"])
+                externalVariables[1].lineValue.notEmpty().maxLength(128)
+                externalVariables[2].expressionValue.notEmpty().maxLength(128)
+                externalVariables[3].expressionValue.notEmpty().maxLength(128)
+            }
+        }
     )
     var externalVariables
     
@@ -207,7 +226,15 @@ public struct SwiftfsmVariables: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required())
         ],
-        validation: .required().unique({ $0.map { $0[1].lineValue } })
+        validation: { table in
+            table.unique() { $0.map { $0[1].lineValue } }
+            table.each { (_, machineVariables) in
+                machineVariables[0].enumeratedValue.in(["let", "var"])
+                machineVariables[1].lineValue.notEmpty().maxLength(128)
+                machineVariables[2].expressionValue.notEmpty().maxLength(128)
+                machineVariables[3].expressionValue.maxLength(128)
+            }
+        }
     )
     var machineVariables
     
@@ -228,7 +255,7 @@ public struct SwiftfsmParameters: ComplexProtocol {
         WhenFalse(enableParameters, makeUnavailable: parameters)
     }
     
-    @BoolProperty(label: "enable_parameters", validation: .required())
+    @BoolProperty(label: "enable_parameters")
     var enableParameters
     
     @TableProperty(
@@ -237,9 +264,25 @@ public struct SwiftfsmParameters: ComplexProtocol {
             .line(label: "label", validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscore().notEmpty()),
             .expression(label: "default_value", language: .swift, validation: ValidatorFactory.required())
-        ]
+        ],
+        validation: { table in
+            table.unique() { $0.map { $0[0].lineValue } }
+            table.each { (_, parameters) in
+                parameters[0].lineValue.notEmpty().maxLength(128)
+                parameters[1].expressionValue.notEmpty().maxLength(128)
+                parameters[2].expressionValue.maxLength(128)
+            }
+        }
     )
     var parameters
+    
+    @LineProperty(
+        label: "result_type",
+        validation: { expression in
+            expression.notEmpty().maxLength(128)
+        }
+    )
+    var resultType
     
 }
 
@@ -259,7 +302,7 @@ public struct SwiftfsmRinglet: GroupProtocol {
         WhenFalse(useCustomRinglet, makeUnavailable: execute)
     }
     
-    @BoolProperty(label: "use_custom_ringlet", validation: .required())
+    @BoolProperty(label: "use_custom_ringlet")
     var useCustomRinglet
     
     @CollectionProperty(label: "actions", lines: ValidatorFactory.required().alphaunderscore().notEmpty())
@@ -273,14 +316,34 @@ public struct SwiftfsmRinglet: GroupProtocol {
             .expression(label: "type", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty()),
             .expression(label: "initial_value", language: .swift, validation: ValidatorFactory.required().alphaunderscorefirst().notEmpty())
         ],
-        validation: .required()
+        validation: { table in
+            table.unique() { $0.map { $0[1].lineValue } }
+            table.each { (_, ringletVariables) in
+                ringletVariables[0].enumeratedValue.in(["let", "var"])
+                ringletVariables[1].lineValue.notEmpty().maxLength(128)
+                ringletVariables[2].expressionValue.notEmpty().maxLength(128)
+                ringletVariables[3].expressionValue.maxLength(128)
+            }
+        }
     )
     var ringletVariables
     
-    @CodeProperty(label: "imports", language: .swift, validation: .required())
+    @CodeProperty(
+        label: "imports",
+        language: .swift,
+        validation: { code in
+            code.maxLength(10240)
+        }
+    )
     var imports
     
-    @CodeProperty(label: "execute", language: .swift, validation: .required())
+    @CodeProperty(
+        label: "execute",
+        language: .swift,
+        validation: { code in
+            code.maxLength(10240)
+        }
+    )
     var execute
     
 }
@@ -291,7 +354,10 @@ public struct SwiftfsmSettings: GroupProtocol {
     
     public let path = MetaMachine.path.attributes[2]
     
-    @EnumeratedProperty(label: "suspend_state", validValues: [])
+    @EnumeratedProperty(
+        label: "suspend_state",
+        validValues: []
+    )
     var suspendState
     
     @ComplexProperty(base: SwiftfsmModuleDependencies(), label: "module_dependencies")
@@ -307,6 +373,24 @@ public struct SwiftfsmModuleDependencies: ComplexProtocol {
     
     @ComplexCollectionProperty(base: SwiftfsmPackage(), label: "packages")
     var packages
+    
+    @CodeProperty(
+        label: "system_imports",
+        language: .swift,
+        validation: { code in
+            code.maxLength(10240)
+        }
+    )
+    var systemImports
+    
+    @CodeProperty(
+        label: "system_includes",
+        language: .swift,
+        validation: { code in
+            code.maxLength(10240)
+        }
+    )
+    var systemIncludes
     
 }
 
@@ -333,7 +417,7 @@ public struct SwiftfsmPackage: ComplexProtocol {
     @CollectionProperty(label: "targets_to_import", lines: .required())
     var targetsToImport
     
-    @LineProperty(label: "url", validation: .required())
+    @LineProperty(label: "url")
     var url
     
 }

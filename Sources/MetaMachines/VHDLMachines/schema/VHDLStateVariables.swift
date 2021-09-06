@@ -14,7 +14,7 @@ struct VHDLStateVariables: GroupProtocol {
     
     let path = CollectionSearchPath(collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0])
     
-    @EnumeratedProperty(label: "externals", validValues: [], validation: .required())
+    @EnumeratedProperty(label: "externals", validValues: [])
     var externals
     
     @TableProperty(
@@ -41,8 +41,7 @@ struct VHDLStateVariables: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ],
-        validation: .required()
+        ]
     )
     var stateSignals
     

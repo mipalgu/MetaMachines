@@ -27,8 +27,7 @@ struct VHDLStateActions: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             )
-        ],
-        validation: .required()
+        ]
     )
     var actionNames
     
@@ -37,8 +36,7 @@ struct VHDLStateActions: GroupProtocol {
         columns: [
             .integer(label: "timeslot", validation: .required().between(min: 0, max: 255)),
             .enumerated(label: "action", validValues: [], validation: .required())
-        ],
-        validation: .required()
+        ]
     )
     var actionOrder
     

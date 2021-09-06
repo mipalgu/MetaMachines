@@ -16,15 +16,14 @@ struct VHDLSettings: GroupProtocol {
     
     @EnumeratedProperty(
         label: "suspended_state",
-        validValues: [],
-        validation: .required()
+        validValues: []
     )
     var suspendedState
     
     @EnumeratedProperty(
         label: "initial_state",
         validValues: [],
-        validation: .required().notEmpty()
+        validation: { $0.notEmpty() }
     )
     var initialState
     

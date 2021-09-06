@@ -56,14 +56,16 @@ struct VHDLVariablesGroup: GroupProtocol {
                 validation: .required()
             )
         ],
-        validation: .required().notEmpty()
+        validation: { table in
+            table.notEmpty()
+        }
     )
     var clocks
     
     @EnumeratedProperty(
         label: "driving_clock",
         validValues: [],
-        validation: .required().notEmpty()
+        validation: { $0.notEmpty() }
     )
     var drivingClock
     
@@ -96,8 +98,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ],
-        validation: .required()
+        ]
     )
     var externalVariables
     
@@ -181,8 +182,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ],
-        validation: .required()
+        ]
     )
     var machineSignals
     
