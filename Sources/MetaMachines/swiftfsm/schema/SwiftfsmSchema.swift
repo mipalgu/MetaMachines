@@ -200,7 +200,7 @@ public struct SwiftfsmVariables: GroupProtocol {
     public let path = MetaMachine.path.attributes[0]
     
     @TriggerBuilder<MetaMachine>
-    public var triggers: some TriggerProtocol {
+    public var triggers: AnyTrigger<MetaMachine> {
         WhenChanged(externalVariables).sync(
             target: CollectionSearchPath(
                 collectionPath: MetaMachine.path.states,
@@ -278,7 +278,7 @@ public struct SwiftfsmParameters: ComplexProtocol {
     public private(set) var available: Set<String> = ["enable_parameters"]
     
     @TriggerBuilder<MetaMachine>
-    public var triggers: some TriggerProtocol {
+    public var triggers: AnyTrigger<MetaMachine> {
         WhenTrue(enableParameters, makeAvailable: parameters)
         WhenTrue(enableParameters, makeAvailable: resultType)
         WhenFalse(enableParameters, makeUnavailable: parameters)
