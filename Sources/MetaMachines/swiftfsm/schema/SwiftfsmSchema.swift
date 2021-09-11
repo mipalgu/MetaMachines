@@ -310,7 +310,7 @@ public struct SwiftfsmParameters: ComplexProtocol {
         label: "result_type",
         language: .swift,
         validation: { expression in
-            expression.notEmpty().maxLength(128)
+            expression.maxLength(128)
         }
     )
     var resultType
