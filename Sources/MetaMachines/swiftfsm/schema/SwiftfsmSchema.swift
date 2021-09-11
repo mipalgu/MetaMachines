@@ -201,7 +201,7 @@ public struct SwiftfsmVariables: GroupProtocol {
     
     @TriggerBuilder<MetaMachine>
     public var triggers: AnyTrigger<MetaMachine> {
-        WhenChanged(externalVariables).sync(
+        AnyTrigger(WhenChanged(externalVariables).sync(
             target: CollectionSearchPath(
                 collectionPath: MetaMachine.path.states,
                 elementPath: Path(State.self).attributes[1].attributes["external_variables"]
@@ -213,12 +213,12 @@ public struct SwiftfsmVariables: GroupProtocol {
                 let currentValues = (oldValue?.enumerableCollectionValue ?? []).filter({ validValues.contains($0) })
                 return .enumerableCollection(currentValues, validValues: validValues)
             }
-        )
+        ))
     }
     
-    public var allTriggers: AnyTrigger<MetaMachine> {
-        AnyTrigger([AnyTrigger(triggers), AnyTrigger(parameters.triggers)])
-    }
+//    public var allTriggers: AnyTrigger<MetaMachine> {
+//        AnyTrigger([AnyTrigger(triggers), AnyTrigger(parameters.triggers)])
+//    }
 
     @TableProperty(
         label: "external_variables",
