@@ -533,6 +533,9 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     
     public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in
+            if (Set(machine.states.map(\.name)).contains(newName)) {
+                return .failure(AttributeError(message: "Name must be unique.", path: MetaMachine.path.states[index].name))
+            }
             let oldName = machine.states[index].name
             if machine.initialState == oldName {
                 machine.initialState = newName
