@@ -306,8 +306,9 @@ public struct SwiftfsmParameters: ComplexProtocol {
     )
     var parameters
     
-    @LineProperty(
+    @ExpressionProperty(
         label: "result_type",
+        language: .swift,
         validation: { expression in
             expression.notEmpty().maxLength(128)
         }
