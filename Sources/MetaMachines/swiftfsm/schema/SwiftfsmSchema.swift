@@ -215,6 +215,10 @@ public struct SwiftfsmVariables: GroupProtocol {
             }
         )
     }
+    
+    public var allTriggers: AnyTrigger<MetaMachine> {
+        AnyTrigger([AnyTrigger(triggers), AnyTrigger(parameters.triggers)])
+    }
 
     @TableProperty(
         label: "external_variables",
@@ -276,7 +280,9 @@ public struct SwiftfsmParameters: ComplexProtocol {
     @TriggerBuilder<MetaMachine>
     public var triggers: some TriggerProtocol {
         WhenTrue(enableParameters, makeAvailable: parameters)
+        WhenTrue(enableParameters, makeAvailable: resultType)
         WhenFalse(enableParameters, makeUnavailable: parameters)
+        WhenFalse(enableParameters, makeUnavailable: resultType)
     }
     
     @BoolProperty(label: "enable_parameters")
