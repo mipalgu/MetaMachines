@@ -520,7 +520,10 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         } else {
             model = nil
         }
-        let resultType: String? = machine.attributes[1].attributes["result_type"]?.expressionValue
+        let resultType: String? = (machine.attributes[1].attributes["result_type"]?.expressionValue).flatMap {
+            let value = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+            return value.isEmpty ? "Void" : value
+        }
         guard let externalVariables = try machine.attributes[0].attributes["external_variables"]?.tableValue.enumerated().map({ try self.parseVariable($1, path: MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue.tableValue[$0]) }) else {
             throw ConversionError(message: "Missing required variable list external_variables", path: MetaMachine.path.attributes[0].attributes["external_variables"].wrappedValue)
         }

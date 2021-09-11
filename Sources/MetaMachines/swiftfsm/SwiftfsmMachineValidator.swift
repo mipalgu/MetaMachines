@@ -139,7 +139,7 @@ struct SwiftfsmMachineValidator: MachineValidator {
                                 }
                             }
                             attributes["result_type"].required()
-                            attributes["result_type"].wrappedValue.lineAttribute.expressionValue.notEmpty().maxLength(128)
+                            attributes["result_type"].wrappedValue.lineAttribute.expressionValue.maxLength(128)
                         }
                     }
                 }
