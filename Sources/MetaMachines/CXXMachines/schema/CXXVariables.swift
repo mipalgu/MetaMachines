@@ -23,8 +23,8 @@ struct CXXVariables: GroupProtocol {
             columns: [
                 .expression(label: "type", language: semantics.language, validation: .required().maxLength(255).notEmpty()),
                 .line(label: "name", validation: .required().notEmpty().maxLength(255)),
-                .expression(label: "value", language: semantics.language, validation: .optional().maxLength(255)),
-                .line(label: "comment", validation: .optional().maxLength(255))
+                .expression(label: "value", language: semantics.language, validation: .required().maxLength(255)),
+                .line(label: "comment", validation: .required().maxLength(255))
             ],
             validation: { table in
                 table.unique { $0.map { $0[1].lineValue } }

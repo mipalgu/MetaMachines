@@ -43,7 +43,6 @@ public struct CXXSchema: MachineSchema {
         return .success(true)
     }
     
-    
     public mutating func didDeleteState(machine: inout MetaMachine, state: State, at: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         syncSuspendList(machine: &machine)
         return .success(true)

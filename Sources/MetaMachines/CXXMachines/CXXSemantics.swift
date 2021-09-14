@@ -31,7 +31,7 @@ enum CXXSemantics {
         case .ucfsm:
             self = .ucfsm
             return
-        case . spartanfsm:
+        case .spartanfsm:
             self = .spartanfsm
             return
         default:
