@@ -34,4 +34,38 @@ public struct CXXSchema: MachineSchema {
         self.includes = CXXIncludes(semantics: cxxSemantics)
     }
     
+    public mutating func update(from metaMachine: MetaMachine) {
+        self.settings.update(from: metaMachine)
+    }
+    
+    public mutating func didCreateNewState(machine: inout MetaMachine, state: State, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(machine: &machine)
+        return .success(true)
+    }
+    
+    
+    public mutating func didDeleteState(machine: inout MetaMachine, state: State, at: Int) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(machine: &machine)
+        return .success(true)
+    }
+    
+    public mutating func didChangeStatesName(machine: inout MetaMachine, state: State, index: Int, oldName: String) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(machine: &machine)
+        return .success(true)
+    }
+    
+    public mutating func didDeleteStates(machine: inout MetaMachine, state: [State], at: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
+        syncSuspendList(machine: &machine)
+        return .success(true)
+    }
+    
+    private mutating func syncSuspendList(machine: inout MetaMachine) {
+        let validValues = Set(machine.states.map(\.name) + [""])
+        let currentValue = machine.attributes[3].attributes["suspended_state"]?.enumeratedValue ?? ""
+        let newValue = validValues.contains(currentValue) ? currentValue : ""
+        machine.attributes[3].fields[0].type = .enumerated(validValues: validValues)
+        machine.attributes[3].attributes["suspended_state"] = .enumerated(newValue, validValues: validValues)
+        self.settings.updateSuspendValues(validValues)
+    }
+    
 }

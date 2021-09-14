@@ -23,4 +23,13 @@ public struct CXXSettings: GroupProtocol {
     )
     var suspendedState
     
+    public mutating func update(from metaMachine: MetaMachine) {
+        let validValues = Set(metaMachine.states.map(\.name))
+        self.updateSuspendValues(validValues)
+    }
+    
+    public mutating func updateSuspendValues(_ validValues: Set<String>) {
+        self.suspendedState.type = .enumerated(validValues: validValues)
+    }
+    
 }
