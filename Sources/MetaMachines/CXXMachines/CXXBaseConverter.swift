@@ -13,15 +13,15 @@ import Attributes
 
 struct CXXBaseConverter {
     
-    func machineAttributes(machine: CXXBase.Machine) -> [AttributeGroup] {
+    func machineAttributes(machine: CXXBase.Machine, semantics: CXXSemantics) -> [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let variables = AttributeGroup(
             name: "variables",
             fields: [
                 Field(name: "machine_variables", type: .table(columns: [
-                    ("type", .expression(language: .cxx)),
+                    ("type", .expression(language: semantics.language)),
                     ("name", .line),
-                    ("value", .expression(language: .cxx)),
+                    ("value", .expression(language: semantics.language)),
                     ("comment", .line)
                 ]))
             ],
@@ -29,9 +29,9 @@ struct CXXBaseConverter {
                 "machine_variables": .table(
                     machine.machineVariables.map(toLineAttribute),
                     columns: [
-                        ("type", .expression(language: .cxx)),
+                        ("type", .expression(language: semantics.language)),
                         ("name", .line),
-                        ("value", .expression(language: .cxx)),
+                        ("value", .expression(language: semantics.language)),
                         ("comment", .line)
                     ]
                 )
@@ -42,10 +42,10 @@ struct CXXBaseConverter {
         let funcRefs = AttributeGroup(
             name: "func_refs",
             fields: [
-                Field(name: "func_refs", type: .code(language: .cxx))
+                Field(name: "func_refs", type: .code(language: semantics.language))
             ],
             attributes: [
-                "func_refs": .code(machine.funcRefs, language: .cxx)
+                "func_refs": .code(machine.funcRefs, language: semantics.language)
             ],
             metaData: [:]
         )
@@ -54,11 +54,11 @@ struct CXXBaseConverter {
             name: "includes",
             fields: [
                 Field(name: "include_paths", type: .text),
-                Field(name: "includes", type: .code(language: .cxx))
+                Field(name: "includes", type: .code(language: semantics.language))
             ],
             attributes: [
                 "include_paths": .text(machine.includePaths.reduce("") { $0 == "" ? $1 : $0 + "\n" + $1 }),
-                "includes": .code(machine.includes, language: .cxx)
+                "includes": .code(machine.includes, language: semantics.language)
             ],
             metaData: [:]
         )
@@ -78,13 +78,16 @@ struct CXXBaseConverter {
     }
     
     func toMachine(machine: CXXBase.Machine, semantics: MetaMachine.Semantics) -> MetaMachine {
-        MetaMachine(
+        guard let cxxSemantics = CXXSemantics(semantics: semantics) else {
+            fatalError("Unsupported Semantics")
+        }
+        return MetaMachine(
             semantics: semantics,
             name: machine.name,
             initialState: machine.states[machine.initialState].name,
-            states: machine.states.map { state in toState(state: state, transitionsForState: machine.transitions.filter { $0.source == state.name }.sorted(by: { $0.priority < $1.priority }), actionOrder: machine.actionDisplayOrder ) },
+            states: machine.states.map { state in toState(state: state, transitionsForState: machine.transitions.filter { $0.source == state.name }.sorted(by: { $0.priority < $1.priority }), actionOrder: machine.actionDisplayOrder, semantics: cxxSemantics ) },
             dependencies: [],
-            attributes: machineAttributes(machine: machine),
+            attributes: machineAttributes(machine: machine, semantics: cxxSemantics),
             metaData: []
         )
     }
@@ -98,15 +101,15 @@ struct CXXBaseConverter {
         ]
     }
     
-    func stateAttributes(state: CXXBase.State) -> [AttributeGroup] {
+    func stateAttributes(state: CXXBase.State, semantics: CXXSemantics) -> [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let variables = AttributeGroup(
             name: "variables",
             fields: [
                 Field(name: "state_variables", type: .table(columns: [
-                    ("type", .expression(language: .cxx)),
+                    ("type", .expression(language: semantics.language)),
                     ("name", .line),
-                    ("value", .expression(language: .cxx)),
+                    ("value", .expression(language: semantics.language)),
                     ("comment", .line)
                 ]))
             ],
@@ -114,9 +117,9 @@ struct CXXBaseConverter {
                 "state_variables": .table(
                     state.variables.map(toLineAttribute),
                     columns: [
-                        ("type", .expression(language: .cxx)),
+                        ("type", .expression(language: semantics.language)),
                         ("name", .line),
-                        ("value", .expression(language: .cxx)),
+                        ("value", .expression(language: semantics.language)),
                         ("comment", .line)
                     ]
                 )
@@ -127,7 +130,7 @@ struct CXXBaseConverter {
         return attributes
     }
     
-    func toState(state: CXXBase.State, transitionsForState: [CXXBase.Transition], actionOrder: [String]) -> State {
+    func toState(state: CXXBase.State, transitionsForState: [CXXBase.Transition], actionOrder: [String], semantics: CXXSemantics) -> State {
         let actions = actionOrder.map {
             toAction(actionName: $0, code: state.actions[$0] ?? "")
         }
@@ -135,7 +138,7 @@ struct CXXBaseConverter {
             name: state.name,
             actions: actions,
             transitions: transitionsForState.map(toTransition),
-            attributes: stateAttributes(state: state),
+            attributes: stateAttributes(state: state, semantics: semantics),
             metaData: []
         )
     }
