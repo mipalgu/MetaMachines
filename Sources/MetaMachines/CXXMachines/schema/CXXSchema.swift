@@ -22,6 +22,8 @@ public struct CXXSchema: MachineSchema {
     
     @Group var includes: CXXIncludes
     
+    @Group var settings = CXXSettings()
+    
     public init?(semantics: MetaMachine.Semantics) {
         guard let cxxSemantics = CXXSemantics(semantics: semantics) else {
             return nil
