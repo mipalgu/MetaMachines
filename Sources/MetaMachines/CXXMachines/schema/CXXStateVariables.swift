@@ -8,18 +8,21 @@
 import Foundation
 import Attributes
 
-struct CXXVariables: GroupProtocol {
+public struct CXXStateVariables: GroupProtocol {
     
     public typealias Root = MetaMachine
     
-    public let path = MetaMachine.path.attributes[0]
+    public let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states,
+        elementPath: Path(State.self).attributes[0]
+    )
     
     @TableProperty
-    var machineVariables: SchemaAttribute
+    var stateVariables: SchemaAttribute
     
     init(semantics: CXXSemantics) {
-        self._machineVariables = TableProperty(
-            label: "machine_variables",
+        self._stateVariables = TableProperty(
+            label: "variables",
             columns: [
                 .expression(label: "type", language: semantics.language, validation: .required().maxLength(255).notEmpty()),
                 .line(label: "name", validation: .required().notEmpty().maxLength(255)),

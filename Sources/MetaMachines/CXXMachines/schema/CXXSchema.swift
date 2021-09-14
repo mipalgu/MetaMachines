@@ -12,7 +12,7 @@ public struct CXXSchema: MachineSchema {
     
     public var dependencyLayout: [Field] = []
     
-    public var stateSchema = CXXStateSchema()
+    public var stateSchema: CXXStateSchema
     
     public var transitionSchema = EmptySchema<MetaMachine>()
     
@@ -26,6 +26,7 @@ public struct CXXSchema: MachineSchema {
         guard let cxxSemantics = CXXSemantics(semantics: semantics) else {
             return nil
         }
+        self.stateSchema = CXXStateSchema(semantics: cxxSemantics)
         self.variables = CXXVariables(semantics: cxxSemantics)
         self.funcRefs = CXXFuncRefs(semantics: cxxSemantics)
         self.includes = CXXIncludes(semantics: cxxSemantics)

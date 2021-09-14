@@ -12,4 +12,10 @@ public struct CXXStateSchema: SchemaProtocol {
     
     public typealias Root = MetaMachine
     
+    @Group var stateVariables: CXXStateVariables
+    
+    init(semantics: CXXSemantics) {
+        self.stateVariables = CXXStateVariables(semantics: semantics)
+    }
+    
 }
