@@ -234,6 +234,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
         case .swiftfsm:
             self.mutator = SchemaMutator(schema: SwiftfsmSchema())
+        case .ucfsm, .clfsm, .spartanfsm:
+            guard let schema = CXXSchema(semantics: semantics) else {
+                fatalError("Tried to create CXXSchema for unsupported semantics")
+            }
+            self.mutator = SchemaMutator(schema: schema)
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
         default:
