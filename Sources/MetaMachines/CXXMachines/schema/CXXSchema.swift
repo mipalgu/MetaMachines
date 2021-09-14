@@ -20,12 +20,15 @@ public struct CXXSchema: MachineSchema {
     
     @Group var funcRefs: CXXFuncRefs
     
+    @Group var includes: CXXIncludes
+    
     public init?(semantics: MetaMachine.Semantics) {
         guard let cxxSemantics = CXXSemantics(semantics: semantics) else {
             return nil
         }
         self.variables = CXXVariables(semantics: cxxSemantics)
         self.funcRefs = CXXFuncRefs(semantics: cxxSemantics)
+        self.includes = CXXIncludes(semantics: cxxSemantics)
     }
     
 }
