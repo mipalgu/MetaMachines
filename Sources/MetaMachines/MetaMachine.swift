@@ -224,12 +224,6 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.semantics = semantics
         self.name = name
         switch semantics {
-//        case .clfsm:
-//            self.mutator = CXXBaseConverter()
-//        case .ucfsm:
-//            self.mutator = CXXBaseConverter()
-//        case .spartanfsm:
-//            self.mutator = CXXBaseConverter()
         case .vhdl:
             self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
         case .swiftfsm:
@@ -241,8 +235,8 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.mutator = SchemaMutator(schema: schema)
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
-        default:
-            fatalError("Semantics not supported")
+//        default:
+//            fatalError("Semantics not supported")
         }
         self.initialState = initialState
         self.states = states
