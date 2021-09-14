@@ -405,8 +405,8 @@ public struct SwiftfsmSettings: GroupProtocol {
     var moduleDependencies
     
     public mutating func update(from metaMachine: MetaMachine) {
-        let externals = metaMachine.states.map(\.name)
-        let validValues = Set(externals)
+        let names = metaMachine.states.map(\.name)
+        let validValues = Set(names)
         self.updateSuspendValues(validValues)
     }
     
