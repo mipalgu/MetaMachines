@@ -6,12 +6,22 @@
 //
 
 import Foundation
+import Attributes
 
 enum CXXSemantics {
     
     case clfsm
     case ucfsm
     case spartanfsm
+    
+    var language: Language {
+        switch self {
+        case .spartanfsm:
+            return .vhdl
+        default:
+            return .cxx
+        }
+    }
     
     public init?(semantics: MetaMachine.Semantics) {
         switch semantics {

@@ -9,8 +9,6 @@ import Foundation
 import Attributes
 
 public struct CXXSchema: MachineSchema {
-
-    let semantics: CXXSemantics
     
     public var dependencyLayout: [Field] = []
     
@@ -20,12 +18,14 @@ public struct CXXSchema: MachineSchema {
     
     @Group var variables: CXXVariables
     
+    @Group var funcRefs: CXXFuncRefs
+    
     public init?(semantics: MetaMachine.Semantics) {
         guard let cxxSemantics = CXXSemantics(semantics: semantics) else {
             return nil
         }
-        self.semantics = cxxSemantics
         self.variables = CXXVariables(semantics: cxxSemantics)
+        self.funcRefs = CXXFuncRefs(semantics: cxxSemantics)
     }
     
 }
