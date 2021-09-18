@@ -61,6 +61,7 @@ import SwiftMachines
 import CLFSMMachines
 import UCFSMMachines
 import CXXBase
+import VHDLMachines
 
 public final class MachineParser {
     
@@ -78,6 +79,12 @@ public final class MachineParser {
     
     public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
         self.errors = []
+        if !wrapper.isDirectory {
+            guard let vhdlMachine = VHDLParser().parse(wrapper: wrapper) else {
+                return nil
+            }
+            return VHDLMachinesConverter().toMachine(machine: vhdlMachine)
+        }
         if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
             return parseCXXMachine(wrapper: wrapper)
         }
@@ -140,7 +147,7 @@ public final class MachineParser {
         }
         let name = nameComponents[0]
         guard
-            let _ = files["\(name).h"],
+            nil != files["\(name).h"],
             let statesFile = files["States"],
             let statesData = statesFile.regularFileContents,
             let statesContents = String(data: statesData, encoding: .utf8)
@@ -154,9 +161,9 @@ public final class MachineParser {
             return nil
         }
         let initialStateName = statesComponents[0]
-        guard let _ = files["State_" + initialStateName + "_OnSuspend.mm"] else {
+        guard nil != files["State_" + initialStateName + "_OnSuspend.mm"] else {
             guard
-                let _ = files["State_" + initialStateName + "_OnEntry.mm"],
+                nil != files["State_" + initialStateName + "_OnEntry.mm"],
                 let ucfsmMachine = UCFSMParser().parseMachine(wrapper: wrapper)
             else {
                 return nil

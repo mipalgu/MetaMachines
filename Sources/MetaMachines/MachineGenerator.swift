@@ -122,12 +122,12 @@ public final class MachineGenerator {
                 self.errors.append("\(e)")
                 return nil
             }
-            guard VHDLGenerator().generate(machine: vhdlMachine) else {
+            guard let wrapper = VHDLGenerator().generate(machine: vhdlMachine) else {
                 self.errors = []
                 return nil
             }
             //return (vhdlMachine.path, [])
-            return nil
+            return wrapper
         default:
             self.errors.append("\(machine.semantics) Machines are currently not supported")
             return nil
