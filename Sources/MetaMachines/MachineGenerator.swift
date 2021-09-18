@@ -105,12 +105,12 @@ public final class MachineGenerator {
                 self.errors.append("\(e)")
                 return nil
             }
-            guard CXXGenerator().generate(machine: cxxMachine) else {
+            guard let wrapper = CXXGenerator().generate(machine: cxxMachine) else {
                 self.errors = []
                 return nil
             }
             //return (cxxMachine.path, [])
-            return nil
+            return wrapper
         case .vhdl:
             let vhdlMachine: VHDLMachines.Machine
             do {

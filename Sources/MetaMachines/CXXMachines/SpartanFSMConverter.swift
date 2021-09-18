@@ -23,7 +23,6 @@ struct SpartanFSMConverter {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let machine = CXXBase.Machine(
             name: name,
-            path: filePath,
             includes: "",
             includePaths: [],
             funcRefs: "",

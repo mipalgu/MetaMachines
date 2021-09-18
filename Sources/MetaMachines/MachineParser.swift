@@ -79,6 +79,22 @@ public final class MachineParser {
     public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
         self.errors = []
         if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
+            return parseCXXMachine(wrapper: wrapper)
+        }
+        guard let swiftMachine = self.swiftParser.parseMachine(wrapper) else {
+            self.errors = self.swiftParser.errors
+            return nil
+        }
+        return MetaMachine(from: swiftMachine)
+    }
+    
+    public func parseMachine(atPath path: String) -> MetaMachine? {
+        self.errors = []
+        let machineDir = URL(fileURLWithPath: path, isDirectory: true)
+        let name = machineDir.lastPathComponent.components(separatedBy: ".machine")[0]
+        let swiftFile = machineDir.appendingPathComponent("SwiftIncludePath", isDirectory: false)
+        let exists = (try? swiftFile.checkResourceIsReachable()) ?? false
+        if false == exists {
 //            let hFile = machineDir.appendingPathComponent(name + ".h", isDirectory: false)
 //            let statesFile = machineDir.appendingPathComponent("States", isDirectory: false)
 //            let cxxConverter = CXXBaseConverter()
@@ -105,55 +121,52 @@ public final class MachineParser {
 //                return nil
 //            }
 //            return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
-            self.errors.append("Machine is not a swift machine.")
-            return nil
-        }
-        guard let swiftMachine = self.swiftParser.parseMachine(wrapper) else {
-            self.errors = self.swiftParser.errors
-            return nil
-        }
-        return MetaMachine(from: swiftMachine)
-    }
-    
-    public func parseMachine(atPath path: String) -> MetaMachine? {
-        self.errors = []
-        let machineDir = URL(fileURLWithPath: path, isDirectory: true)
-        let name = machineDir.lastPathComponent.components(separatedBy: ".machine")[0]
-        let swiftFile = machineDir.appendingPathComponent("SwiftIncludePath", isDirectory: false)
-        let exists = (try? swiftFile.checkResourceIsReachable()) ?? false
-        if false == exists {
-            let hFile = machineDir.appendingPathComponent(name + ".h", isDirectory: false)
-            let statesFile = machineDir.appendingPathComponent("States", isDirectory: false)
-            let cxxConverter = CXXBaseConverter()
-            guard
-                let _ = try? hFile.checkResourceIsReachable(),
-                let states = try? String(contentsOf: statesFile)
-            else {
-                self.errors.append("Machine at path \(path) is using an unsupported semantics.")
-                return nil
-            }
-            let initialStateName = states.components(separatedBy: .newlines)[0]
-            let initialOnSuspend = machineDir.appendingPathComponent("State_" + initialStateName + "_OnSuspend.mm", isDirectory: false)
-            let initialOnEntry = machineDir.appendingPathComponent("State_" + initialStateName + "_OnEntry.mm", isDirectory: false)
-            guard let _ = try? initialOnSuspend.checkResourceIsReachable() else {
-                guard
-                    let _ = try? initialOnEntry.checkResourceIsReachable(),
-                    let ucfsmMachine = UCFSMParser().parseMachine(location: machineDir)
-                else {
-                    return nil
-                }
-                return cxxConverter.toMachine(machine: ucfsmMachine, semantics: .ucfsm)
-            }
-            guard let clfsmMachine = CLFSMParser().parseMachine(location: machineDir) else {
-                return nil
-            }
-            return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
+            fatalError("This machine is not supported using paths. Please use FileWrappers instead.")
         }
         guard let swiftMachine = self.swiftParser.parseMachine(atPath: path) else {
             self.errors = self.swiftParser.errors
             return nil
         }
         return MetaMachine(from: swiftMachine)
+    }
+    
+    private func parseCXXMachine(wrapper: FileWrapper) -> MetaMachine? {
+        guard
+            let files = wrapper.fileWrappers,
+            let nameComponents = wrapper.filename?.components(separatedBy: ".machine"),
+            nameComponents.count > 0
+        else {
+            return nil
+        }
+        let name = nameComponents[0]
+        guard
+            let _ = files["\(name).h"],
+            let statesFile = files["States"],
+            let statesData = statesFile.regularFileContents,
+            let statesContents = String(data: statesData, encoding: .utf8)
+        else {
+            self.errors.append("Machine \(name) is using an unsupported semantics.")
+            return nil
+        }
+        let cxxConverter = CXXBaseConverter()
+        let statesComponents = statesContents.components(separatedBy: .newlines)
+        if statesComponents.count == 0 {
+            return nil
+        }
+        let initialStateName = statesComponents[0]
+        guard let _ = files["State_" + initialStateName + "_OnSuspend.mm"] else {
+            guard
+                let _ = files["State_" + initialStateName + "_OnEntry.mm"],
+                let ucfsmMachine = UCFSMParser().parseMachine(wrapper: wrapper)
+            else {
+                return nil
+            }
+            return cxxConverter.toMachine(machine: ucfsmMachine, semantics: .ucfsm)
+        }
+        guard let clfsmMachine = CLFSMParser().parseMachine(wrapper: wrapper) else {
+            return nil
+        }
+        return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
     }
     
 }

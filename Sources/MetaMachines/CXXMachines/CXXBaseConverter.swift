@@ -220,7 +220,6 @@ struct CXXBaseConverter {
         }
         return CXXBase.Machine(
             name: machine.name,
-            path: URL(fileURLWithPath: "/tmp/Temp.machine", isDirectory: true), // fix later
             includes: machine.attributes.first { $0.name == "includes" }?.attributes["includes"]?.codeValue ?? "",
             includePaths: machine.attributes.first { $0.name == "includes" }?.attributes["include_paths"]?.textValue.components(separatedBy: .newlines) ?? [],
             funcRefs: machine.attributes.first { $0.name == "func_refs" }?.attributes["func_refs"]?.codeValue ?? "",
