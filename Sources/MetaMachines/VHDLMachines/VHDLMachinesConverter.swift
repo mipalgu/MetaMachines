@@ -541,7 +541,7 @@ struct VHDLMachinesConverter {
     func getIncludes(machine: MetaMachine) -> [String] {
         guard
             machine.attributes.count == 4,
-            let includes = machine.attributes[1].attributes["includes"]?.codeValue
+            let includes = machine.attributes[2].attributes["includes"]?.codeValue
         else {
             fatalError("Cannot retrieve includes")
         }
