@@ -126,7 +126,7 @@ class VHDLMachinesValidator: MachineValidator {
                     }
                 }
             }
-            validator.attributes.length(3)
+            validator.attributes.length(4)
             validator.attributes.validate { attributes in
                 attributes[0].validate { variables in
                     variables.attributes["clocks"].required()
