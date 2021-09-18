@@ -22,7 +22,6 @@ struct UCFSMConverter {
         let name = filePath.lastPathComponent.components(separatedBy: ".machine")[0]
         let ucfsmMachine = CXXBase.Machine(
             name: name,
-            path: filePath,
             includes: "",
             includePaths: [],
             funcRefs: "",
