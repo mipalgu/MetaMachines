@@ -79,34 +79,7 @@ public final class MachineParser {
     public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
         self.errors = []
         if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
-//            let hFile = machineDir.appendingPathComponent(name + ".h", isDirectory: false)
-//            let statesFile = machineDir.appendingPathComponent("States", isDirectory: false)
-//            let cxxConverter = CXXBaseConverter()
-//            guard
-//                let _ = try? hFile.checkResourceIsReachable(),
-//                let states = try? String(contentsOf: statesFile)
-//            else {
-//                self.errors.append("Machine at path \(path) is using an unsupported semantics.")
-//                return nil
-//            }
-//            let initialStateName = states.components(separatedBy: .newlines)[0]
-//            let initialOnSuspend = machineDir.appendingPathComponent("State_" + initialStateName + "_OnSuspend.mm", isDirectory: false)
-//            let initialOnEntry = machineDir.appendingPathComponent("State_" + initialStateName + "_OnEntry.mm", isDirectory: false)
-//            guard let _ = try? initialOnSuspend.checkResourceIsReachable() else {
-//                guard
-//                    let _ = try? initialOnEntry.checkResourceIsReachable(),
-//                    let ucfsmMachine = UCFSMParser().parseMachine(location: machineDir)
-//                else {
-//                    return nil
-//                }
-//                return cxxConverter.toMachine(machine: ucfsmMachine, semantics: .ucfsm)
-//            }
-//            guard let clfsmMachine = CLFSMParser().parseMachine(location: machineDir) else {
-//                return nil
-//            }
-//            return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
-            self.errors.append("Machine is not a swift machine.")
-            return nil
+            return parseCXXMachine(wrapper: wrapper)
         }
         guard let swiftMachine = self.swiftParser.parseMachine(wrapper) else {
             self.errors = self.swiftParser.errors
@@ -154,6 +127,49 @@ public final class MachineParser {
             return nil
         }
         return MetaMachine(from: swiftMachine)
+    }
+    
+    private func parseCXXMachine(wrapper: FileWrapper) -> MetaMachine? {
+        guard
+            let files = wrapper.fileWrappers,
+            let nameComponents = wrapper.filename?.components(separatedBy: ".machine"),
+            nameComponents.count > 0
+        else {
+            return nil
+        }
+        let name = nameComponents[0]
+        guard
+            let hFile = files["\(name).h"],
+            let statesFile = files["States"],
+            let hFileData = hFile.regularFileContents,
+            let hFileContents = String(data: hFileData, encoding: .utf8),
+            let statesData = statesFile.regularFileContents,
+            let statesContents = String(data: statesData, encoding: .utf8)
+        else {
+            self.errors.append("Machine \(name) is using an unsupported semantics.")
+            return nil
+        }
+        let cxxConverter = CXXBaseConverter()
+        let statesComponents = statesContents.components(separatedBy: .newlines)
+        if statesComponents.count == 0 {
+            return nil
+        }
+        let initialStateName = statesComponents[0]
+        guard let onSuspend = files["State_" + initialStateName + "_OnSuspend.mm"] else {
+            guard
+                let onEntry = files["State_" + initialStateName + "_OnEntry.mm"],
+                let ucfsmMachine = UCFSMParser().parseMachine(location: machineDir)
+            else {
+                return nil
+            }
+            return cxxConverter.toMachine(machine: ucfsmMachine, semantics: .ucfsm)
+        }
+        guard let clfsmMachine = CLFSMParser().parseMachine(location: machineDir) else {
+            return nil
+        }
+        return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
+        self.errors.append("Machine is not a swift machine.")
+        return nil
     }
     
 }
