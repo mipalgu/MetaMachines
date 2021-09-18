@@ -79,8 +79,11 @@ public final class MachineParser {
     
     public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
         self.errors = []
-        if !wrapper.isDirectory {
-            guard let vhdlMachine = VHDLParser().parse(wrapper: wrapper) else {
+        guard let files = wrapper.fileWrappers else {
+            return nil
+        }
+        if let vhdlMachineWrapper = files["machine.json"] {
+            guard let vhdlMachine = VHDLParser().parse(wrapper: vhdlMachineWrapper) else {
                 return nil
             }
             return VHDLMachinesConverter().toMachine(machine: vhdlMachine)
