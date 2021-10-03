@@ -58,6 +58,9 @@
 
 import Foundation
 import Attributes
+#if os(Linux)
+import IO
+#endif
 
 /// A general meta model machine.
 ///

@@ -62,6 +62,9 @@ import CLFSMMachines
 import UCFSMMachines
 import CXXBase
 import VHDLMachines
+#if os(Linux)
+import IO
+#endif
 
 public final class MachineParser {
     
