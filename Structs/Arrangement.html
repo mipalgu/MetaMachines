@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Arrangement Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Struct/Arrangement" class="dashAnchor"></a>
+
+    <a title="Arrangement Structure Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+           Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <div class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </div>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html"> Reference</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      Arrangement Structure Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MachineAssembler.html">MachineAssembler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MachineGenerator.html">MachineGenerator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MachineParser.html">MachineParser</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/VHDLMachinesValidator.html">VHDLMachinesValidator</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/CXXSemantics.html">CXXSemantics</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/AttributeError.html">AttributeError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ArrangementMutator.html">ArrangementMutator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Converter.html">Converter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/DependenciesContainer.html">DependenciesContainer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/DependencyLayoutContainer.html">DependencyLayoutContainer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineAttributesMutator.html">MachineAttributesMutator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineModifier.html">MachineModifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineMutator.html">MachineMutator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineMutatorResponder.html">MachineMutatorResponder</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineSchema.html">MachineSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MachineValidator.html">MachineValidator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MutatorContainer.html">MutatorContainer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SwiftArrangementConvertible.html">SwiftArrangementConvertible</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SwiftMachinesConvertible.html">SwiftMachinesConvertible</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Action.html">Action</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Arrangement.html">Arrangement</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Arrangement/Semantics.html">– Semantics</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Arrangement/CodingKeys.html">– CodingKeys</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CLFSMConverter.html">CLFSMConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXBaseConverter.html">CXXBaseConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXBaseMachineValidator.html">CXXBaseMachineValidator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXFuncRefs.html">CXXFuncRefs</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXIncludes.html">CXXIncludes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXSchema.html">CXXSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXSettings.html">CXXSettings</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXStateSchema.html">CXXStateSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXStateVariables.html">CXXStateVariables</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CXXVariables.html">CXXVariables</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/FlattenedDependency.html">FlattenedDependency</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MachineDependency.html">MachineDependency</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MetaMachine.html">MetaMachine</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MetaMachine/Semantics.html">– Semantics</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MetaMachine/CodingKeys.html">– CodingKeys</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NullMachineValidator.html">NullMachineValidator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SchemaMutator.html">SchemaMutator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpartanFSMConverter.html">SpartanFSMConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/State.html">State</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmConverter.html">SwiftfsmConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmMachineValidator.html">SwiftfsmMachineValidator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmModuleDependencies.html">SwiftfsmModuleDependencies</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmPackage.html">SwiftfsmPackage</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmParameters.html">SwiftfsmParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmRinglet.html">SwiftfsmRinglet</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmSchema.html">SwiftfsmSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmSettings.html">SwiftfsmSettings</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmStateSchema.html">SwiftfsmStateSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmStateSettings.html">SwiftfsmStateSettings</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmStateVariables.html">SwiftfsmStateVariables</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SwiftfsmVariables.html">SwiftfsmVariables</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Transition.html">Transition</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/UCFSMConverter.html">UCFSMConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLIncludes.html">VHDLIncludes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLMachinesConverter.html">VHDLMachinesConverter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLParametersGroup.html">VHDLParametersGroup</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLReservedWords.html">VHDLReservedWords</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLSchema.html">VHDLSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLSettings.html">VHDLSettings</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLStateActions.html">VHDLStateActions</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLStateSchema.html">VHDLStateSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLStateVariables.html">VHDLStateVariables</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLTransitionsSchema.html">VHDLTransitionsSchema</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/VHDLVariablesGroup.html">VHDLVariablesGroup</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Typealiases.html#/s:12MetaMachines15ConversionErrora">ConversionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Typealiases.html#/s:12MetaMachines0B5Errora">MachinesError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Typealiases.html#/s:12MetaMachines9StateNamea">StateName</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>Arrangement</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Arrangement</span> <span class="p">:</span> <span class="kt">Identifiable</span><span class="p">,</span> <span class="kt">PathContainer</span><span class="p">,</span> <span class="kt"><a href="../Protocols/MutatorContainer.html">MutatorContainer</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/DependenciesContainer.html">DependenciesContainer</a></span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Arrangement</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SwiftArrangementConvertible.html">SwiftArrangementConvertible</a></span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Arrangement</span><span class="p">:</span> <span class="kt">Modifiable</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Arrangement</span><span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Arrangement</span><span class="p">:</span> <span class="kt">Hashable</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Arrangement</span><span class="p">:</span> <span class="kt">Codable</span></code></pre>
+
+                </div>
+              </div>
+            
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV9SemanticsO"></a>
+                    <a name="//apple_ref/swift/Enum/Semantics" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV9SemanticsO">Semantics</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/Arrangement/Semantics.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Semantics</span> <span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">Hashable</span><span class="p">,</span> <span class="kt">Codable</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV18supportedSemanticsSayAC0E0OGvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/supportedSemantics" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV18supportedSemanticsSayAC0E0OGvpZ">supportedSemantics</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The semantics that are fully supported by this module.</p>
+
+<p>This means that it is possible to create an arrangement using the
+helper functions such as <code>initialArrangement(forSemantics:)</code> or call
+the semantics initialiser.</p>
+
+<p>If you are implementing an editor, this could be used when creating a
+new machine to display a list of options to asking inquiring which
+semantics they would like to use.</p>
+
+<p>This array generally contains all semantics except for the <code>other</code> case.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">supportedSemantics</span><span class="p">:</span> <span class="p">[</span><span class="kt">Arrangement</span><span class="o">.</span><span class="kt"><a href="../Structs/Arrangement/Semantics.html">Semantics</a></span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7mutatorAA0C7Mutator_pvp"></a>
+                    <a name="//apple_ref/swift/Property/mutator" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7mutatorAA0C7Mutator_pvp">mutator</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">mutator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ArrangementMutator.html">ArrangementMutator</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV8errorBag10Attributes05ErrorE0VyACGvp"></a>
+                    <a name="//apple_ref/swift/Property/errorBag" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV8errorBag10Attributes05ErrorE0VyACGvp">errorBag</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">errorBag</span><span class="p">:</span> <span class="kt">ErrorBag</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:s12IdentifiableP2id2IDQzvp"></a>
+                    <a name="//apple_ref/swift/Property/id" class="dashAnchor"></a>
+                    <a class="token" href="#/s:s12IdentifiableP2id2IDQzvp">id</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">UUID</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV4path10Attributes4PathVyA2CGvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/path" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV4path10Attributes4PathVyA2CGvpZ">path</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">Path</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Arrangement</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV4path10Attributes4PathVyA2CGvp"></a>
+                    <a name="//apple_ref/swift/Property/path" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV4path10Attributes4PathVyA2CGvp">path</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">Path</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Arrangement</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV9semanticsAC9SemanticsOvp"></a>
+                    <a name="//apple_ref/swift/Property/semantics" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV9semanticsAC9SemanticsOvp">semantics</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The underlying semantics which this meta machine follows.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">semantics</span><span class="p">:</span> <span class="kt"><a href="../Structs/Arrangement/Semantics.html">Semantics</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV4nameSSvp"></a>
+                    <a name="//apple_ref/swift/Property/name" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV4nameSSvp">name</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The name of the arrangement.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV12dependenciesSayAA17MachineDependencyVGvp"></a>
+                    <a name="//apple_ref/swift/Property/dependencies" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV12dependenciesSayAA17MachineDependencyVGvp">dependencies</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The root machines of the arrangement.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Structs/MachineDependency.html">MachineDependency</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV23dependencyAttributeType10Attributes0eF0Ovp"></a>
+                    <a name="//apple_ref/swift/Property/dependencyAttributeType" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV23dependencyAttributeType10Attributes0eF0Ovp">dependencyAttributeType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dependencyAttributeType</span><span class="p">:</span> <span class="kt">AttributeType</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV20dependencyAttributesSay0E09AttributeOGvp"></a>
+                    <a name="//apple_ref/swift/Property/dependencyAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV20dependencyAttributesSay0E09AttributeOGvp">dependencyAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">dependencyAttributes</span><span class="p">:</span> <span class="p">[</span><span class="kt">Attribute</span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV10attributesSay10Attributes14AttributeGroupVGvp"></a>
+                    <a name="//apple_ref/swift/Property/attributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV10attributesSay10Attributes14AttributeGroupVGvp">attributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">attributes</span><span class="p">:</span> <span class="p">[</span><span class="kt">AttributeGroup</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV8metaDataSay10Attributes14AttributeGroupVGvp"></a>
+                    <a name="//apple_ref/swift/Property/metaData" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV8metaDataSay10Attributes14AttributeGroupVGvp">metaData</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">metaData</span><span class="p">:</span> <span class="p">[</span><span class="kt">AttributeGroup</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV9semantics4name12dependencies10attributes8metaDataA2C9SemanticsO_SSSayAA17MachineDependencyVGSay10Attributes14AttributeGroupVGAQtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(semantics:name:dependencies:attributes:metaData:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV9semantics4name12dependencies10attributes8metaDataA2C9SemanticsO_SSSayAA17MachineDependencyVGSay10Attributes14AttributeGroupVGAQtcfc">init(semantics:<wbr>name:<wbr>dependencies:<wbr>attributes:<wbr>metaData:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+    <span class="nv">semantics</span><span class="p">:</span> <span class="kt"><a href="../Structs/Arrangement/Semantics.html">Semantics</a></span><span class="p">,</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Structs/MachineDependency.html">MachineDependency</a></span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="nv">attributes</span><span class="p">:</span> <span class="p">[</span><span class="kt">AttributeGroup</span><span class="p">],</span>
+    <span class="nv">metaData</span><span class="p">:</span> <span class="p">[</span><span class="kt">AttributeGroup</span><span class="p">]</span>
+<span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV14loadAtFilePathAC10Foundation3URLV_tKcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(loadAtFilePath:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV14loadAtFilePathAC10Foundation3URLV_tKcfc">init(loadAtFilePath:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">loadAtFilePath</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV15allMachineNames10relativeToShySSG10Foundation3URLV_tF"></a>
+                    <a name="//apple_ref/swift/Method/allMachineNames(relativeTo:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV15allMachineNames10relativeToShySSG10Foundation3URLV_tF">allMachineNames(relativeTo:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/Arrangement/allMachineNames%28relativeTo%3A%29.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">allMachineNames</span><span class="p">(</span><span class="n">relativeTo</span> <span class="nv">arrangementDir</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV07initialC012forSemantics8filePathA2C0F0O_10Foundation3URLVtFZ"></a>
+                    <a name="//apple_ref/swift/Method/initialArrangement(forSemantics:filePath:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV07initialC012forSemantics8filePathA2C0F0O_10Foundation3URLVtFZ">initialArrangement(forSemantics:<wbr>filePath:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Setup an initial machine for a specific semantics.</p>
+<div class="aside aside-warning">
+    <p class="aside-title">Warning</p>
+    <p>The value of <code><a href="../Structs/Arrangement.html#/s:12MetaMachines11ArrangementV9semanticsAC9SemanticsOvp">semantics</a></code> should exist in the
+<code><a href="../Structs/Arrangement.html#/s:12MetaMachines11ArrangementV18supportedSemanticsSayAC0E0OGvpZ">supportedSemantics</a></code> array.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">initialArrangement</span><span class="p">(</span><span class="n">forSemantics</span> <span class="nv">semantics</span><span class="p">:</span> <span class="kt">Arrangement</span><span class="o">.</span><span class="kt"><a href="../Structs/Arrangement/Semantics.html">Semantics</a></span><span class="p">,</span> <span class="nv">filePath</span><span class="p">:</span> <span class="kt">URL</span> <span class="o">=</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">fileURLWithPath</span><span class="p">:</span> <span class="s">"/tmp/Untitled.arrangement"</span><span class="p">,</span> <span class="nv">isDirectory</span><span class="p">:</span> <span class="kc">true</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="kt">Arrangement</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>semantics</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The semantics which the machine should follow.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV21flattenedDependencies10relativeToSayAA19FlattenedDependencyVG10Foundation3URLV_tKF"></a>
+                    <a name="//apple_ref/swift/Method/flattenedDependencies(relativeTo:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV21flattenedDependencies10relativeToSayAA19FlattenedDependencyVG10Foundation3URLV_tKF">flattenedDependencies(relativeTo:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/Arrangement/flattenedDependencies%28relativeTo%3A%29.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">flattenedDependencies</span><span class="p">(</span><span class="n">relativeTo</span> <span class="nv">arrangementDir</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Structs/FlattenedDependency.html">FlattenedDependency</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV03allB010relativeToSDy10Foundation3URLVAA0A7MachineVGAH_tKF"></a>
+                    <a name="//apple_ref/swift/Method/allMachines(relativeTo:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV03allB010relativeToSDy10Foundation3URLVAA0A7MachineVGAH_tKF">allMachines(relativeTo:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/Arrangement/allMachines%28relativeTo%3A%29.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">allMachines</span><span class="p">(</span><span class="n">relativeTo</span> <span class="nv">arrangementDir</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">URL</span> <span class="p">:</span> <span class="kt"><a href="../Structs/MetaMachine.html">MetaMachine</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV4save2aty10Foundation3URLV_tKF"></a>
+                    <a name="//apple_ref/swift/Method/save(at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV4save2aty10Foundation3URLV_tKF">save(at:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">save</span><span class="p">(</span><span class="n">at</span> <span class="nv">directory</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV012initialSwiftC0ACvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/initialSwiftArrangement" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV012initialSwiftC0ACvpZ">initialSwiftArrangement</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">initialSwiftArrangement</span><span class="p">:</span> <span class="kt">Arrangement</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV4from11atDirectoryAC05SwiftB0ABV_10Foundation3URLVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(from:atDirectory:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV4from11atDirectoryAC05SwiftB0ABV_10Foundation3URLVtcfc">init(from:<wbr>atDirectory:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">from</span> <span class="nv">swiftArrangement</span><span class="p">:</span> <span class="kt">SwiftMachines</span><span class="o">.</span><span class="kt">Arrangement</span><span class="p">,</span> <span class="n">atDirectory</span> <span class="nv">arrangementDir</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV05swiftC005SwiftB0ABVyKF"></a>
+                    <a name="//apple_ref/swift/Method/swiftArrangement()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV05swiftC005SwiftB0ABVyKF">swiftArrangement()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftArrangement</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">SwiftMachines</span><span class="o">.</span><span class="kt">Arrangement</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7addItem_2tos6ResultOySb10Attributes14AttributeErrorVyACGGq__xtAH12PathProtocolRzAC4RootRtzSayq_G5ValueRtzr0_lF"></a>
+                    <a name="//apple_ref/swift/Method/addItem(_:to:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7addItem_2tos6ResultOySb10Attributes14AttributeErrorVyACGGq__xtAH12PathProtocolRzAC4RootRtzSayq_G5ValueRtzr0_lF">addItem(_:<wbr>to:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Add a new item to a table attribute.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="n">addItem</span><span class="o">&lt;</span><span class="kt">Path</span><span class="p">,</span> <span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">item</span><span class="p">:</span> <span class="kt">T</span><span class="p">,</span> <span class="n">to</span> <span class="nv">attribute</span><span class="p">:</span> <span class="kt">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span> <span class="k">where</span> <span class="kt">Path</span> <span class="p">:</span> <span class="kt">PathProtocol</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Root</span> <span class="o">==</span> <span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Value</span> <span class="o">==</span> <span class="p">[</span><span class="kt">T</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:10Attributes10ModifiableP9moveItems5table4from2tos6ResultOySbAA14AttributeErrorVyxGGqd___10Foundation8IndexSetVSit4RootQyd__RszAA12PathProtocolRd__Sayqd_0_G5ValueRtd__r0_lF"></a>
+                    <a name="//apple_ref/swift/Method/moveItems(table:from:to:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:10Attributes10ModifiableP9moveItems5table4from2tos6ResultOySbAA14AttributeErrorVyxGGqd___10Foundation8IndexSetVSit4RootQyd__RszAA12PathProtocolRd__Sayqd_0_G5ValueRtd__r0_lF">moveItems(table:<wbr>from:<wbr>to:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="n">moveItems</span><span class="o">&lt;</span><span class="kt">Path</span><span class="p">,</span> <span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">table</span> <span class="nv">attribute</span><span class="p">:</span> <span class="kt">Path</span><span class="p">,</span> <span class="n">from</span> <span class="nv">source</span><span class="p">:</span> <span class="kt">IndexSet</span><span class="p">,</span> <span class="n">to</span> <span class="nv">destination</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span> <span class="k">where</span> <span class="kt">Path</span> <span class="p">:</span> <span class="kt">PathProtocol</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Root</span> <span class="o">==</span> <span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Value</span> <span class="o">==</span> <span class="p">[</span><span class="kt">T</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV10deleteItem5table7atIndexs6ResultOySb10Attributes14AttributeErrorVyACGGx_SitAI12PathProtocolRzAC4RootRtzSayq_G5ValueRtzr0_lF"></a>
+                    <a name="//apple_ref/swift/Method/deleteItem(table:atIndex:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV10deleteItem5table7atIndexs6ResultOySb10Attributes14AttributeErrorVyACGGx_SitAI12PathProtocolRzAC4RootRtzSayq_G5ValueRtzr0_lF">deleteItem(table:<wbr>atIndex:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Delete a specific item in a table attribute.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="n">deleteItem</span><span class="o">&lt;</span><span class="kt">Path</span><span class="p">,</span> <span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">table</span> <span class="nv">attribute</span><span class="p">:</span> <span class="kt">Path</span><span class="p">,</span> <span class="n">atIndex</span> <span class="nv">index</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span> <span class="k">where</span> <span class="kt">Path</span> <span class="p">:</span> <span class="kt">PathProtocol</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Root</span> <span class="o">==</span> <span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Value</span> <span class="o">==</span> <span class="p">[</span><span class="kt">T</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:10Attributes10ModifiableP11deleteItems5table5itemss6ResultOySbAA14AttributeErrorVyxGGqd___10Foundation8IndexSetVt4RootQyd__RszAA12PathProtocolRd__Sayqd_0_G5ValueRtd__r0_lF"></a>
+                    <a name="//apple_ref/swift/Method/deleteItems(table:items:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:10Attributes10ModifiableP11deleteItems5table5itemss6ResultOySbAA14AttributeErrorVyxGGqd___10Foundation8IndexSetVt4RootQyd__RszAA12PathProtocolRd__Sayqd_0_G5ValueRtd__r0_lF">deleteItems(table:<wbr>items:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="n">deleteItems</span><span class="o">&lt;</span><span class="kt">Path</span><span class="p">,</span> <span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">table</span> <span class="nv">attribute</span><span class="p">:</span> <span class="kt">Path</span><span class="p">,</span> <span class="nv">items</span><span class="p">:</span> <span class="kt">IndexSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span> <span class="k">where</span> <span class="kt">Path</span> <span class="p">:</span> <span class="kt">PathProtocol</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Root</span> <span class="o">==</span> <span class="kt">Arrangement</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Value</span> <span class="o">==</span> <span class="p">[</span><span class="kt">T</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV6modify9attribute5values6ResultOySb10Attributes14AttributeErrorVyACGGx_5ValueQztAI12PathProtocolRzAC4RootRtzlF"></a>
+                    <a name="//apple_ref/swift/Method/modify(attribute:value:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV6modify9attribute5values6ResultOySb10Attributes14AttributeErrorVyACGGx_5ValueQztAI12PathProtocolRzAC4RootRtzlF">modify(attribute:<wbr>value:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Modify a specific attributes value.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="n">modify</span><span class="o">&lt;</span><span class="kt">Path</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">attribute</span><span class="p">:</span> <span class="kt">Path</span><span class="p">,</span> <span class="nv">value</span><span class="p">:</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span> <span class="k">where</span> <span class="kt">Path</span> <span class="p">:</span> <span class="kt">PathProtocol</span><span class="p">,</span> <span class="kt">Path</span><span class="o">.</span><span class="kt">Root</span> <span class="o">==</span> <span class="kt">Arrangement</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV8validateyyKF"></a>
+                    <a name="//apple_ref/swift/Method/validate()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV8validateyyKF">validate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Are there any errors with the machine?</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">validate</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLyyyACKXEKF"></a>
+                    <a name="//apple_ref/swift/Method/perform(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLyyyACKXEKF">perform(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">private</span> <span class="kd">func</span> <span class="nf">perform</span><span class="p">(</span><span class="n">_</span> <span class="nv">f</span><span class="p">:</span> <span class="p">(</span><span class="kt">Arrangement</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLyyyACzKXEKF"></a>
+                    <a name="//apple_ref/swift/Method/perform(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLyyyACzKXEKF">perform(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">private</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="nf">perform</span><span class="p">(</span><span class="n">_</span> <span class="nv">f</span><span class="p">:</span> <span class="p">(</span><span class="k">inout</span> <span class="kt">Arrangement</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLys6ResultOySb10Attributes14AttributeErrorVyACGGAlCXEF"></a>
+                    <a name="//apple_ref/swift/Method/perform(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLys6ResultOySb10Attributes14AttributeErrorVyACGGAlCXEF">perform(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">private</span> <span class="kd">func</span> <span class="nf">perform</span><span class="p">(</span><span class="n">_</span> <span class="nv">f</span><span class="p">:</span> <span class="p">(</span><span class="kt">Arrangement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLys6ResultOySb10Attributes14AttributeErrorVyACGGAlCzXEF"></a>
+                    <a name="//apple_ref/swift/Method/perform(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV7perform33_53A9459A075ACC782FC52BDAF2ED93CALLys6ResultOySb10Attributes14AttributeErrorVyACGGAlCzXEF">perform(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">private</span> <span class="k">mutating</span> <span class="kd">func</span> <span class="nf">perform</span><span class="p">(</span><span class="n">_</span> <span class="nv">f</span><span class="p">:</span> <span class="p">(</span><span class="k">inout</span> <span class="kt">Arrangement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">AttributeError</span><span class="o">&lt;</span><span class="kt">Arrangement</span><span class="o">&gt;&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:SQ2eeoiySbx_xtFZ"></a>
+                    <a name="//apple_ref/swift/Method/==(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:SQ2eeoiySbx_xtFZ">==(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="o">==</span> <span class="p">(</span><span class="nv">lhs</span><span class="p">:</span> <span class="kt">Arrangement</span><span class="p">,</span> <span class="nv">rhs</span><span class="p">:</span> <span class="kt">Arrangement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:SH4hash4intoys6HasherVz_tF"></a>
+                    <a name="//apple_ref/swift/Method/hash(into:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:SH4hash4intoys6HasherVz_tF">hash(into:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">hash</span><span class="p">(</span><span class="n">into</span> <span class="nv">hasher</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">Hasher</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12MetaMachines11ArrangementV10CodingKeysO"></a>
+                    <a name="//apple_ref/swift/Enum/CodingKeys" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12MetaMachines11ArrangementV10CodingKeysO">CodingKeys</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/Arrangement/CodingKeys.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CodingKeys</span> <span class="p">:</span> <span class="kt">CodingKey</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:Se4fromxs7Decoder_p_tKcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(from:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:Se4fromxs7Decoder_p_tKcfc">init(from:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">from</span> <span class="nv">decoder</span><span class="p">:</span> <span class="kt">Decoder</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:SE6encode2toys7Encoder_p_tKF"></a>
+                    <a name="//apple_ref/swift/Method/encode(to:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:SE6encode2toys7Encoder_p_tKF">encode(to:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">encode</span><span class="p">(</span><span class="n">to</span> <span class="nv">encoder</span><span class="p">:</span> <span class="kt">Encoder</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2022 <a class="link" href="" target="_blank" rel="external noopener">MiPal Griffith University</a>. All rights reserved. (Last updated: 2022-05-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+    </section>
+  </body>
+</html>
