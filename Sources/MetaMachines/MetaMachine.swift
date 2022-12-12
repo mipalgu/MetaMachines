@@ -188,13 +188,13 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// Fetches a keypath like structure for use when modifying and validating
     /// properties of machines.
     public var path: Path<MetaMachine, MetaMachine> {
-        return Path(path: \.self, ancestors: [])
+        return Path(Self.self)
     }
     
     /// Fetches a keypath like structure for use when modifying and validating
     /// properties of machines.
     public static var path: Path<MetaMachine, MetaMachine> {
-        return Path(path: \MetaMachine.self, ancestors: [])
+        return Path(Self.self)
     }
     
     /// Create a new `Machine`.

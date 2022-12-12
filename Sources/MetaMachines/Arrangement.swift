@@ -90,7 +90,7 @@ public struct Arrangement: Identifiable, PathContainer, MutatorContainer, Depend
     
     
     public static var path: Path<Arrangement, Arrangement> {
-        return Attributes.Path<Arrangement, Arrangement>(path: \.self, ancestors: [])
+        return Attributes.Path<Arrangement, Arrangement>(Self.self)
     }
     
     public var path: Path<Arrangement, Arrangement> {
