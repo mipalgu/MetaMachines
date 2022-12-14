@@ -58,4 +58,5 @@
 
 import Attributes
 
+/// A ConversionError is the same as an AttributeError.
 public typealias ConversionError<Root> = AttributeError<Root>
