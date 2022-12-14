@@ -56,35 +56,60 @@
  *
  */
 
-import Foundation
 import Attributes
+import Foundation
 
+/// A state represents a group of actions the execute in a specific order. A machine can have multiple states
+/// and may transition between them using a states transitions.
+/// - SeeAlso: ``Transition``, ``Action``.
 public struct State: Hashable, Codable, Identifiable {
-    
+
+    /// The id of this state. This is the same as the name.
     public var id: StateName {
-        return self.name
+        self.name
     }
-    
+
+    /// The name of this state.
     public var name: StateName
-    
+
+    /// The actions that this state will execute.
     public var actions: [Action]
-    
+
+    /// The transitions where this state is the source.
     public var transitions: [Transition]
-    
+
+    /// The view attributes of this state.
     public var attributes: [AttributeGroup]
-    
+
+    /// The view meta data of this state.
     public var metaData: [AttributeGroup]
-    
-    public init(name: String, actions: [Action], transitions: [Transition], attributes: [AttributeGroup] = [], metaData: [AttributeGroup] = []) {
+
+    /// Creates a new state with the given name, actions, transitions, attributes and meta data.
+    /// - Parameters:
+    ///   - name: The name of this state.
+    ///   - actions: The actions that this state will execute.
+    ///   - transitions: The transitions where this state is the source.
+    ///   - attributes: The view attributes of this state.
+    ///   - metaData: The view meta data of this state.
+    public init(
+        name: String,
+        actions: [Action],
+        transitions: [Transition],
+        attributes: [AttributeGroup] = [],
+        metaData: [AttributeGroup] = []
+    ) {
         self.name = name
         self.actions = actions
         self.transitions = transitions
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
+    /// Find all the transitions that have this state as the target.
+    /// - Parameter machine: The machine that this state belongs to.
+    /// - Returns: All the transitions that have this state as the target.
     public func targetTransitions(in machine: MetaMachine) -> [Transition] {
-        return machine.states.flatMap{ $0.transitions.filter { $0.target == name } }
+        machine.states.flatMap { $0.transitions.filter { $0.target == name } }
     }
-    
+
 }
