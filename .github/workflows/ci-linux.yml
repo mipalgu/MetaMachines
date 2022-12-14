@@ -3,6 +3,8 @@ name: Ubuntu 20.04 Swift CI
 on:
   push:
     branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
 
 jobs:
 
@@ -10,9 +12,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: fwal/setup-swift@v1
+      - uses: swift-actions/setup-swift@v1
         with:
-            swift-version: "5.6"
+            swift-version: "5.7"
 
       - name: Setup SSH Key
         run: | 
@@ -30,11 +32,20 @@ jobs:
       #- name: Reconfigure Private Repo URLs
       #  run: sed -i 's/git@github.com:/https:\/\/${{ secrets.ACCESS_TOKEN }}@github.com\//g' Package.swift
 
-      - name: Run tests
+      - name: Debug Build
+        run: swift build -c debug
+
+      - name: Release build
+        run: swift build -c release
+
+      - name: Debug Test
         run: swift test --enable-code-coverage
 
+      - name: Release Test
+        run: swift test -c release
+
       - name: Coverage Report
-        uses: mattpolzin/swift-codecov-action@0.6.1
+        uses: mattpolzin/swift-codecov-action@0.7.3
         id: cov
         with:
           MINIMUM_COVERAGE: 0
