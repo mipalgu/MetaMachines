@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test MetaMachines",
+            "program": "${workspaceFolder:MetaMachines}/.build/debug/MetaMachinesPackageTests.xctest",
+            "cwd": "${workspaceFolder:MetaMachines}",
+            "preLaunchTask": "swift: Build All"
+        }
+    ]
+}
