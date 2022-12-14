@@ -58,18 +58,28 @@
 
 import Attributes
 
+/// An action is a piece of code that can be executed by a machine when it is in a particular state.
+/// A state may contain many actions with a particular order that they are executed in.
 public struct Action: Hashable, Codable {
-    
+
+    /// The name of the action.
     public var name: String
-    
+
+    /// The code within the action.
     public var implementation: Code
-    
+
+    /// The language that the actions code is written in.
     public var language: Language
-    
+
+    /// Creates a new action with the given name, implementation and language.
+    /// - Parameters:
+    ///   - name: The name of the action.
+    ///   - implementation: The code within the action.
+    ///   - language: The language that the actions code is written in.
     public init(name: String, implementation: Code, language: Language) {
         self.name = name
         self.implementation = implementation
         self.language = language
     }
-    
+
 }
