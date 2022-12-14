@@ -611,22 +611,45 @@ struct SwiftfsmConverter: Converter, MachineValidator {
         }
     }
     
-    private func parsePackageDependencies<Path: ReadOnlyPathProtocol>(_ attributes: [String: Attribute], attributePath: Path) throws -> SwiftMachines.PackageDependency where Path.Root == MetaMachine, Path.Value == [String: Attribute] {
-        let products = attributes["products"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
-        let qualifiers = attributes["qualifiers"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
-        let targets = attributes["targets_to_import"]?.collectionLines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } ?? []
+    private func parsePackageDependencies<Path: ReadOnlyPathProtocol>(
+        _ attributes: [String: Attribute], attributePath: Path
+    ) throws -> SwiftMachines.PackageDependency where
+        Path.Root == MetaMachine, Path.Value == [String: Attribute] {
+        let products = attributes["products"]?.collectionLines.map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        .filter { !$0.isEmpty } ?? []
+        let qualifiers = attributes["qualifiers"]?.collectionLines.map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        .filter { !$0.isEmpty } ?? []
+        let targets = attributes["targets_to_import"]?.collectionLines.map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        .filter { !$0.isEmpty } ?? []
         let url = attributes["url"]?.lineValue.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if products.isEmpty {
-            throw ConversionError(message: "Missing required field", path: ReadOnlyPath(keyPath: attributePath.keyPath.appending(path: \.["products"]), ancestors: attributePath.fullPath))
+            throw ConversionError(
+                message: "Missing required field",
+                path: attributePath["products"]
+            )
         }
         if qualifiers.isEmpty {
-            throw ConversionError(message: "Missing required field", path: ReadOnlyPath(keyPath: attributePath.keyPath.appending(path: \.["qualifiers"]), ancestors: attributePath.fullPath))
+            throw ConversionError(
+                message: "Missing required field", path: attributePath["qualifiers"]
+            )
         }
         if targets.isEmpty {
-            throw ConversionError(message: "Missing required field \(attributePath)", path: ReadOnlyPath(keyPath: attributePath.keyPath.appending(path: \.["targets"]), ancestors: attributePath.fullPath))
+            throw ConversionError(
+                message: "Missing required field \(attributePath)",
+                path: attributePath["targets"]
+            )
         }
         if url.isEmpty {
-            throw ConversionError(message: "Missing required field \(attributePath)", path: ReadOnlyPath(keyPath: attributePath.keyPath.appending(path: \.["url"]), ancestors: attributePath.fullPath))
+            throw ConversionError(
+                message: "Missing required field \(attributePath)",
+                path: attributePath["url"]
+            )
         }
         return SwiftMachines.PackageDependency(products: products, targets: targets, url: url, qualifiers: qualifiers)
     }
@@ -648,7 +671,7 @@ struct SwiftfsmConverter: Converter, MachineValidator {
             throw ConversionError(message: "Missing required fields", path: path)
         }
         guard let accessType = SwiftMachines.Variable.AccessType(rawValue: variable[0].enumeratedValue) ?? self.parseExternalAccessType(variable[0].enumeratedValue) else {
-            throw ConversionError(message: "Invalid value", path: ReadOnlyPath(keyPath: path.keyPath.appending(path: \.[0]), ancestors: path.fullPath))
+            throw ConversionError(message: "Invalid value", path: path[0])
         }
         let label = String(variable[1].lineValue)
         let type = String(variable[2].expressionValue)
@@ -916,13 +939,14 @@ extension SwiftfsmConverter: MachineMutator {
     }
     
     func modify<Path>(attribute: Path, value: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine {
-        if let index = machine.attributes[1].attributes["actions"]?.collectionValue.indices.first(where: { (index: Int) -> Bool in
-            MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].path == attribute.path
-                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineValue.path == attribute.path
-                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineValue.path == attribute.path
-                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.blockAttribute.collectionValue[index].lineAttribute.lineValue.path == attribute.path
-                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.path == attribute.path
-                || MetaMachine.path.attributes[1].attributes["actions"].wrappedValue.collectionValue[index].lineAttribute.lineValue.path == attribute.path
+        let actionsPath = MetaMachine.path.attributes[1].attributes["actions"].wrappedValue
+        if let actions = machine.attributes[1].attributes["actions"], let index: Int = actions.collectionValue.indices.first(where: { (index: Int) -> Bool in
+            actionsPath.collectionValue[index].path == attribute.path
+                || actionsPath.collectionValue[index].lineValue.path == attribute.path
+                || actionsPath.blockAttribute.collectionValue[index].lineValue.path == attribute.path
+                || actionsPath.blockAttribute.collectionValue[index].lineAttribute.lineValue.path == attribute.path
+                || actionsPath.collectionValue[index].lineAttribute.path == attribute.path
+                || actionsPath.collectionValue[index].lineAttribute.lineValue.path == attribute.path
         }) {
             guard let actionName = (value as? Attribute)?.lineValue ?? (value as? LineAttribute)?.lineValue ?? (value as? String) else {
                 return .failure(ValidationError(message: "Invalid value \(value)", path: attribute))

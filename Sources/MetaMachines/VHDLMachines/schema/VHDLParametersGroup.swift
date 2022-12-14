@@ -25,7 +25,7 @@ struct VHDLParametersGroup: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greylist(VHDLReservedWords.signalTypes)
+                    .greyList(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
@@ -53,7 +53,7 @@ struct VHDLParametersGroup: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greylist(VHDLReservedWords.signalTypes)
+                    .greyList(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
