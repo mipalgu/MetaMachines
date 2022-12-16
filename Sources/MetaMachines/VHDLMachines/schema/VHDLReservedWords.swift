@@ -43,8 +43,6 @@ struct VHDLReservedWords {
         "variable", "wait", "when", "while", "with", "xnor", "xor"
     ]
     
-    static var allReservedWords: Set<String> {
-        signalTypes.union(variableTypes).union(reservedWords)
-    }
+    static let allReservedWords: Set<String> = signalTypes.union(variableTypes).union(reservedWords)
     
 }
