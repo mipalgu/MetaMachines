@@ -62,7 +62,10 @@ import Attributes
 public struct MachineDependency: Hashable, Codable {
     
     public var name: String {
-        return relativePath.components(separatedBy: ".")[0]
+        guard let name = relativePath.components(separatedBy: ".").first, !name.isEmpty else {
+            return relativePath
+        }
+        return name
     }
     
     public var relativePath: String
