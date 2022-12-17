@@ -105,4 +105,82 @@ final class MachineDependencyTests: XCTestCase {
         XCTAssertEqual(dependency.name, "TestMachine")
     }
 
+    /// Test name works for relative paths.
+    func testNameWithDottedRelativePath() {
+        dependency.relativePath = "./TestMachine.machine"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "../TestMachine.machine"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "../../path/to/TestMachine.machine"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "TestMachine.machine/"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "./TestMachine.machine/"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "../TestMachine.machine/"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "./@T?e)stMachine.machine/"
+        XCTAssertEqual(dependency.name, "TestMachine")
+        dependency.relativePath = "machine.machine"
+        XCTAssertEqual(dependency.name, "machine.machine")
+    }
+
+    /// Test complexAttributeType is correct.
+    func testComplexAttributeType() {
+        let expected = AttributeType.complex(
+            layout: ["relative_path": .line, "attributes": .complex(layout: dependency.fields)]
+        )
+        XCTAssertEqual(dependency.complexAttributeType, expected)
+    }
+
+    /// Test the complexAttribute property gets the correct values.
+    func testComplexAttributeGetter() {
+        let expected = Attribute.complex(
+            [
+                "relative_path": .line(dependency.relativePath),
+                "attributes": .complex(dependency.attributes, layout: dependency.fields)
+            ],
+            layout: [
+                Field(name: "relative_path", type: .line),
+                Field(name: "attributes", type: .complex(layout: dependency.fields))
+            ]
+        )
+        XCTAssertEqual(expected, dependency.complexAttribute)
+    }
+
+    /// Verify that the stored properties are updated correctly.
+    func testComplexAttributeSetter() {
+        let attribute = Attribute.complex(
+            [
+                "relative_path": .line("path"),
+                "attributes": .complex(
+                    ["A": .line("B")],
+                    layout: dependency.fields
+                )
+            ],
+            layout: [
+                Field(name: "relative_path", type: .line),
+                Field(name: "attributes", type: .complex(layout: dependency.fields))
+            ]
+        )
+        dependency.complexAttribute = attribute
+        XCTAssertEqual(dependency.relativePath, "path")
+        XCTAssertEqual(dependency.attributes, ["A": .line("B")])
+    }
+
+    /// Test file path creates path correctly.
+    func testFilePath() {
+        let path = URL(fileURLWithPath: "/tmp", isDirectory: true)
+        let expected: URL
+        if #available(OSX 10.11, *) {
+            expected = URL(fileURLWithPath: dependency.relativePath, isDirectory: true, relativeTo: path)
+        } else {
+            expected = URL(fileURLWithPath: "/tmp/\(dependency.relativePath)", isDirectory: true)
+        }
+        let result = dependency.filePath(relativeTo: path)
+        XCTAssertEqual(result, expected)
+        XCTAssertEqual(result.absoluteString, expected.absoluteString)
+        XCTAssertEqual(result.absoluteString, "file:///tmp/\(dependency.relativePath)/")
+    }
+
 }

@@ -56,14 +56,23 @@
  *
  */
 
-import Foundation
 import Attributes
+import Foundation
 
 public struct MachineDependency: Hashable, Codable {
     
     public var name: String {
-        guard let name = relativePath.components(separatedBy: ".").first, !name.isEmpty else {
-            return relativePath
+        let components = relativePath.components(separatedBy: CharacterSet([".", "/"]))
+        let filter: (String) -> Bool
+        if relativePath.contains(".machine") {
+            filter = { $0 != "machine" && !$0.isEmpty }
+        } else {
+            filter = { !$0.isEmpty }
+        }
+        guard
+            let name = components.lazy.map(\.fileRepresentation).reversed().first(where: filter)
+        else {
+            return relativePath.fileRepresentation
         }
         return name
     }
@@ -78,7 +87,6 @@ public struct MachineDependency: Hashable, Codable {
     
     public var complexAttributeType: AttributeType {
         return .complex(layout: [
-            "name": .line,
             "relative_path": .line,
             "attributes": .complex(layout: fields)
         ])
@@ -86,7 +94,7 @@ public struct MachineDependency: Hashable, Codable {
     
     public var complexAttribute: Attribute {
         get {
-            return .complex(
+            .complex(
                 [
                     "relative_path": .line(relativePath),
                     "attributes": .complex(attributes, layout: fields)
@@ -117,11 +125,35 @@ public struct MachineDependency: Hashable, Codable {
     public func filePath(relativeTo parent: URL) -> URL {
         let fileURL: URL
         if #available(OSX 10.11, *) {
-            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: false, relativeTo: parent)
+            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: true, relativeTo: parent)
         } else {
-            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: false)
+            fileURL = parent.appendingPathComponent(relativePath.trimmingCharacters(in: .whitespacesAndNewlines), isDirectory: true)
         }
         return fileURL
     }
     
+}
+
+/// Add fileRepresentation.
+private extension String {
+
+    /// A form of `self` that is safe to use in the file system.
+    var fileRepresentation: String {
+        let chars = CharacterSet.fileName
+        return self.filter {
+            guard let char = $0.asciiValue else {
+                return false
+            }
+            return chars.contains(Unicode.Scalar(char))
+        }
+    }
+
+}
+
+/// Add fileName static property.
+private extension CharacterSet {
+
+    /// The characters allowed for resources in the file system.
+    static let fileName = CharacterSet.alphanumerics.union(CharacterSet(["_", "-", "."]))
+
 }
