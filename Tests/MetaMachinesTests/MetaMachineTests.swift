@@ -197,16 +197,19 @@ final class MetaMachineTests: XCTestCase {
 
     /// Test getter and setter work correctly.
     func testDependencyAttributesGetterAndSetter() {
-        guard let attribute = dependencies.first?.complexAttribute else {
-            XCTFail("failed to get attributes")
+        guard var newDependency = dependencies.first else {
+            XCTFail("failed to get dependency")
             return
         }
+        let attribute = newDependency.complexAttribute
         XCTAssertEqual(machine.dependencyAttributes, [attribute])
         var val = attribute.complexValue
-        val["foo"] = .line("bar")
-        let newAttribute = Attribute.complex(val, layout: ["foo": .line])
+        val["relative_path"] = .line("bar")
+        let newAttribute = Attribute.complex(val, layout: attribute.complexFields)
         machine.dependencyAttributes = [newAttribute]
         XCTAssertEqual(machine.dependencyAttributes, [newAttribute])
+        newDependency.relativePath = "bar"
+        XCTAssertEqual(machine.dependencies, [newDependency])
     }
 
     /// Test path points to MetaMachine.
