@@ -68,155 +68,87 @@ extension MockMetaMachineMutator {
 
     /// The amount of times the didCreateDependency function was called.
     var didCreateDependencyTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didCreateDependency = $0 else { return false }
-            return true
-        }
-        .count
+        self.didCreateDependencyParameters.count
     }
 
     /// The amount of times the didCreateNewState function was called.
     var didCreateNewStateTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didCreateNewState = $0 else { return false }
-            return true
-        }
-        .count
+        self.didCreateNewStateParameters.count
     }
 
     /// The amount of times the didChangeStatesName function was called.
     var didChangeStatesNameTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didChangeStatesName = $0 else { return false }
-            return true
-        }
-        .count
+        self.didChangeStatesNameParameters.count
     }
 
     /// The amount of times the didCreateNewTransition function was called.
     var didCreateNewTransitionTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didCreateNewTransition = $0 else { return false }
-            return true
-        }
-        .count
+        self.didCreateNewTransitionParameters.count
     }
 
     /// The amount of times the didDeleteDependency function was called.
     var didDeleteDependencyTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteDependency = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteDependencyParameters.count
     }
 
     /// The amount of times the didDeleteState function was called.
     var didDeleteStateTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteState = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteStateParameters.count
     }
 
     /// The amount of times the didDeleteTransition function was called.
     var didDeleteTransitionTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteTransition = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteTransitionParameters.count
     }
 
     /// The amount of times the didDeleteDependencies function was called.
     var didDeleteDependenciesTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteDependencies = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteDependenciesParameters.count
     }
 
     /// The amount of times the didDeleteStates function was called.
     var didDeleteStatesTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteStates = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteStatesParameters.count
     }
 
     /// The amount of times the didDeleteTransitions function was called.
     var didDeleteTransitionsTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteTransitions = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteTransitionsParameters.count
     }
 
     /// The amount of times the update function was called.
     var updateTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .update = $0 else { return false }
-            return true
-        }
-        .count
+        self.updateParameters.count
     }
 
     /// The amount of times the didAddItem function was called.
     var didAddItemTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didAddItem = $0 else { return false }
-            return true
-        }
-        .count
+        self.didAddItemParameters.count
     }
 
     /// The amount of times the didMoveItems function was called.
     var didMoveItemsTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didMoveItems = $0 else { return false }
-            return true
-        }
-        .count
+        self.didMoveItemsParameters.count
     }
 
     /// The amount of times the didDeleteItems function was called.
     var didDeleteItemsTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteItems = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteItemsParameters.count
     }
 
     /// The amount of times the didDeleteItem function was called.
     var didDeleteItemTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didDeleteItem = $0 else { return false }
-            return true
-        }
-        .count
+        self.didDeleteItemParameters.count
     }
 
     /// The amount of times the didModify function was called.
     var didModifyTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .didModify = $0 else { return false }
-            return true
-        }
-        .count
+        self.didModifyParameters.count
     }
 
     /// The amount of times the validate function was called.
     var validateTimesCalled: Int {
-        self.functionsCalled.filter {
-            guard case .validate = $0 else { return false }
-            return true
-        }
-        .count
+        self.validateParameters.count
     }
 
     /// The amount of times functions and properties were called in this mock.
