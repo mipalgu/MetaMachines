@@ -66,6 +66,9 @@ class MockMetaMachineMutator: MachineMutatorResponder, MachineAttributesMutator,
 
         // swiftlint:disable large_tuple
 
+        /// The dependencyLayout property was called.
+        case dependencyLayout
+
         /// Function called with parameters.
         case didCreateDependency(
             parameters: (
@@ -169,7 +172,10 @@ class MockMetaMachineMutator: MachineMutatorResponder, MachineAttributesMutator,
     private(set) var functionsCalled: [FunctionCalled] = []
 
     /// The dependency layout.
-    let dependencyLayout: [Attributes.Field] = []
+    var dependencyLayout: [Attributes.Field] {
+        self.functionsCalled.append(.dependencyLayout)
+        return []
+    }
 
     /// What value to return from the functions.
     private let returns: Result<Bool, Attributes.AttributeError<MetaMachines.MetaMachine>>
