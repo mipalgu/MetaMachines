@@ -84,13 +84,17 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     
     public typealias Mutator = MachineMutatorResponder & MachineAttributesMutator & MachineModifier
     
-    public enum Semantics: String, Hashable, Codable, CaseIterable {
+    public enum Semantics: String, Hashable, Codable, CaseIterable, Comparable {
         case other
         case swiftfsm
         case clfsm
         case vhdl
         case ucfsm
         case spartanfsm
+
+        public static func < (lhs: MetaMachine.Semantics, rhs: MetaMachine.Semantics) -> Bool {
+            lhs.rawValue < rhs.rawValue
+        }
     }
     
     /// The semantics that are fully supported by this module.
