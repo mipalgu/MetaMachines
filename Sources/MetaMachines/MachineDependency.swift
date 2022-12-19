@@ -59,8 +59,11 @@
 import Attributes
 import Foundation
 
+/// Defines a dependency to another machine located on the file system. This struct represents the metadata
+/// of the dependency and does not load the machine in.
 public struct MachineDependency: Hashable, Codable {
-    
+
+    /// The name of the machine.
     public var name: String {
         let components = relativePath.components(separatedBy: CharacterSet([".", "/"]))
         let filter: (String) -> Bool
@@ -76,22 +79,28 @@ public struct MachineDependency: Hashable, Codable {
         }
         return name
     }
-    
+
+    /// The relative path to the dependent machine from the current machines folder.
     public var relativePath: String
-    
+
+    /// Fields for a view rendering this dependency.
     public var fields: [Field]
-    
+
+    /// Attributes for a view rendering this dependency.
     public var attributes: [Label: Attribute]
-    
+
+    /// Metadata for a view rendering this dependency.
     public var metaData: [Label: Attribute]
-    
+
+    /// The type of the attribute equivalent to this dependency.
     public var complexAttributeType: AttributeType {
-        return .complex(layout: [
+        .complex(layout: [
             "relative_path": .line,
             "attributes": .complex(layout: fields)
         ])
     }
-    
+
+    /// The attribute that is equivalent to this dependency.
     public var complexAttribute: Attribute {
         get {
             .complex(
@@ -114,24 +123,40 @@ public struct MachineDependency: Hashable, Codable {
             }
         }
     }
-    
-    public init(relativePath: String, fields: [Field] = [], attributes: [Label: Attribute] = [:], metaData: [Label: Attribute] = [:]) {
+
+    /// Initialise this dependency with the given parameters.
+    /// - Parameters:
+    ///   - relativePath: The relative path to the dependent machine from the current machines folder.
+    ///   - fields: The fields for a view rendering this dependency.
+    ///   - attributes: The attributes for a view rendering this dependency.
+    ///   - metaData: The metadata for a view rendering this dependency.
+    public init(
+        relativePath: String,
+        fields: [Field] = [],
+        attributes: [Label: Attribute] = [:],
+        metaData: [Label: Attribute] = [:]
+    ) {
         self.relativePath = relativePath
         self.fields = fields
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
+    /// Creates a path relative to a parent folder.
+    /// - Parameter parent: The parent folder to create the relative path from.
+    /// - Returns: The path to this dependency relative to the parent folder.
     public func filePath(relativeTo parent: URL) -> URL {
-        let fileURL: URL
-        if #available(OSX 10.11, *) {
-            fileURL = URL(fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces), isDirectory: true, relativeTo: parent)
-        } else {
-            fileURL = parent.appendingPathComponent(relativePath.trimmingCharacters(in: .whitespacesAndNewlines), isDirectory: true)
+        guard #available(OSX 10.11, *) else {
+            return parent.appendingPathComponent(
+                relativePath.trimmingCharacters(in: .whitespacesAndNewlines), isDirectory: true
+            )
         }
-        return fileURL
+        return URL(
+            fileURLWithPath: relativePath.trimmingCharacters(in: .whitespaces),
+            isDirectory: true,
+            relativeTo: parent
+        )
     }
-    
 }
 
 /// Add fileRepresentation.
