@@ -54,6 +54,7 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
+import Attributes
 @testable import MetaMachines
 import XCTest
 
@@ -63,8 +64,36 @@ final class MetaMachineTests: XCTestCase {
     /// The machine under test.
     var machine = MetaMachine.initialSwiftMachine
 
+    /// A mock mutator.
+    var mutator = MockMetaMachineMutator()
+
+    /// The default actions for the states.
+    let defaultActions = [
+        Action.onEntry(language: .swift),
+        Action.onExit(language: .swift),
+        Action.internal(language: .swift)
+    ]
+
+    /// The default states in a machine.
+    var states: [State] {
+        [
+            State(name: "Initial", actions: defaultActions, transitions: []),
+            State(name: "Suspended", actions: defaultActions, transitions: [])
+        ]
+    }
+
+    /// A fake dependency.
+    let dependencies = [MachineDependency(relativePath: "Other.machine")]
+
+    /// Fake attributes.
+    let attributes = [AttributeGroup(name: "Group 1")]
+
+    /// Fake meta data.
+    let metaData = [AttributeGroup(name: "Group 2")]
+
     /// Initialise MetaMachine.
     override func setUp() {
+        self.mutator = MockMetaMachineMutator()
         self.machine = MetaMachine.initialSwiftMachine
     }
 
@@ -107,17 +136,55 @@ final class MetaMachineTests: XCTestCase {
         )
     }
 
-    // func testStoredInit() {
-    //     let machine = MetaMachine(
-    //         semantics: .swiftfsm,
-    //         mutator: MetaMachine.Mutator,
-    //         name: String,
-    //         initialState: StateName,
-    //         states: [State],
-    //         dependencies: [MachineDependency],
-    //         attributes: [AttributeGroup],
-    //         metaData: [AttributeGroup]
-    //     )
-    // }
+    /// Test init sets stored properties correctly.
+    func testStoredInit() {
+        let machine = MetaMachine(
+            semantics: .swiftfsm,
+            mutator: mutator,
+            name: "Machine",
+            initialState: "Initial",
+            states: states,
+            dependencies: dependencies,
+            attributes: attributes,
+            metaData: metaData
+        )
+        XCTAssertEqual(machine.semantics, .swiftfsm)
+        XCTAssertIdentical(machine.mutator as? MockMetaMachineMutator, mutator)
+        XCTAssertEqual(machine.name, "Machine")
+        XCTAssertEqual(machine.initialState, "Initial")
+        XCTAssertEqual(machine.states, states)
+        XCTAssertEqual(machine.dependencies, dependencies)
+        XCTAssertEqual(machine.attributes, attributes)
+        XCTAssertEqual(machine.metaData, metaData)
+        XCTAssertTrue(machine.errorBag.allErrors.isEmpty)
+        XCTAssertEqual(machine.acceptingStates, states)
+        XCTAssertEqual(
+            machine.dependencyAttributeType,
+            .complex(layout: ["name": .line, "filePath": .line, "attributes": .complex(layout: [])])
+        )
+        XCTAssertEqual(mutator.dependencyLayoutTimesCalled, 1)
+    }
+
+    /// Test other init sets stored properties correctly.
+    func testSemanticsInit() {
+        let swiftfsmMachine = MetaMachine.initialSwiftMachine
+        let machine = MetaMachine(
+            semantics: .swiftfsm,
+            name: "Machine",
+            initialState: "Initial",
+            states: states,
+            dependencies: dependencies,
+            attributes: swiftfsmMachine.attributes,
+            metaData: swiftfsmMachine.metaData
+        )
+        XCTAssertEqual(machine.semantics, .swiftfsm)
+        XCTAssertNotNil(machine.mutator as? SchemaMutator<SwiftfsmSchema>)
+        XCTAssertEqual(machine.name, "Machine")
+        XCTAssertEqual(machine.initialState, "Initial")
+        XCTAssertEqual(machine.states, states)
+        XCTAssertEqual(machine.dependencies, dependencies)
+        XCTAssertEqual(machine.attributes, swiftfsmMachine.attributes)
+        XCTAssertEqual(machine.metaData, swiftfsmMachine.metaData)
+    }
 
 }
