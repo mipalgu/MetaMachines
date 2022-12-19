@@ -54,6 +54,7 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
+import Attributes
 @testable import MetaMachines
 import XCTest
 
@@ -82,6 +83,22 @@ final class ActionTests: XCTestCase {
         XCTAssertEqual(action.implementation, "Goodbye World!")
         action.language = .c
         XCTAssertEqual(action.language, .c)
+    }
+
+    /// Test static funcs for default actions.
+    func testStaticFuncs() {
+        let code = "Hello World!"
+        let language = Language.swift
+        let onEntry = Action.onEntry(language: language, code: code)
+        XCTAssertEqual(onEntry, Action(name: "onEntry", implementation: code, language: language))
+        let onExit = Action.onExit(language: language, code: code)
+        XCTAssertEqual(onExit, Action(name: "onExit", implementation: code, language: language))
+        let internalAction = Action.internal(language: language, code: code)
+        XCTAssertEqual(internalAction, Action(name: "internal", implementation: code, language: language))
+        let onSuspend = Action.onSuspend(language: language, code: code)
+        XCTAssertEqual(onSuspend, Action(name: "onSuspend", implementation: code, language: language))
+        let onResume = Action.onResume(language: language, code: code)
+        XCTAssertEqual(onResume, Action(name: "onResume", implementation: code, language: language))
     }
 
 }

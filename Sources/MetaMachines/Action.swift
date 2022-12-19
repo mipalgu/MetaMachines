@@ -82,4 +82,49 @@ public struct Action: Hashable, Codable {
         self.language = language
     }
 
+    /// Creates an onEntry action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onEntry` with the given implementation and language.
+    public static func onEntry(language: Language, code: Code = "") -> Action {
+        Action(name: "onEntry", implementation: code, language: language)
+    }
+
+    /// Creates an onExit action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onExit` with the given implementation and language.
+    public static func onExit(language: Language, code: Code = "") -> Action {
+        Action(name: "onExit", implementation: code, language: language)
+    }
+
+    /// Creates an internal action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `internal` with the given implementation and language.
+    public static func `internal`(language: Language, code: Code = "") -> Action {
+        Action(name: "internal", implementation: code, language: language)
+    }
+
+    /// Creates an onResume action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onResume` with the given implementation and language.
+    public static func onResume(language: Language, code: Code = "") -> Action {
+        Action(name: "onResume", implementation: code, language: language)
+    }
+
+    /// Creates an onSuspend action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onSuspend` with the given implementation and language.
+    public static func onSuspend(language: Language, code: Code = "") -> Action {
+        Action(name: "onSuspend", implementation: code, language: language)
+    }
+
 }
