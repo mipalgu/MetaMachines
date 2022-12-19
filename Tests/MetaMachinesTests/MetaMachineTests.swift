@@ -62,7 +62,16 @@ import XCTest
 final class MetaMachineTests: XCTestCase {
 
     /// The machine under test.
-    var machine = MetaMachine.initialSwiftMachine
+    lazy var machine = MetaMachine(
+        semantics: .swiftfsm,
+        mutator: mutator,
+        name: "Machine",
+        initialState: "Initial",
+        states: states,
+        dependencies: dependencies,
+        attributes: attributes,
+        metaData: metaData
+    )
 
     /// A mock mutator.
     var mutator = MockMetaMachineMutator()
@@ -94,7 +103,16 @@ final class MetaMachineTests: XCTestCase {
     /// Initialise MetaMachine.
     override func setUp() {
         self.mutator = MockMetaMachineMutator()
-        self.machine = MetaMachine.initialSwiftMachine
+        self.machine = MetaMachine(
+            semantics: .swiftfsm,
+            mutator: mutator,
+            name: "Machine",
+            initialState: "Initial",
+            states: states,
+            dependencies: dependencies,
+            attributes: attributes,
+            metaData: metaData
+        )
     }
 
     /// Test supported semantics include everything except `other`.
@@ -138,16 +156,6 @@ final class MetaMachineTests: XCTestCase {
 
     /// Test init sets stored properties correctly.
     func testStoredInit() {
-        let machine = MetaMachine(
-            semantics: .swiftfsm,
-            mutator: mutator,
-            name: "Machine",
-            initialState: "Initial",
-            states: states,
-            dependencies: dependencies,
-            attributes: attributes,
-            metaData: metaData
-        )
         XCTAssertEqual(machine.semantics, .swiftfsm)
         XCTAssertIdentical(machine.mutator as? MockMetaMachineMutator, mutator)
         XCTAssertEqual(machine.name, "Machine")
@@ -185,6 +193,37 @@ final class MetaMachineTests: XCTestCase {
         XCTAssertEqual(machine.dependencies, dependencies)
         XCTAssertEqual(machine.attributes, swiftfsmMachine.attributes)
         XCTAssertEqual(machine.metaData, swiftfsmMachine.metaData)
+    }
+
+    /// Test getter and setter work correctly.
+    func testDependencyAttributesGetterAndSetter() {
+        guard let attribute = dependencies.first?.complexAttribute else {
+            XCTFail("failed to get attributes")
+            return
+        }
+        XCTAssertEqual(machine.dependencyAttributes, [attribute])
+        var val = attribute.complexValue
+        val["foo"] = .line("bar")
+        let newAttribute = Attribute.complex(val, layout: ["foo": .line])
+        machine.dependencyAttributes = [newAttribute]
+        XCTAssertEqual(machine.dependencyAttributes, [newAttribute])
+    }
+
+    /// Test path points to MetaMachine.
+    func testPath() {
+        let path = Path(MetaMachine.self)
+        XCTAssertEqual(machine.path, path)
+        XCTAssertEqual(MetaMachine.path, path)
+    }
+
+    /// Test can decode and encode machine with correct attributes.
+    func testCodableConformance() throws {
+        let machine = MetaMachine.initialSwiftMachine
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        let data = try encoder.encode(machine)
+        let decodedMachine = try decoder.decode(MetaMachine.self, from: data)
+        XCTAssertEqual(decodedMachine, machine)
     }
 
 }
