@@ -56,6 +56,7 @@
 
 import Attributes
 @testable import MetaMachines
+import VHDLMachines
 import XCTest
 
 /// Test class for ``MetaMachine``.
@@ -84,7 +85,7 @@ final class MetaMachineTests: XCTestCase {
     ]
 
     /// The default states in a machine.
-    var states: [State] {
+    var states: [MetaMachines.State] {
         [
             State(name: "Initial", actions: defaultActions, transitions: []),
             State(name: "Suspended", actions: defaultActions, transitions: [])
@@ -227,6 +228,30 @@ final class MetaMachineTests: XCTestCase {
         let data = try encoder.encode(machine)
         let decodedMachine = try decoder.decode(MetaMachine.self, from: data)
         XCTAssertEqual(decodedMachine, machine)
+    }
+
+    /// Test fileWrapper function creates correct file wrapper.
+    func testFileWrapper() throws {
+        let machine = MetaMachine.initialMachine(forSemantics: .vhdl)
+        let wrapper = try machine.fileWrapper()
+        XCTAssertEqual(wrapper.preferredFilename, "Untitled.machine")
+        XCTAssertTrue(wrapper.isDirectory)
+        XCTAssertFalse(wrapper.isRegularFile)
+        XCTAssertNil(wrapper.regularFileContents)
+        guard let subWrappers = wrapper.fileWrappers, let subWrapper = subWrappers["machine.json"] else {
+            XCTFail("failed to get subwrappers")
+            return
+        }
+        XCTAssertEqual(subWrappers.count, 1)
+        XCTAssertEqual(subWrapper.preferredFilename, "machine.json")
+        XCTAssertFalse(subWrapper.isDirectory)
+        XCTAssertTrue(subWrapper.isRegularFile)
+        guard let contents = subWrapper.regularFileContents else {
+            XCTFail("failed to get contents")
+            return
+        }
+        let decoder = JSONDecoder()
+        XCTAssertNoThrow(try decoder.decode(VHDLMachines.Machine.self, from: contents))
     }
 
 }
