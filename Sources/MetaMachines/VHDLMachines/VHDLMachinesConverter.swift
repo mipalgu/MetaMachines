@@ -737,7 +737,7 @@ struct VHDLMachinesConverter {
         let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
         return VHDLMachines.Machine(
             name: machine.name,
-            path: URL(fileURLWithPath: "/tmp/Temp.machine", isDirectory: true), //fix later
+            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true), //fix later
             includes: getIncludes(machine: machine),
             externalSignals: getExternalSignals(machine: machine),
             generics: getVHDLVariables(machine: machine, key: "generics"),
