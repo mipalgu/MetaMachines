@@ -85,8 +85,8 @@ public final class MachineParser {
         guard let files = wrapper.fileWrappers else {
             return nil
         }
-        if let vhdlMachineWrapper = files["machine.json"] {
-            guard let vhdlMachine = VHDLParser().parse(wrapper: vhdlMachineWrapper) else {
+        if files["machine.json"] != nil {
+            guard let vhdlMachine = VHDLParser().parse(wrapper: wrapper) else {
                 return nil
             }
             return VHDLMachinesConverter().toMachine(machine: vhdlMachine)
