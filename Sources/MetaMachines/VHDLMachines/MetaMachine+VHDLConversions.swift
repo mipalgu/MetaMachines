@@ -59,12 +59,187 @@ import VHDLMachines
 
 extension MetaMachine {
 
+    var vhdlClocks: [Clock] {
+        guard
+            self.attributes.count == 4,
+            let clocks = self.attributes[0].attributes["clocks"]?.tableValue
+        else {
+            fatalError("Cannot retrieve clocks")
+        }
+        return clocks.map {
+            guard let unit = Clock.FrequencyUnit(rawValue: $0[2].enumeratedValue) else {
+                fatalError("Clock unit is invalid: \($0[2])")
+            }
+            return Clock(name: $0[0].lineValue, frequency: UInt(clamping: $0[1].integerValue), unit: unit)
+        }
+    }
+
+    var vhdlDrivingClock: Int {
+        guard
+            self.attributes.count == 4,
+            let clock = self.attributes[0].attributes["driving_clock"]?.enumeratedValue,
+            let index = self.attributes[0].attributes["clocks"]?.tableValue.firstIndex(where: { $0[0].lineValue == clock })
+        else {
+            fatalError("Cannot retrieve driving clock")
+        }
+        return index
+    }
+
+    var vhdlExternalVariables: [ExternalVariable] {
+        guard
+            self.attributes.count == 4,
+            let variables = self.attributes[0].attributes["external_variables"]?.tableValue
+        else {
+            fatalError("Cannot retrieve external variables")
+        }
+        return variables.map {
+            ExternalVariable(
+                type: $0[1].expressionValue,
+                name: $0[2].lineValue,
+                mode: Mode(rawValue: $0[0].enumeratedValue)!,
+                range: nil,
+                defaultValue: $0[3].expressionValue == "" ? nil : $0[2].expressionValue,
+                comment: $0[4].lineValue == "" ? nil : $0[3].lineValue
+            )
+        }
+    }
+
+    var vhdlExternalSignals: [ExternalSignal] {
+        guard
+            self.attributes.count == 4,
+            let signals = self.attributes[0].attributes["external_signals"]?.tableValue
+        else {
+            fatalError("Cannot retrieve external signals")
+        }
+        return signals.map {
+            let value = $0[3].expressionValue == "" ? nil : $0[3].expressionValue
+            let comment = $0[4].lineValue == "" ? nil : $0[4].lineValue
+            guard let mode = Mode(rawValue: $0[0].enumeratedValue) else {
+                fatalError("Cannot convert Mode!")
+            }
+            return ExternalSignal(type: $0[1].expressionValue, name: $0[2].lineValue, mode: mode, defaultValue: value, comment: comment)
+        }
+    }
+
+    var vhdlIncludes: [String] {
+        guard
+            self.attributes.count == 4,
+            let includes = self.attributes[2].attributes["includes"]?.codeValue
+        else {
+            fatalError("Cannot retrieve includes")
+        }
+        return includes.split(separator: ";").map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines) + ";"
+        }
+    }
+
+    var vhdlIsParameterised: Bool {
+        guard let isParameterised = self.attributes[1].attributes["is_parameterised"]?.boolValue else {
+            fatalError("Cannot discern if machine is parameterised")
+        }
+        return isParameterised
+    }
+
+    var vhdlMachineSignals: [MachineSignal] {
+        guard
+            self.attributes.count == 4,
+            let signals = self.attributes[0].attributes["machine_signals"]?.tableValue
+        else {
+            fatalError("Cannot retrieve machine signals")
+        }
+        return signals.map {
+            MachineSignal(
+                type: $0[0].expressionValue,
+                name: $0[1].lineValue,
+                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
+                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+            )
+        }
+    }
+
+    var vhdlMachineVariables: [VHDLVariable] {
+        guard
+            self.attributes.count == 4,
+            let variables = self.attributes[0].attributes["machine_variables"]?.tableValue
+        else {
+            fatalError("Cannot retrieve machine variables")
+        }
+        return variables.map {
+            VHDLVariable(
+                type: $0[0].expressionValue,
+                name: $0[1].lineValue,
+                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
+                range: nil,
+                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+            )
+        }
+    }
+
+    var vhdlTransitions: [VHDLMachines.Transition] {
+        self.states.indices.flatMap { stateIndex in
+            self.states[stateIndex].transitions.map { transition in
+                guard let targetIndex = self.states.firstIndex(where: { transition.target == $0.name }) else {
+                    fatalError("Cannot find target state \(transition.target) for transition \(transition) from state \(self.states[stateIndex].name)")
+                }
+                return VHDLMachines.Transition(condition: transition.condition ?? "true", source: stateIndex, target: targetIndex)
+            }
+        }
+    }
+
     public init(vhdl machine: VHDLMachines.Machine) {
         self = VHDLMachinesConverter().toMachine(machine: machine)
     }
 
     public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
         VHDLMachinesConverter().toMachine(machine: VHDLMachines.Machine.initial(path: filePath))
+    }
+
+    func vhdlParameterOutputs(for key: String) -> [ReturnableVariable] {
+        guard
+            self.attributes.count == 4,
+            let returns = self.attributes[1].attributes[key]?.tableValue
+        else {
+            fatalError("No outputs")
+        }
+        return returns.map {
+            let comment = $0[2].lineValue
+            return ReturnableVariable(type: $0[0].expressionValue, name: $0[1].lineValue, comment: comment == "" ? nil : comment)
+        }
+    }
+
+    func vhdlParameters(for key: String) -> [Parameter] {
+        guard
+            self.attributes.count == 4,
+            let variables = self.attributes[1].attributes[key]?.tableValue
+        else {
+            fatalError("Cannot retrieve external variables")
+        }
+        return variables.map {
+            Parameter(
+                type: $0[0].expressionValue,
+                name: $0[1].lineValue,
+                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
+                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+            )
+        }
+    }
+
+    func vhdlVariables(for key: String) -> [VHDLVariable] {
+        guard
+            self.attributes.count == 4,
+            let variables = self.attributes[0].attributes[key]?.tableValue
+        else {
+            fatalError("Cannot retrieve external variables")
+        }
+        return variables.map {
+            VHDLVariable(
+                type: $0[0].expressionValue,
+                name: $0[1].lineValue,
+                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
+                range: nil,
+                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+            )
+        }
     }
 
 }
