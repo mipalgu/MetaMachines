@@ -217,6 +217,8 @@ final class VHDLMachineConverterMachineTests: XCTestCase {
                     type: .table(
                         columns: [
                             ("type", .expression(language: .vhdl)),
+                            ("lower_range", .line),
+                            ("upper_range", .line),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
@@ -239,6 +241,8 @@ final class VHDLMachineConverterMachineTests: XCTestCase {
                     type: .table(
                         columns: [
                             ("type", .expression(language: .vhdl)),
+                            ("lower_range", .line),
+                            ("upper_range", .line),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
@@ -271,6 +275,8 @@ final class VHDLMachineConverterMachineTests: XCTestCase {
                 ]),
                 "generics": .table([], columns: [
                     ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
@@ -283,6 +289,8 @@ final class VHDLMachineConverterMachineTests: XCTestCase {
                 ]),
                 "machine_variables": .table([], columns: [
                     ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)

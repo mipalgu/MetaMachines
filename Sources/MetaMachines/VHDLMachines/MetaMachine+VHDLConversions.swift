@@ -165,12 +165,21 @@ extension MetaMachine {
             fatalError("Cannot retrieve machine variables")
         }
         return variables.map {
-            VHDLVariable(
+            guard let range0 = Int($0[1].lineValue), let range1 = Int($0[2].lineValue) else {
+                return VHDLVariable(
+                    type: $0[0].expressionValue,
+                    name: $0[3].lineValue,
+                    defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                    range: nil,
+                    comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                )
+            }
+            return VHDLVariable(
                 type: $0[0].expressionValue,
-                name: $0[1].lineValue,
-                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
-                range: nil,
-                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+                name: $0[3].lineValue,
+                defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                range: (range0, range1),
+                comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
             )
         }
     }
@@ -203,7 +212,9 @@ extension MetaMachine {
     }
 
     func vhdlCodeIncludes(for key: String) -> String? {
-        guard let val = self.attributes[1].attributes[key]?.codeValue else {
+        guard
+            let val = self.attributes.first(where: { $0.name == "includes" })?.attributes[key]?.codeValue
+        else {
             return nil
         }
         return val == "" ? nil : val
@@ -247,12 +258,21 @@ extension MetaMachine {
             fatalError("Cannot retrieve external variables")
         }
         return variables.map {
-            VHDLVariable(
+            guard let range0 = Int($0[1].lineValue), let range1 = Int($0[2].lineValue) else {
+                return VHDLVariable(
+                    type: $0[0].expressionValue,
+                    name: $0[3].lineValue,
+                    defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                    range: nil,
+                    comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                )
+            }
+            return VHDLVariable(
                 type: $0[0].expressionValue,
-                name: $0[1].lineValue,
-                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
-                range: nil,
-                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+                name: $0[3].lineValue,
+                defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                range: (range0, range1),
+                comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
             )
         }
     }

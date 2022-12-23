@@ -94,13 +94,17 @@ extension VHDLMachines.State {
     /// Create a new `VHDLMachines.State` from a ``MetaMachine.State``.
     /// - Parameter state: The ``MetaMachine.State`` to convert.
     public init(state: State) {
+        let order = state.vhdlActionOrder
+        let signals = state.vhdlStateSignals
+        let variables = state.vhdlStateVariables
+        let externals = state.vhdlExternalVariables
         self.init(
             name: state.name,
             actions: Dictionary(uniqueKeysWithValues: state.actions.map { ($0.name, $0.implementation) }),
-            actionOrder: state.vhdlActionOrder,
-            signals: state.vhdlStateSignals,
-            variables: state.vhdlStateVariables,
-            externalVariables: state.vhdlExternalVariables
+            actionOrder: order,
+            signals: signals,
+            variables: variables,
+            externalVariables: externals
         )
     }
 
