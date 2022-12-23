@@ -59,22 +59,6 @@ import VHDLMachines
 
 extension State {
 
-    public init(vhdl state: VHDLMachines.State, in machine: VHDLMachines.Machine) {
-        let actions = state.actionOrder.reduce([]) { $0 + $1 }.map {
-            Action(name: $0, implementation: state.actions[$0] ?? "", language: .vhdl)
-        }
-        guard let stateIndex = machine.states.firstIndex(where: { $0.name == state.name }) else {
-            fatalError("Cannot find state with name: \(state.name).")
-        }
-        self.init(
-            name: state.name,
-            actions: actions,
-            transitions: machine.transitions.filter({ $0.source == stateIndex }).map({ Transition(vhdl: $0, in: machine) }),
-            attributes: state.attributes(for: machine),
-            metaData: []
-        )
-    }
-
     var vhdlExternalVariables: [String] {
         guard let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["externals"]?.enumerableCollectionValue else {
             return []
@@ -133,6 +117,22 @@ extension State {
             }
         }
         return actionOrder
+    }
+
+    public init(vhdl state: VHDLMachines.State, in machine: VHDLMachines.Machine) {
+        let actions = state.actionOrder.reduce([]) { $0 + $1 }.map {
+            Action(name: $0, implementation: state.actions[$0] ?? "", language: .vhdl)
+        }
+        guard let stateIndex = machine.states.firstIndex(where: { $0.name == state.name }) else {
+            fatalError("Cannot find state with name: \(state.name).")
+        }
+        self.init(
+            name: state.name,
+            actions: actions,
+            transitions: machine.transitions.filter({ $0.source == stateIndex }).map({ Transition(vhdl: $0, in: machine) }),
+            attributes: state.attributes(for: machine),
+            metaData: []
+        )
     }
 
 }

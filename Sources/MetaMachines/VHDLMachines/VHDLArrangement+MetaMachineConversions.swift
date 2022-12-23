@@ -1,4 +1,4 @@
-// VHDLMachine+MetaMachineConversion.swift 
+// DefaultAttributes.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -54,39 +54,64 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
-import Foundation
+import Attributes
 import VHDLMachines
 
-extension VHDLMachines.Machine {
+extension VHDLMachines.Arrangement {
 
-    public init(machine: MetaMachine) throws {
-        let validator = VHDLMachinesValidator()
-        try validator.validate(machine: machine)
-        let vhdlStates = machine.states.map(VHDLMachines.State.init)
-        let suspendedState = machine.attributes.first { $0.name == "settings" }?.attributes["suspended_state"]?.enumeratedValue
-        let suspendedStateName = suspendedState == "" ? nil : suspendedState
-        let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
-        self.init(
-            name: machine.name,
-            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true), //fix later
-            includes: machine.vhdlIncludes,
-            externalSignals: machine.vhdlExternalSignals,
-            generics: machine.vhdlVariables(for: "generics"),
-            clocks: machine.vhdlClocks,
-            drivingClock: machine.vhdlDrivingClock,
-            dependentMachines: [:],//getDependentMachines(machine: machine),
-            machineVariables: machine.vhdlMachineVariables,
-            machineSignals: machine.vhdlMachineSignals,
-            isParameterised: machine.vhdlIsParameterised,
-            parameterSignals: machine.vhdlParameters(for: "parameter_signals"),
-            returnableSignals: machine.vhdlParameterOutputs(for: "returnable_signals"),
-            states: machine.states.map(VHDLMachines.State.init),
-            transitions: machine.vhdlTransitions,
-            initialState: machine.states.firstIndex(where: { machine.initialState == $0.name }) ?? 0,
-            suspendedState: suspendedIndex,
-            architectureHead: machine.vhdlCodeIncludes(for: "architecture_head"),
-            architectureBody: machine.vhdlCodeIncludes(for: "architecture_body")
+    var attributes: [AttributeGroup] {
+        var attributes: [AttributeGroup] = []
+        let variables = AttributeGroup(
+            name: "variables",
+            fields: [
+                Field(name: "clocks", type: .table(columns: [
+                    ("name", .line),
+                    ("frequency", .integer),
+                    ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                ])),
+                Field(name: "external_signals", type: .table(columns: [
+                    ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("comment", .line)
+                ])),
+                Field(name: "external_variables", type: .table(columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("comment", .line)
+                ]))
+            ],
+            attributes: [
+                "clocks": .table(
+                    self.clocks.map(\.toLineAttribute),
+                    columns: [
+                        ("name", .line),
+                        ("frequency", .integer),
+                        ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                    ]
+                ),
+                "external_signals": .table(
+                    self.externalSignals.map(\.toLineAttribute),
+                    columns: [
+                        ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("comment", .line)
+                    ]
+                ),
+                "external_variables": .table(
+                    self.externalVariables.map(\.toLineAttribute),
+                    columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("comment", .line)
+                    ]
+                )
+            ],
+            metaData: [:]
         )
+        attributes.append(variables)
+        return attributes
     }
 
 }
