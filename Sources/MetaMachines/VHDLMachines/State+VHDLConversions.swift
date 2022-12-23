@@ -57,48 +57,81 @@
 import Attributes
 import VHDLMachines
 
+/// Adds computed properties and initialisers for conversions between `VHDLMachines.State` and the ``State``
+/// type.
 extension State {
 
+    /// Retrieve the VHDL external variables in the states attributes.
     var vhdlExternalVariables: [String] {
-        guard let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["externals"]?.enumerableCollectionValue else {
+        guard
+            let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["externals"]?
+                .enumerableCollectionValue
+        else {
             return []
         }
-        return Array(rows)
+        return Array(rows).sorted()
     }
 
+    /// Retrieve the VHDL state signals from the states attributes.
     var vhdlStateSignals: [VHDLMachines.MachineSignal] {
-        guard let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["state_signals"]?.tableValue else {
+        guard
+            let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["state_signals"]?
+                .tableValue
+        else {
             return []
         }
         return rows.map {
             VHDLMachines.MachineSignal(
                 type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
                 name: $0[1].lineValue.trimmingCharacters(in: .whitespaces),
-                defaultValue: $0[2].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[2].expressionValue.trimmingCharacters(in: .whitespaces),
-                comment: $0[3].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[3].lineValue.trimmingCharacters(in: .whitespaces)
+                defaultValue: $0[2].expressionValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
+                    $0[2].expressionValue.trimmingCharacters(in: .whitespaces),
+                comment: $0[3].lineValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
+                    $0[3].lineValue.trimmingCharacters(in: .whitespaces)
             )
         }
     }
 
+    /// Retrieve the VHDL state variables from the states attributes.
     var vhdlStateVariables: [VHDLMachines.VHDLVariable] {
-        guard let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["state_variables"]?.tableValue else {
+        guard
+            let rows = self.attributes.first(where: { $0.name == "variables" })?
+                .attributes["state_variables"]?.tableValue
+        else {
             return []
         }
         return rows.map {
-            let lowerRange = Int($0[1].lineValue.trimmingCharacters(in: .whitespaces))
-            let upperRange = Int($0[2].lineValue.trimmingCharacters(in: .whitespaces))
+            guard
+                let lowerRange = Int($0[1].lineValue.trimmingCharacters(in: .whitespaces)),
+                let upperRange = Int($0[2].lineValue.trimmingCharacters(in: .whitespaces))
+            else {
+                return VHDLMachines.VHDLVariable(
+                    type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
+                    name: $0[3].lineValue.trimmingCharacters(in: .whitespaces),
+                    defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil :
+                        $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
+                    range: nil,
+                    comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil :
+                        $0[5].lineValue.trimmingCharacters(in: .whitespaces)
+                )
+            }
             return VHDLMachines.VHDLVariable(
                 type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
                 name: $0[3].lineValue.trimmingCharacters(in: .whitespaces),
-                defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
-                range: lowerRange == nil || upperRange == nil ? nil : (lowerRange!, upperRange!),
-                comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[5].lineValue.trimmingCharacters(in: .whitespaces)
+                defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
+                    $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
+                range: (lowerRange, upperRange),
+                comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
+                    $0[5].lineValue.trimmingCharacters(in: .whitespaces)
             )
         }
     }
 
+    /// Retrieve the VHDL action order from the states attributes.
     var vhdlActionOrder: [[VHDLMachines.ActionName]] {
-        guard let order = self.attributes.first(where: { $0.name == "actions" })?.attributes["action_order"] else {
+        guard
+            let order = self.attributes.first(where: { $0.name == "actions" })?.attributes["action_order"]
+        else {
             fatalError("Failed to retrieve action attributes.")
         }
         if order.tableValue.isEmpty {
@@ -119,8 +152,12 @@ extension State {
         return actionOrder
     }
 
+    /// Create a new ``State`` from a `VHDLMachines.State`.
+    /// - Parameters:
+    ///   - state: The `VHDLMachines.State` to convert.
+    ///   - machine: The `VHDLMachines.Machine` the state belongs to.
     public init(vhdl state: VHDLMachines.State, in machine: VHDLMachines.Machine) {
-        let actions = state.actionOrder.reduce([]) { $0 + $1 }.map {
+        let actions = state.actionOrder.joined().map {
             Action(name: $0, implementation: state.actions[$0] ?? "", language: .vhdl)
         }
         guard let stateIndex = machine.states.firstIndex(where: { $0.name == state.name }) else {
@@ -129,7 +166,8 @@ extension State {
         self.init(
             name: state.name,
             actions: actions,
-            transitions: machine.transitions.filter({ $0.source == stateIndex }).map({ Transition(vhdl: $0, in: machine) }),
+            transitions: machine.transitions.filter { $0.source == stateIndex }
+                .map { Transition(vhdl: $0, in: machine) },
             attributes: state.attributes(for: machine),
             metaData: []
         )
