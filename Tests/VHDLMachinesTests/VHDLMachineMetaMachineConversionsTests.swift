@@ -70,4 +70,13 @@ final class VHDLMachineMetaMachineConversionsTests: XCTestCase {
         XCTAssertEqual(machine.attributes, VHDLMachines.Machine.testAttributes)
     }
 
+    /// Test meta machine initialiser converts machine correctly.
+    func testMetaMachineInit() {
+        let path = URL(fileURLWithPath: "Machine.machine", isDirectory: true)
+        let testMachine = VHDLMachines.Machine.testMachine(path: path)
+        let metaMachine = MetaMachine(vhdl: testMachine)
+        let vhdlMachine = VHDLMachines.Machine(machine: metaMachine)
+        XCTAssertEqual(vhdlMachine, testMachine)
+    }
+
 }

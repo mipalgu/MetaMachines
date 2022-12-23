@@ -77,6 +77,8 @@ extension VHDLMachines.Machine {
             ])),
             Field(name: "generics", type: .table(columns: [
                 ("type", .expression(language: .vhdl)),
+                ("lower_range", .line),
+                ("upper_range", .line),
                 ("name", .line),
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)
@@ -89,6 +91,8 @@ extension VHDLMachines.Machine {
             ])),
             Field(name: "machine_variables", type: .table(columns: [
                 ("type", .expression(language: .vhdl)),
+                ("lower_range", .line),
+                ("upper_range", .line),
                 ("name", .line),
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)
@@ -118,6 +122,8 @@ extension VHDLMachines.Machine {
                 self.generics.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
@@ -136,6 +142,8 @@ extension VHDLMachines.Machine {
                 self.machineVariables.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
@@ -220,9 +228,9 @@ extension VHDLMachines.Machine {
         return attributes
     }
 
-    public init(machine: MetaMachine) throws {
-        let validator = VHDLMachinesValidator()
-        try validator.validate(machine: machine)
+    public init(machine: MetaMachine) {
+        // let validator = VHDLMachinesValidator()
+        // try validator.validate(machine: machine)
         let vhdlStates = machine.states.map(VHDLMachines.State.init)
         let suspendedState = machine.attributes.first { $0.name == "settings" }?.attributes["suspended_state"]?.enumeratedValue
         let suspendedStateName = suspendedState == "" ? nil : suspendedState

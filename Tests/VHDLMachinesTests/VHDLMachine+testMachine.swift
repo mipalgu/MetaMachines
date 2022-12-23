@@ -93,6 +93,8 @@ extension Machine {
                         type: .table(
                             columns: [
                                 ("type", .expression(language: .vhdl)),
+                                ("lower_range", .line),
+                                ("upper_range", .line),
                                 ("name", .line),
                                 ("value", .expression(language: .vhdl)),
                                 ("comment", .line)
@@ -115,6 +117,8 @@ extension Machine {
                         type: .table(
                             columns: [
                                 ("type", .expression(language: .vhdl)),
+                                ("lower_range", .line),
+                                ("upper_range", .line),
                                 ("name", .line),
                                 ("value", .expression(language: .vhdl)),
                                 ("comment", .line)
@@ -172,12 +176,16 @@ extension Machine {
                         [
                             [
                                 .expression("boolean", language: .vhdl),
+                                .line(""),
+                                .line(""),
                                 .line("hasX"),
                                 .expression("true", language: .vhdl),
                                 .line("Bool hasX.")
                             ],
                             [
                                 .expression("integer", language: .vhdl),
+                                .line("0"),
+                                .line("255"),
                                 .line("numX"),
                                 .expression("1", language: .vhdl),
                                 .line("Int numX.")
@@ -185,6 +193,8 @@ extension Machine {
                         ],
                         columns: [
                             ("type", .expression(language: .vhdl)),
+                            ("lower_range", .line),
+                            ("upper_range", .line),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
@@ -216,12 +226,16 @@ extension Machine {
                         [
                             [
                                 .expression("integer", language: .vhdl),
+                                .line("0"),
+                                .line("127"),
                                 .line("numA"),
                                 .expression("0", language: .vhdl),
                                 .line("Int numA.")
                             ],
                             [
                                 .expression("integer", language: .vhdl),
+                                .line("0"),
+                                .line("127"),
                                 .line("numB"),
                                 .expression("10", language: .vhdl),
                                 .line("Int numB.")
@@ -229,6 +243,8 @@ extension Machine {
                         ],
                         columns: [
                             ("type", .expression(language: .vhdl)),
+                            ("lower_range", .line),
+                            ("upper_range", .line),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
