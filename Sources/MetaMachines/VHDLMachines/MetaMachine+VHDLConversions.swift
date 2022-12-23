@@ -59,6 +59,14 @@ import VHDLMachines
 
 extension MetaMachine {
 
+    var vhdlArchitectureBody: String? {
+        self.vhdlCodeIncludes(for: "architecture_body")
+    }
+
+    var vhdlArchitectureHead: String? {
+        self.vhdlCodeIncludes(for: "architecture_head")
+    }
+
     var vhdlClocks: [Clock] {
         guard
             self.attributes.count == 4,
@@ -98,25 +106,6 @@ extension MetaMachine {
         return index
     }
 
-    var vhdlExternalVariables: [ExternalVariable] {
-        guard
-            self.attributes.count == 4,
-            let variables = self.attributes[0].attributes["external_variables"]?.tableValue
-        else {
-            fatalError("Cannot retrieve external variables")
-        }
-        return variables.map {
-            ExternalVariable(
-                type: $0[1].expressionValue,
-                name: $0[2].lineValue,
-                mode: Mode(rawValue: $0[0].enumeratedValue)!,
-                range: nil,
-                defaultValue: $0[3].expressionValue == "" ? nil : $0[2].expressionValue,
-                comment: $0[4].lineValue == "" ? nil : $0[3].lineValue
-            )
-        }
-    }
-
     var vhdlExternalSignals: [ExternalSignal] {
         guard
             self.attributes.count == 4,
@@ -132,6 +121,10 @@ extension MetaMachine {
             }
             return ExternalSignal(type: $0[1].expressionValue, name: $0[2].lineValue, mode: mode, defaultValue: value, comment: comment)
         }
+    }
+
+    var vhdlGenerics: [VHDLVariable] {
+        self.vhdlVariables(for: "generics")
     }
 
     var vhdlIncludes: [String] {
@@ -197,6 +190,14 @@ extension MetaMachine {
         }
     }
 
+    var vhdlParameterSignals: [Parameter] {
+        self.vhdlParameters(for: "parameter_signals")
+    }
+
+    var vhdlReturnableSignals: [ReturnableVariable] {
+        self.vhdlParameterOutputs(for: "returnable_signals")
+    }
+
     var vhdlTransitions: [VHDLMachines.Transition] {
         self.states.indices.flatMap { stateIndex in
             self.states[stateIndex].transitions.map { transition in
@@ -224,7 +225,7 @@ extension MetaMachine {
         MetaMachine(vhdl: VHDLMachines.Machine.initial(path: filePath))
     }
 
-    func vhdlCodeIncludes(for key: String) -> String? {
+    private func vhdlCodeIncludes(for key: String) -> String? {
         guard
             let val = self.attributes.first(where: { $0.name == "includes" })?.attributes[key]?.codeValue
         else {
@@ -233,7 +234,7 @@ extension MetaMachine {
         return val == "" ? nil : val
     }
 
-    func vhdlParameterOutputs(for key: String) -> [ReturnableVariable] {
+    private func vhdlParameterOutputs(for key: String) -> [ReturnableVariable] {
         guard
             self.attributes.count == 4,
             let returns = self.attributes[1].attributes[key]?.tableValue
@@ -246,7 +247,7 @@ extension MetaMachine {
         }
     }
 
-    func vhdlParameters(for key: String) -> [Parameter] {
+    private func vhdlParameters(for key: String) -> [Parameter] {
         guard
             self.attributes.count == 4,
             let variables = self.attributes[1].attributes[key]?.tableValue
@@ -263,7 +264,7 @@ extension MetaMachine {
         }
     }
 
-    func vhdlVariables(for key: String) -> [VHDLVariable] {
+    private func vhdlVariables(for key: String) -> [VHDLVariable] {
         guard
             self.attributes.count == 4,
             let variables = self.attributes[0].attributes[key]?.tableValue

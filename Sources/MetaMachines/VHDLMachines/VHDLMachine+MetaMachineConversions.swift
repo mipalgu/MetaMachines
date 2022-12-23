@@ -240,21 +240,21 @@ extension VHDLMachines.Machine {
             path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true),
             includes: machine.vhdlIncludes,
             externalSignals: machine.vhdlExternalSignals,
-            generics: machine.vhdlVariables(for: "generics"),
+            generics: machine.vhdlGenerics,
             clocks: machine.vhdlClocks,
             drivingClock: machine.vhdlDrivingClock,
             dependentMachines: machine.vhdlDependentMachines,
             machineVariables: machine.vhdlMachineVariables,
             machineSignals: machine.vhdlMachineSignals,
             isParameterised: machine.vhdlIsParameterised,
-            parameterSignals: machine.vhdlParameters(for: "parameter_signals"),
-            returnableSignals: machine.vhdlParameterOutputs(for: "returnable_signals"),
+            parameterSignals: machine.vhdlParameterSignals,
+            returnableSignals: machine.vhdlReturnableSignals,
             states: machine.states.map(VHDLMachines.State.init),
             transitions: machine.vhdlTransitions,
             initialState: machine.states.firstIndex(where: { machine.initialState == $0.name }) ?? 0,
             suspendedState: suspendedIndex,
-            architectureHead: machine.vhdlCodeIncludes(for: "architecture_head"),
-            architectureBody: machine.vhdlCodeIncludes(for: "architecture_body")
+            architectureHead: machine.vhdlArchitectureHead,
+            architectureBody: machine.vhdlArchitectureBody
         )
     }
 
