@@ -461,5 +461,12 @@ extension VHDLMachinesConverter: MachineMutator {
         try VHDLMachinesValidator().validate(machine: machine)
     }
 
+    private func toLineAttribute(actionOrder: [[String]], validValues: Set<String>) -> [[LineAttribute]] {
+        actionOrder.indices.flatMap { timeslot in
+            actionOrder[timeslot].map { action in
+                [LineAttribute.integer(timeslot), LineAttribute.enumerated(action, validValues: validValues)]
+            }
+        }
+    }
 
 }

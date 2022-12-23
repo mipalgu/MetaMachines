@@ -221,27 +221,27 @@ final class VHDLMachinesConverterStatesTests: XCTestCase {
         super.setUp()
     }
 
-    /// Test toLineAttribute for action order.
-    func testActionOrderToLineAttribute() {
-        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
-        let validValues = actionsNames
-        let attribute = converter.toLineAttribute(actionOrder: actionOrder, validValues: validValues)
-        let expected: [[LineAttribute]] = [
-            [.integer(0), .enumerated("OnResume", validValues: validValues)],
-            [.integer(0), .enumerated("OnSuspend", validValues: validValues)],
-            [.integer(1), .enumerated("OnEntry", validValues: validValues)],
-            [.integer(2), .enumerated("OnExit", validValues: validValues)],
-            [.integer(2), .enumerated("Internal", validValues: validValues)]
-        ]
-        XCTAssertEqual(attribute, expected)
-    }
+    // /// Test toLineAttribute for action order.
+    // func testActionOrderToLineAttribute() {
+    //     let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+    //     let validValues = actionsNames
+    //     let attribute = converter.toLineAttribute(actionOrder: actionOrder, validValues: validValues)
+    //     let expected: [[LineAttribute]] = [
+    //         [.integer(0), .enumerated("OnResume", validValues: validValues)],
+    //         [.integer(0), .enumerated("OnSuspend", validValues: validValues)],
+    //         [.integer(1), .enumerated("OnEntry", validValues: validValues)],
+    //         [.integer(2), .enumerated("OnExit", validValues: validValues)],
+    //         [.integer(2), .enumerated("Internal", validValues: validValues)]
+    //     ]
+    //     XCTAssertEqual(attribute, expected)
+    // }
 
-    /// Test the state attributes match the expected ones.
-    func testStateAttributes() {
-        let intialState = vhdlMachine.states[0]
-        let attributes = converter.stateAttributes(state: intialState, machine: vhdlMachine)
-        XCTAssertEqual(attributes, stateAttributes)
-    }
+    // /// Test the state attributes match the expected ones.
+    // func testStateAttributes() {
+    //     let intialState = vhdlMachine.states[0]
+    //     let attributes = converter.stateAttributes(state: intialState, machine: vhdlMachine)
+    //     XCTAssertEqual(attributes, stateAttributes)
+    // }
 
     /// Test converter creates correct machine.
     func testConverterProducesMachine() throws {
