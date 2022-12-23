@@ -69,6 +69,39 @@ extension MetaMachine {
 
 }
 
+extension State {
+
+    public init(vhdl state: VHDLMachines.State, in machine: VHDLMachines.Machine) {
+        let actions = state.actionOrder.reduce([]){ $0 + $1 }.map {
+            Action(name: $0, implementation: state.actions[$0] ?? "", language: .vhdl)
+        }
+        guard let stateIndex = machine.states.firstIndex(where: { $0.name == state.name }) else {
+            fatalError("Cannot find state with name: \(state.name).")
+        }
+        self.init(
+            name: state.name,
+            actions: actions,
+            transitions: machine.transitions.filter({ $0.source == stateIndex }).map({ Transition(vhdl: $0, in: machine) }),
+            attributes: state.attributes(for: machine),
+            metaData: []
+        )
+    }
+
+}
+
+extension Transition {
+
+    public init(vhdl transition: VHDLMachines.Transition, in machine: VHDLMachines.Machine) {
+        self.init(
+            condition: transition.condition,
+            target: machine.states[transition.target].name,
+            attributes: [],
+            metaData: []
+        )
+    }
+
+}
+
 extension VHDLMachines.Machine {
 
     public init(machine: MetaMachine) throws {
