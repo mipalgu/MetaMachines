@@ -72,17 +72,45 @@ final class LineAttributeConversionsTests: XCTestCase {
     }
 
     /// Test variable implementation.
-    func testVariable() {
+    func testVHDLVariable() {
         let variable = VHDLMachines.VHDLVariable(
             type: "std_logic", name: "x", defaultValue: "'1'", range: nil, comment: "Variable x."
         )
         let expected: [LineAttribute] = [
             .expression("std_logic", language: .vhdl),
+            .line(""),
+            .line(""),
             .line("x"),
             .expression("'1'", language: .vhdl),
             .line("Variable x.")
         ]
         XCTAssertEqual(variable.toLineAttribute, expected)
+        let variable2 = VHDLMachines.VHDLVariable(
+            type: "integer", name: "y", defaultValue: "1", range: (0, 255), comment: "Variable y."
+        )
+        let expected2: [LineAttribute] = [
+            .expression("integer", language: .vhdl),
+            .line("0"),
+            .line("255"),
+            .line("y"),
+            .expression("1", language: .vhdl),
+            .line("Variable y.")
+        ]
+        XCTAssertEqual(variable2.toLineAttribute, expected2)
+    }
+
+    /// Test machine signal.
+    func testMachineSignal() {
+        let signal = VHDLMachines.MachineSignal(
+            type: "std_logic", name: "x", defaultValue: "'1'", comment: "Signal x"
+        )
+        let expected: [LineAttribute] = [
+            .expression("std_logic", language: .vhdl),
+            .line("x"),
+            .expression("'1'", language: .vhdl),
+            .line("Signal x")
+        ]
+        XCTAssertEqual(signal.toLineAttribute, expected)
     }
 
     /// Test external signal implementation.

@@ -86,6 +86,33 @@ extension VHDLMachines.Variable {
 
 }
 
+/// Add toLineAttribute for VHDLVariable.
+extension VHDLMachines.VHDLVariable {
+
+    /// Creates `LineAttributes` from a `VHDLMachines.VHDLVariable`.
+    var toLineAttribute: [LineAttribute] {
+        guard let range = self.range else {
+            return [
+                .expression(String(self.type), language: .vhdl),
+                .line(""),
+                .line(""),
+                .line(self.name),
+                .expression(self.defaultValue ?? "", language: .vhdl),
+                .line(self.comment ?? "")
+            ]
+        }
+        return [
+            .expression(String(self.type), language: .vhdl),
+            .line("\(range.0)"),
+            .line("\(range.1)"),
+            .line(self.name),
+            .expression(self.defaultValue ?? "", language: .vhdl),
+            .line(self.comment ?? "")
+        ]
+    }
+
+}
+
 /// Creates `LineAttributes` from a `VHDLMachines.ExternalSignal`.
 extension VHDLMachines.ExternalSignal {
 
