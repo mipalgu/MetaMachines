@@ -309,7 +309,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         case .swiftfsm:
             return SwiftfsmConverter().initialMachine
         case .vhdl:
-            return VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
+            return self.initialVHDLMachine(filePath: filePath)
         case .other:
             fatalError("You cannot create an initial machine for an unknown semantics")
         }

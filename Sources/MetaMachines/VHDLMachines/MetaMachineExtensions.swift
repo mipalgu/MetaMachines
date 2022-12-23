@@ -64,7 +64,7 @@ extension MetaMachine {
     }
 
     public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
-        VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
+        VHDLMachinesConverter().toMachine(machine: VHDLMachines.Machine.initial(path: filePath))
     }
 
 }
@@ -80,7 +80,18 @@ extension VHDLMachines.Machine {
 extension Arrangement {
 
     public init(vhdl arrangement: VHDLMachines.Arrangement) {
-        self = VHDLMachinesConverter().toArrangement(arrangement: arrangement)
+        self.init(
+            semantics: .swiftfsm,
+            name: arrangement.path.lastPathComponent.components(separatedBy: ".")[0],
+            dependencies: arrangement.parents.compactMap {
+                guard let path = arrangement.machines[$0] else {
+                    return nil
+                }
+                return MachineDependency(relativePath: path.relativePathString(relativeto: arrangement.path))
+            },
+            attributes: [],
+            metaData: []
+        )
     }
 
 }

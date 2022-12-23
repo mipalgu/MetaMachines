@@ -40,25 +40,6 @@ struct VHDLMachinesConverter {
             architectureBody: getCodeIncludes(machine: machine, key: "architecture_body")
         )
     }
-    
-    func initialVHDLMachine(filePath: URL) -> MetaMachine {
-        self.toMachine(machine: VHDLMachines.Machine.initial(path: filePath))
-    }
-
-    func toArrangement(arrangement: VHDLMachines.Arrangement) -> Arrangement {
-        Arrangement(
-            semantics: .swiftfsm,
-            name: arrangement.path.lastPathComponent.components(separatedBy: ".")[0],
-            dependencies: arrangement.parents.compactMap {
-                guard let path = arrangement.machines[$0] else {
-                    return nil
-                }
-                return MachineDependency(relativePath: path.relativePathString(relativeto: arrangement.path))
-            },
-            attributes: [],
-            metaData: []
-        )
-    }
 
     func toMachine(machine: VHDLMachines.Machine) -> MetaMachine {
         MetaMachine(
@@ -72,7 +53,7 @@ struct VHDLMachinesConverter {
         )
     }
     
-    func arrangementAttributes(arrangement: VHDLMachines.Arrangement) -> [AttributeGroup] {
+    private func arrangementAttributes(arrangement: VHDLMachines.Arrangement) -> [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let variables = AttributeGroup(
             name: "variables",

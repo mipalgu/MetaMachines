@@ -367,7 +367,7 @@ final class VHDLMachineConverterMachineTests: XCTestCase {
 
     /// Test initial machine is set up correctly.
     func testInitialMachine() {
-        let machine = converter.initialVHDLMachine(
+        let machine = MetaMachine.initialVHDLMachine(
             filePath: URL(fileURLWithPath: "Test.machine", isDirectory: true)
         )
         let states = [
