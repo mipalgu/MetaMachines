@@ -1,4 +1,4 @@
-// LineAttributeConversions.swift 
+// LineAttributeConversionsTests.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -55,82 +55,74 @@
 // 
 
 import Attributes
+@testable import MetaMachines
 import VHDLMachines
+import XCTest
 
-/// Creates `LineAttributes` from a `VHDLMachines.ReturnableVariable`.
-extension ReturnableVariable {
+/// Test class for ``LineAttributeConversions``.
+final class LineAttributeConversionsTests: XCTestCase {
 
-    /// Creates `LineAttributes` from a `VHDLMachines.ReturnableVariable`.
-    var toLineAttribute: [LineAttribute] {
-        [
-            .expression(String(self.type), language: .vhdl),
-            .line(self.name),
-            .line(self.comment ?? "")
+    /// Test ReturnableVariable implementation.
+    func testReturnable() {
+        let returnable = ReturnableVariable(type: "std_logic", name: "y", comment: "The output.")
+        let expected: [LineAttribute] = [
+            .expression("std_logic", language: .vhdl), .line("y"), .line("The output.")
         ]
+        XCTAssertEqual(returnable.toLineAttribute, expected)
     }
 
-}
-
-/// Creates `LineAttributes` from a `VHDLMachines.Variable`.
-extension VHDLMachines.Variable {
-
-    /// Creates `LineAttributes` from a `VHDLMachines.Variable`.
-    var toLineAttribute: [LineAttribute] {
-        [
-            .expression(String(self.type), language: .vhdl),
-            .line(self.name),
-            .expression(self.defaultValue ?? "", language: .vhdl),
-            .line(self.comment ?? "")
+    /// Test variable implementation.
+    func testVariable() {
+        let variable = VHDLMachines.VHDLVariable(
+            type: "std_logic", name: "x", defaultValue: "'1'", range: nil, comment: "Variable x."
+        )
+        let expected: [LineAttribute] = [
+            .expression("std_logic", language: .vhdl),
+            .line("x"),
+            .expression("'1'", language: .vhdl),
+            .line("Variable x.")
         ]
+        XCTAssertEqual(variable.toLineAttribute, expected)
     }
 
-}
-
-/// Creates `LineAttributes` from a `VHDLMachines.ExternalSignal`.
-extension VHDLMachines.ExternalSignal {
-
-    /// Creates `LineAttributes` from a `VHDLMachines.ExternalSignal`.
-    var toLineAttribute: [LineAttribute] {
-        [
-            .enumerated(self.mode.rawValue, validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue })),
-            .expression(self.type, language: .vhdl),
-            .line(self.name),
-            .expression(self.defaultValue ?? "", language: .vhdl),
-            .line(self.comment ?? "")
+    /// Test external signal implementation.
+    func testSignal() {
+        let signal = ExternalSignal(
+            type: "std_logic", name: "x", mode: .input, defaultValue: "'1'", comment: "Signal x."
+        )
+        let expected: [LineAttribute] = [
+            .enumerated("in", validValues: ["in", "out", "inout", "buffer"]),
+            .expression("std_logic", language: .vhdl),
+            .line("x"),
+            .expression("'1'", language: .vhdl),
+            .line("Signal x.")
         ]
+        XCTAssertEqual(signal.toLineAttribute, expected)
     }
 
-}
-
-/// Creates `LineAttributes` from a `VHDLMachines.Clock`.
-extension VHDLMachines.Clock {
-
-    /// Creates `LineAttributes` from a `VHDLMachines.Clock`.
-    var toLineAttribute: [LineAttribute] {
-        [
-            .line(self.name),
-            .integer(Int(self.frequency)),
-            .enumerated(
-                self.unit.rawValue,
-                validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })
-            )
+    /// Test clock implementation.
+    func testClock() {
+        let clock = Clock(name: "clk", frequency: 50, unit: .MHz)
+        let expected: [LineAttribute] = [
+            .line("clk"),
+            .integer(50),
+            .enumerated("MHz", validValues: ["Hz", "kHz", "MHz", "GHz", "THz"])
         ]
+        XCTAssertEqual(clock.toLineAttribute, expected)
     }
 
-}
-
-/// Creates `LineAttributes` from a VHDL action order.
-extension Array where Element == [String] {
-
-    /// Creates `LineAttributes` from a VHDL action order.
-    /// - Parameter validValues: The valid actions.
-    /// - Returns: An attributes representing the action order.
-    func toLineAttribute(validValues: Set<String>) -> [[LineAttribute]] {
-        self.indices.flatMap { timeslot in
-            self[timeslot].map { action in
-                [LineAttribute.integer(timeslot), LineAttribute.enumerated(action, validValues: validValues)]
-            }
-        }
+    /// Test actionOrder implementation.
+    func testActionOrder() {
+        let order = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+        let validValues: Set<String> = ["OnResume", "OnSuspend", "OnEntry", "OnExit", "Internal"]
+        let expected: [[LineAttribute]] = [
+            [.integer(0), .enumerated("OnResume", validValues: validValues)],
+            [.integer(0), .enumerated("OnSuspend", validValues: validValues)],
+            [.integer(1), .enumerated("OnEntry", validValues: validValues)],
+            [.integer(2), .enumerated("OnExit", validValues: validValues)],
+            [.integer(2), .enumerated("Internal", validValues: validValues)]
+        ]
+        XCTAssertEqual(order.toLineAttribute(validValues: validValues), expected)
     }
 
 }
