@@ -77,7 +77,7 @@ struct VHDLMachinesConverter {
             ],
             attributes: [
                 "clocks": .table(
-                    arrangement.clocks.map(toLineAttribute),
+                    arrangement.clocks.map(\.toLineAttribute),
                     columns: [
                         ("name", .line),
                         ("frequency", .integer),
@@ -85,7 +85,7 @@ struct VHDLMachinesConverter {
                     ]
                 ),
                 "external_signals": .table(
-                    arrangement.externalSignals.map(toLineAttribute),
+                    arrangement.externalSignals.map(\.toLineAttribute),
                     columns: [
                         ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
                         ("type", .expression(language: .vhdl)),
@@ -94,7 +94,7 @@ struct VHDLMachinesConverter {
                     ]
                 ),
                 "external_variables": .table(
-                    arrangement.externalVariables.map(toLineAttribute),
+                    arrangement.externalVariables.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
@@ -145,7 +145,7 @@ struct VHDLMachinesConverter {
         ]
         let variableAttributes: [String: Attribute] = [
             "clocks": .table(
-                machine.clocks.map(toLineAttribute),
+                machine.clocks.map(\.toLineAttribute),
                 columns: [
                     ("name", .line),
                     ("frequency", .integer),
@@ -153,7 +153,7 @@ struct VHDLMachinesConverter {
                 ]
             ),
             "external_signals": .table(
-                machine.externalSignals.map(toLineAttribute),
+                machine.externalSignals.map(\.toLineAttribute),
                 columns: [
                     ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
                     ("type", .expression(language: .vhdl)),
@@ -163,7 +163,7 @@ struct VHDLMachinesConverter {
                 ]
             ),
             "generics": .table(
-                machine.generics.map(toLineAttribute),
+                machine.generics.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
                     ("name", .line),
@@ -172,7 +172,7 @@ struct VHDLMachinesConverter {
                 ]
             ),
             "machine_signals": .table(
-                machine.machineSignals.map(toLineAttribute),
+                machine.machineSignals.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
                     ("name", .line),
@@ -181,7 +181,7 @@ struct VHDLMachinesConverter {
                 ]
             ),
             "machine_variables": .table(
-                machine.machineVariables.map(toLineAttribute),
+                machine.machineVariables.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
                     ("name", .line),
@@ -217,7 +217,7 @@ struct VHDLMachinesConverter {
             attributes: [
                 "is_parameterised": .bool(machine.isParameterised),
                 "parameter_signals": .table(
-                    !machine.isParameterised ? [] : machine.parameterSignals.map(toLineAttribute),
+                    !machine.isParameterised ? [] : machine.parameterSignals.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
@@ -226,7 +226,7 @@ struct VHDLMachinesConverter {
                     ]
                 ),
                 "returnable_signals": .table(
-                    !machine.isParameterised ? [] : machine.returnableSignals.map(toLineAttribute),
+                    !machine.isParameterised ? [] : machine.returnableSignals.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
@@ -278,49 +278,6 @@ struct VHDLMachinesConverter {
         return lhs + "\n" + rhs
     }
     
-    private func toLineAttribute(returnable: ReturnableVariable) -> [LineAttribute] {
-        [
-            .expression(String(returnable.type), language: .vhdl),
-            .line(returnable.name),
-            .line(returnable.comment ?? "")
-        ]
-    }
-    
-    private func toLineAttribute<T: VHDLMachines.Variable>(variable: T) -> [LineAttribute] {
-        [
-            .expression(String(variable.type), language: .vhdl),
-            .line(variable.name),
-            .expression(variable.defaultValue ?? "", language: .vhdl),
-            .line(variable.comment ?? "")
-        ]
-    }
-    
-    private func toLineAttribute(variable: VHDLMachines.ExternalSignal) -> [LineAttribute] {
-        [
-            .enumerated(variable.mode.rawValue, validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue })),
-            .expression(variable.type, language: .vhdl),
-            .line(variable.name),
-            .expression(variable.defaultValue ?? "", language: .vhdl),
-            .line(variable.comment ?? "")
-        ]
-    }
-    
-    private func toLineAttribute(variable: VHDLMachines.Clock) -> [LineAttribute] {
-        [
-            .line(variable.name),
-            .integer(Int(variable.frequency)),
-            .enumerated(variable.unit.rawValue, validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue }))
-        ]
-    }
-    
-    private func toLineAttribute(actionOrder: [[String]], validValues: Set<String>) -> [[LineAttribute]] {
-        actionOrder.indices.flatMap { timeslot in
-            actionOrder[timeslot].map { action in
-                [LineAttribute.integer(timeslot), LineAttribute.enumerated(action, validValues: validValues)]
-            }
-        }
-    }
-    
     private func stateAttributes(state: VHDLMachines.State, machine: VHDLMachines.Machine) -> [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let externals = machine.externalSignals.map { $0.name }
@@ -348,7 +305,7 @@ struct VHDLMachinesConverter {
             attributes: [
                 "externals": .enumerableCollection(Set(state.externalVariables), validValues: Set(externals)),
                 "state_signals": .table(
-                    state.signals.map(toLineAttribute),
+                    state.signals.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
@@ -357,7 +314,7 @@ struct VHDLMachinesConverter {
                     ]
                 ),
                 "state_variables": .table(
-                    state.variables.map(toLineAttribute),
+                    state.variables.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("lower_range", .line),
@@ -386,7 +343,7 @@ struct VHDLMachinesConverter {
                 "action_names": .table(state.actions.keys.sorted().map { [LineAttribute.line($0)] }, columns: [
                     ("name", .line)
                 ]),
-                "action_order": .table(toLineAttribute(actionOrder: state.actionOrder, validValues: Set(state.actions.keys)), columns: [
+                "action_order": .table(state.actionOrder.toLineAttribute(validValues: Set(state.actions.keys)), columns: [
                     ("timeslot", .integer),
                     ("action", .enumerated(validValues: Set(state.actions.keys)))
                 ])

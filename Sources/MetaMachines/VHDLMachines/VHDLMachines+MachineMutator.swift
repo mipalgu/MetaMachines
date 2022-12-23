@@ -152,7 +152,7 @@ extension VHDLMachinesConverter: MachineMutator {
                         "action_names": .table(actions.map { [LineAttribute.line($0)] }, columns: [
                             ("name", .line)
                         ]),
-                        "action_order": .table(toLineAttribute(actionOrder: defaultActionOrder, validValues: Set(actions)), columns: [
+                        "action_order": .table(defaultActionOrder.toLineAttribute(validValues: Set(actions)), columns: [
                             ("timeslot", .integer),
                             ("action", .enumerated(validValues: Set(actions)))
                         ])
@@ -459,14 +459,6 @@ extension VHDLMachinesConverter: MachineMutator {
 
     func validate(machine: MetaMachine) throws {
         try VHDLMachinesValidator().validate(machine: machine)
-    }
-
-    private func toLineAttribute(actionOrder: [[String]], validValues: Set<String>) -> [[LineAttribute]] {
-        actionOrder.indices.flatMap { timeslot in
-            actionOrder[timeslot].map { action in
-                [LineAttribute.integer(timeslot), LineAttribute.enumerated(action, validValues: validValues)]
-            }
-        }
     }
 
 }
