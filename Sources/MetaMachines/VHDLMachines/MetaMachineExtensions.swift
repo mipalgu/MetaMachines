@@ -59,6 +59,10 @@ import VHDLMachines
 
 extension MetaMachine {
 
+    public init(vhdl machine: VHDLMachines.Machine) {
+        self = VHDLMachinesConverter().toMachine(machine: machine)
+    }
+
     public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
         VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
     }
