@@ -105,13 +105,6 @@ public struct State: Equatable, Hashable, Codable, Identifiable {
         self.metaData = metaData
     }
 
-    /// Find all the transitions that have this state as the target.
-    /// - Parameter machine: The machine that this state belongs to.
-    /// - Returns: All the transitions that have this state as the target.
-    public func targetTransitions(in machine: MetaMachine) -> [Transition] {
-        machine.states.flatMap { $0.transitions.filter { $0.target == name } }
-    }
-
     /// Equality function.
     /// - Parameters:
     ///   - lhs: The state on the left hand side of the equation.
@@ -124,6 +117,13 @@ public struct State: Equatable, Hashable, Codable, Identifiable {
         let rhsActions = rhs.actions.sorted { $0.name < $1.name }
         return lhs.name == rhs.name && lhsActions == rhsActions && lhs.transitions == rhs.transitions &&
             lhs.attributes == rhs.attributes && lhs.metaData == rhs.metaData
+    }
+
+    /// Find all the transitions that have this state as the target.
+    /// - Parameter machine: The machine that this state belongs to.
+    /// - Returns: All the transitions that have this state as the target.
+    public func targetTransitions(in machine: MetaMachine) -> [Transition] {
+        machine.states.flatMap { $0.transitions.filter { $0.target == name } }
     }
 
 }
