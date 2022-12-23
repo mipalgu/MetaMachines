@@ -1,4 +1,4 @@
-// MetaMachineExtensions.swift 
+// Transition+VHDLConversions.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -54,27 +54,16 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
-import Foundation
 import VHDLMachines
 
-extension VHDLMachines.Machine {
+extension Transition {
 
-    public init(machine: MetaMachine) throws {
-        self = try VHDLMachinesConverter().convert(machine: machine)
-    }
-
-}
-
-extension VHDLMachines.State {
-
-    public init(state: State) {
+    public init(vhdl transition: VHDLMachines.Transition, in machine: VHDLMachines.Machine) {
         self.init(
-            name: state.name,
-            actions: Dictionary(uniqueKeysWithValues: state.actions.map { ($0.name, $0.implementation) }),
-            actionOrder: state.vhdlActionOrder,
-            signals: state.vhdlStateSignals,
-            variables: state.vhdlStateVariables,
-            externalVariables: state.vhdlExternalVariables
+            condition: transition.condition,
+            target: machine.states[transition.target].name,
+            attributes: [],
+            metaData: []
         )
     }
 

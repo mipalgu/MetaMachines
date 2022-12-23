@@ -1,4 +1,4 @@
-// MetaMachineExtensions.swift 
+// MetaMachine+VHDLConversions.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -57,25 +57,14 @@
 import Foundation
 import VHDLMachines
 
-extension VHDLMachines.Machine {
+extension MetaMachine {
 
-    public init(machine: MetaMachine) throws {
-        self = try VHDLMachinesConverter().convert(machine: machine)
+    public init(vhdl machine: VHDLMachines.Machine) {
+        self = VHDLMachinesConverter().toMachine(machine: machine)
     }
 
-}
-
-extension VHDLMachines.State {
-
-    public init(state: State) {
-        self.init(
-            name: state.name,
-            actions: Dictionary(uniqueKeysWithValues: state.actions.map { ($0.name, $0.implementation) }),
-            actionOrder: state.vhdlActionOrder,
-            signals: state.vhdlStateSignals,
-            variables: state.vhdlStateVariables,
-            externalVariables: state.vhdlExternalVariables
-        )
+    public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
+        VHDLMachinesConverter().toMachine(machine: VHDLMachines.Machine.initial(path: filePath))
     }
 
 }

@@ -1,4 +1,4 @@
-// MetaMachineExtensions.swift 
+// Arrangement+VHDLConversions.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -54,27 +54,22 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
-import Foundation
 import VHDLMachines
 
-extension VHDLMachines.Machine {
+extension Arrangement {
 
-    public init(machine: MetaMachine) throws {
-        self = try VHDLMachinesConverter().convert(machine: machine)
-    }
-
-}
-
-extension VHDLMachines.State {
-
-    public init(state: State) {
+    public init(vhdl arrangement: VHDLMachines.Arrangement) {
         self.init(
-            name: state.name,
-            actions: Dictionary(uniqueKeysWithValues: state.actions.map { ($0.name, $0.implementation) }),
-            actionOrder: state.vhdlActionOrder,
-            signals: state.vhdlStateSignals,
-            variables: state.vhdlStateVariables,
-            externalVariables: state.vhdlExternalVariables
+            semantics: .swiftfsm,
+            name: arrangement.path.lastPathComponent.components(separatedBy: ".")[0],
+            dependencies: arrangement.parents.compactMap {
+                guard let path = arrangement.machines[$0] else {
+                    return nil
+                }
+                return MachineDependency(relativePath: path.relativePathString(relativeto: arrangement.path))
+            },
+            attributes: [],
+            metaData: []
         )
     }
 

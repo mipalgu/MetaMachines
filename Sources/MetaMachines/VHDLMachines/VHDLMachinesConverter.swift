@@ -14,7 +14,7 @@ struct VHDLMachinesConverter {
     func convert(machine: MetaMachine) throws -> VHDLMachines.Machine {
         let validator = VHDLMachinesValidator()
         try validator.validate(machine: machine)
-        let vhdlStates = machine.states.map(toState)
+        let vhdlStates = machine.states.map(VHDLMachines.State.init)
         let suspendedState = machine.attributes.first { $0.name == "settings" }?.attributes["suspended_state"]?.enumeratedValue
         let suspendedStateName = suspendedState == "" ? nil : suspendedState
         let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
@@ -32,7 +32,7 @@ struct VHDLMachinesConverter {
             isParameterised: isParameterised(machine: machine),
             parameterSignals: getParameters(machine: machine, key: "parameter_signals"),
             returnableSignals: getOutputs(machine: machine, key: "returnable_signals"),
-            states: machine.states.map(toState),
+            states: machine.states.map(VHDLMachines.State.init),
             transitions: getTransitions(machine: machine),
             initialState: machine.states.firstIndex(where: { machine.initialState == $0.name }) ?? 0,
             suspendedState: suspendedIndex,
@@ -65,85 +65,6 @@ struct VHDLMachinesConverter {
 
     private func toAction(actionName: String, code: String) -> Action {
         Action(name: actionName, implementation: code, language: .vhdl)
-    }
-
-
-    private func fromAction(action: Action) -> (String, String) {
-        (
-            action.name,
-            action.implementation
-        )
-    }
-    
-    private func actionOrder(state: State) -> [[VHDLMachines.ActionName]] {
-        guard let order = state.attributes.first(where: { $0.name == "actions" })?.attributes["action_order"] else {
-            fatalError("Failed to retrieve action attributes.")
-        }
-        if order.tableValue.isEmpty {
-            return [[]]
-        }
-        let maxIndex = order.tableValue.reduce(0) {
-            max($0, $1[0].integerValue)
-        }
-        var actionOrder: [[VHDLMachines.ActionName]] = Array(repeating: [], count: maxIndex + 1)
-        actionOrder.indices.forEach { timeslot in
-            actionOrder[timeslot] = order.tableValue.compactMap { row in
-                if row[0].integerValue == timeslot {
-                    return row[1].enumeratedValue.trimmingCharacters(in: .whitespaces)
-                }
-                return nil
-            }
-        }
-        return actionOrder
-    }
-    
-    private func stateSignals(state: State) -> [VHDLMachines.MachineSignal] {
-        guard let rows = state.attributes.first(where: { $0.name == "variables" })?.attributes["state_signals"]?.tableValue else {
-            return []
-        }
-        return rows.map {
-            VHDLMachines.MachineSignal(
-                type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
-                name: $0[1].lineValue.trimmingCharacters(in: .whitespaces),
-                defaultValue: $0[2].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[2].expressionValue.trimmingCharacters(in: .whitespaces),
-                comment: $0[3].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[3].lineValue.trimmingCharacters(in: .whitespaces)
-            )
-        }
-    }
-    
-    private func stateVariables(state: State) -> [VHDLMachines.VHDLVariable] {
-        guard let rows = state.attributes.first(where: { $0.name == "variables" })?.attributes["state_variables"]?.tableValue else {
-            return []
-        }
-        return rows.map {
-            let lowerRange = Int($0[1].lineValue.trimmingCharacters(in: .whitespaces))
-            let upperRange = Int($0[2].lineValue.trimmingCharacters(in: .whitespaces))
-            return VHDLMachines.VHDLVariable(
-                type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
-                name: $0[3].lineValue.trimmingCharacters(in: .whitespaces),
-                defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
-                range: lowerRange == nil || upperRange == nil ? nil : (lowerRange!, upperRange!),
-                comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil : $0[5].lineValue.trimmingCharacters(in: .whitespaces)
-            )
-        }
-    }
-    
-    private func externalVariables(state: State) -> [String] {
-        guard let rows = state.attributes.first(where: { $0.name == "variables" })?.attributes["externals"]?.enumerableCollectionValue else {
-            return []
-        }
-        return Array(rows)
-    }
-
-    private func toState(state: State) -> VHDLMachines.State {
-        VHDLMachines.State(
-            name: state.name,
-            actions: Dictionary(uniqueKeysWithValues: state.actions.map(fromAction)),
-            actionOrder: actionOrder(state: state),
-            signals: stateSignals(state: state),
-            variables: stateVariables(state: state),
-            externalVariables: externalVariables(state: state)
-        )
     }
     
     private func getIncludes(machine: MetaMachine) -> [String] {
