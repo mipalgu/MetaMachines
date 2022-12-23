@@ -68,13 +68,33 @@ final class MetaMachineVHDLConversionsTests: XCTestCase {
     )
 
     /// The machine under test.
-    var machine: MetaMachine {
-        MetaMachine(vhdl: testMachine)
+    lazy var machine = MetaMachine(vhdl: testMachine)
+
+    /// Initialise the test machine.
+    override func setUp() {
+        machine = MetaMachine(vhdl: testMachine)
+    }
+
+    /// Test the conversion init sets properties correctly.
+    func testConversionInit() {
+        let expected = MetaMachine(
+            semantics: .vhdl,
+            name: "Machine",
+            initialState: "Initial",
+            states: testMachine.states.map { MetaMachines.State(vhdl: $0, in: testMachine) },
+            dependencies: [
+                MachineDependency(relativePath: "Machine2.machine"),
+                MachineDependency(relativePath: "Machine3.machine")
+            ],
+            attributes: VHDLMachines.Machine.testAttributes,
+            metaData: []
+        )
+        XCTAssertEqual(machine, expected)
     }
 
     /// Test computed properties work correctly.
     func testMachineComputedProperties() {
-        let machine = machine
+        XCTAssertFalse(machine.dependencies.isEmpty)
         XCTAssertEqual(machine.vhdlArchitectureBody, testMachine.architectureBody)
         XCTAssertEqual(machine.vhdlArchitectureHead, testMachine.architectureHead)
         XCTAssertEqual(machine.vhdlClocks, testMachine.clocks)

@@ -86,11 +86,7 @@ extension MetaMachine {
         Dictionary(uniqueKeysWithValues: self.dependencies.map {
             (
                 $0.name,
-                URL(
-                    fileURLWithPath: $0.relativePath,
-                    isDirectory: true,
-                    relativeTo: URL(fileURLWithPath: "\(self.name).machine", isDirectory: true)
-                )
+                URL(fileURLWithPath: $0.relativePath, isDirectory: true)
             )
         })
     }
@@ -215,7 +211,9 @@ extension MetaMachine {
             name: machine.name,
             initialState: machine.states[machine.initialState].name,
             states: machine.states.map { State(vhdl: $0, in: machine) },
-            dependencies: [],
+            dependencies: machine.dependentMachines.values.map {
+                MachineDependency(relativePath: $0.relativePath)
+            },
             attributes: machine.attributes,
             metaData: []
         )

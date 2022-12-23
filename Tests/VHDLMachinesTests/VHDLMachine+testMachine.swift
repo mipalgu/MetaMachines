@@ -61,6 +61,7 @@ import VHDLMachines
 /// Add test machine data.
 extension Machine {
 
+    /// The machine attributes that are equivalent to the test machine.
     static var testAttributes: [AttributeGroup] {
         [
             AttributeGroup(
