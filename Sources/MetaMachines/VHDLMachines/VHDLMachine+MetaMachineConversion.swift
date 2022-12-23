@@ -1,4 +1,4 @@
-// MetaMachineExtensions.swift 
+// VHDLMachine+MetaMachineConversion.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -86,21 +86,6 @@ extension VHDLMachines.Machine {
             suspendedState: suspendedIndex,
             architectureHead: machine.vhdlCodeIncludes(for: "architecture_head"),
             architectureBody: machine.vhdlCodeIncludes(for: "architecture_body")
-        )
-    }
-
-}
-
-extension VHDLMachines.State {
-
-    public init(state: State) {
-        self.init(
-            name: state.name,
-            actions: Dictionary(uniqueKeysWithValues: state.actions.map { ($0.name, $0.implementation) }),
-            actionOrder: state.vhdlActionOrder,
-            signals: state.vhdlStateSignals,
-            variables: state.vhdlStateVariables,
-            externalVariables: state.vhdlExternalVariables
         )
     }
 
