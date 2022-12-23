@@ -20,10 +20,11 @@ struct VHDLMachinesConverter {
             "OnResume": "",
             "OnSuspend": ""
         ]
+        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
         let machine = VHDLMachines.Machine(
             name: name,
             path: filePath,
-            includes: ["library IEEE;", "use IEEE.std_logic_1164.All"],
+            includes: ["library IEEE;", "use IEEE.std_logic_1164.All;"],
             externalSignals: [],
             generics: [],
             clocks: [Clock(name: "clk", frequency: 50, unit: .MHz)],
@@ -38,7 +39,7 @@ struct VHDLMachinesConverter {
                 VHDLMachines.State(
                     name: "Initial",
                     actions: defaultActions,
-                    actionOrder: [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]],
+                    actionOrder: actionOrder,
                     signals: [],
                     variables: [],
                     externalVariables: []
@@ -46,7 +47,7 @@ struct VHDLMachinesConverter {
                 VHDLMachines.State(
                     name: "Suspended",
                     actions: defaultActions,
-                    actionOrder: [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]],
+                    actionOrder: actionOrder,
                     signals: [],
                     variables: [],
                     externalVariables: []
@@ -280,7 +281,7 @@ struct VHDLMachinesConverter {
                 Field(name: "suspended_state", type: .enumerated(validValues: Set([""] + machine.states.map(\.name))))
             ],
             attributes: [
-                "initial_state": .enumerated(machine.states[machine.initialState].name, validValues: Set(machine.states.map(\.name))),
+                "initial_state": .enumerated(machine.states[machine.initialState].name, validValues: Set(machine.states.map(\.name) + [""])),
                 "suspended_state": .enumerated(machine.suspendedState.map { machine.states[$0].name } ?? "", validValues: Set([""] + machine.states.map(\.name)))
             ],
             metaData: [:]
@@ -347,8 +348,8 @@ struct VHDLMachinesConverter {
     }
     
     func toLineAttribute(actionOrder: [[String]], validValues: Set<String>) -> [[LineAttribute]] {
-        actionOrder.indices.map { timeslot in
-            actionOrder[timeslot].flatMap { action in
+        actionOrder.indices.flatMap { timeslot in
+            actionOrder[timeslot].map { action in
                 [LineAttribute.integer(timeslot), LineAttribute.enumerated(action, validValues: validValues)]
             }
         }
@@ -416,7 +417,7 @@ struct VHDLMachinesConverter {
                 ]))
             ],
             attributes: [
-                "action_names": .table(state.actions.keys.map { [LineAttribute.line($0)] }, columns: [
+                "action_names": .table(state.actions.keys.sorted().map { [LineAttribute.line($0)] }, columns: [
                     ("name", .line)
                 ]),
                 "action_order": .table(toLineAttribute(actionOrder: state.actionOrder, validValues: Set(state.actions.keys)), columns: [
