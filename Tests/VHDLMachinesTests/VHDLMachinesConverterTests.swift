@@ -175,6 +175,182 @@ final class VHDLMachinesConverterTests: XCTestCase {
         ]
     }
 
+    /// The default machine attributes.
+    var machineAttributes: [AttributeGroup] {
+        [
+            AttributeGroup(
+                name: "variables",
+                fields: [
+                    Field(
+                        name: "clocks",
+                        type: .table(
+                            columns: [
+                                ("name", .line),
+                                ("frequency", .integer),
+                                ("unit", .enumerated(validValues: ["Hz", "kHz", "MHz", "GHz", "THz"]))
+                            ]
+                        )
+                    ),
+                    Field(
+                        name: "external_signals",
+                        type: .table(
+                            columns: [
+                                ("mode", .enumerated(validValues: ["in", "out", "inout", "buffer"])),
+                                ("type", .expression(language: .vhdl)),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    ),
+                    Field(
+                        name: "generics",
+                        type: .table(
+                            columns: [
+                                ("type", .expression(language: .vhdl)),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    ),
+                    Field(
+                        name: "machine_signals",
+                        type: .table(
+                            columns: [
+                                ("type", .expression(language: .vhdl)),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    ),
+                    Field(
+                        name: "machine_variables",
+                        type: .table(
+                            columns: [
+                                ("type", .expression(language: .vhdl)),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    ),
+                    Field(name: "driving_clock", type: .enumerated(validValues: ["clk"]))
+                ],
+                attributes: [
+                    "clocks": .table(
+                        [
+                            [
+                                .line("clk"),
+                                .integer(50),
+                                .enumerated("MHz", validValues: ["Hz", "kHz", "MHz", "GHz", "THz"])
+                            ]
+                        ],
+                        columns: [
+                            ("name", .line),
+                            ("frequency", .integer),
+                            ("unit", .enumerated(validValues: ["Hz", "kHz", "MHz", "GHz", "THz"]))
+                        ]
+                    ),
+                    "external_signals": .table([], columns: [
+                        ("mode", .enumerated(validValues: ["in", "out", "inout", "buffer"])),
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]),
+                    "generics": .table([], columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]),
+                    "machine_signals": .table([], columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]),
+                    "machine_variables": .table([], columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]),
+                    "driving_clock": .enumerated("clk", validValues: ["clk"])
+                ],
+                metaData: [:]
+            ),
+            AttributeGroup(
+                name: "parameters",
+                fields: [
+                    Field(name: "is_parameterised", type: .bool),
+                    Field(name: "parameter_signals", type: .table(
+                        columns: [
+                            ("type", .expression(language: .vhdl)),
+                            ("name", .line),
+                            ("value", .expression(language: .vhdl)),
+                            ("comment", .line)
+                        ]
+                    )),
+                    Field(name: "returnable_signals", type: .table(
+                        columns: [
+                            ("type", .expression(language: .vhdl)),
+                            ("name", .line),
+                            ("comment", .line)
+                        ]
+                    ))
+                ],
+                attributes: [
+                    "is_parameterised": .bool(false),
+                    "parameter_signals": .table([], columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]),
+                    "returnable_signals": .table([], columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("comment", .line)
+                    ])
+                ],
+                metaData: [:]
+            ),
+            AttributeGroup(
+                name: "includes",
+                fields: [
+                    Field(name: "includes", type: .code(language: .vhdl)),
+                    Field(name: "architecture_head", type: .code(language: .vhdl)),
+                    Field(name: "architecture_body", type: .code(language: .vhdl))
+                ],
+                attributes: [
+                    "includes": .code("library IEEE;\nuse IEEE.std_logic_1164.All;", language: .vhdl),
+                    "architecture_head": .code("", language: .vhdl),
+                    "architecture_body": .code("", language: .vhdl)
+                ],
+                metaData: [:]
+            ),
+            AttributeGroup(
+                name: "settings",
+                fields: [
+                    Field(
+                        name: "initial_state", type: .enumerated(validValues: ["Initial", "Suspended", ""])
+                    ),
+                    Field(
+                        name: "suspended_state", type: .enumerated(validValues: ["Initial", "Suspended", ""])
+                    )
+                ],
+                attributes: [
+                    "initial_state": .enumerated("Initial", validValues: ["Initial", "Suspended", ""]),
+                    "suspended_state": .enumerated("Suspended", validValues: ["Initial", "Suspended", ""])
+                ],
+                metaData: [:]
+            )
+        ]
+    }
+
     /// A default VHDL machine.
     lazy var vhdlMachine = VHDLMachines.Machine(
         name: machine.name,
@@ -221,61 +397,70 @@ final class VHDLMachinesConverterTests: XCTestCase {
         super.setUp()
     }
 
+    /// Test toLineAttribute for action order.
+    func testActionOrderToLineAttribute() {
+        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+        let validValues = actionsNames
+        let attribute = converter.toLineAttribute(actionOrder: actionOrder, validValues: validValues)
+        let expected: [[LineAttribute]] = [
+            [.integer(0), .enumerated("OnResume", validValues: validValues)],
+            [.integer(0), .enumerated("OnSuspend", validValues: validValues)],
+            [.integer(1), .enumerated("OnEntry", validValues: validValues)],
+            [.integer(2), .enumerated("OnExit", validValues: validValues)],
+            [.integer(2), .enumerated("Internal", validValues: validValues)]
+        ]
+        XCTAssertEqual(attribute, expected)
+    }
+
     /// Test the state attributes match the expected ones.
     func testStateAttributes() {
         let intialState = vhdlMachine.states[0]
         let attributes = converter.stateAttributes(state: intialState, machine: vhdlMachine)
-        let stateAttributes = stateAttributes
-        XCTAssertEqual(attributes.count, stateAttributes.count)
-        zip(attributes, stateAttributes).forEach {
-            XCTAssertEqual($0.name, $1.name)
-            XCTAssertEqual($0.fields.count, $1.fields.count)
-            zip($0.fields, $1.fields).forEach {
-                XCTAssertEqual($0.name, $1.name)
-                XCTAssertEqual($0.type, $1.type)
-            }
-            XCTAssertEqual($0.attributes.count, $1.attributes.count)
-            zip($0.attributes.sorted { $0.0 < $1.0 }, $1.attributes.sorted { $0.0 < $1.0 }).forEach {
-                let lhs = $0.1
-                let rhs = $1.1
-                XCTAssertEqual($0.0, $1.0)
-                XCTAssertEqual(lhs, rhs)
-            }
-        }
+        XCTAssertEqual(attributes, stateAttributes)
     }
 
-    // func testInitialMachine() {
-    //     let machine = converter.initialVHDLMachine(
-    //         filePath: URL(fileURLWithPath: "Test.machine", isDirectory: true)
-    //     )
-    //     let states = [
-    //         State(
-    //             name: "Initial",
-    //             actions: actions,
-    //             transitions: [],
-    //             attributes: stateAttributes,
-    //             metaData: []
-    //         ),
-    //         State(
-    //             name: "Suspended",
-    //             actions: actions,
-    //             transitions: [],
-    //             attributes: stateAttributes,
-    //             metaData: []
-    //         )
-    //     ]
-    //     let expected = MetaMachine(
-    //         semantics: .vhdl,
-    //         mutator: SchemaMutator(schema: VHDLSchema()),
-    //         name: "Test",
-    //         initialState: "Initial",
-    //         states: states,
-    //         dependencies: [],
-    //         attributes: [AttributeGroup],
-    //         metaData: [AttributeGroup]
-    //     )
-    // }
+    func testInitialMachine() {
+        let machine = converter.initialVHDLMachine(
+            filePath: URL(fileURLWithPath: "Test.machine", isDirectory: true)
+        )
+        let states = [
+            State(
+                name: "Initial",
+                actions: actions,
+                transitions: [],
+                attributes: stateAttributes,
+                metaData: []
+            ),
+            State(
+                name: "Suspended",
+                actions: actions,
+                transitions: [],
+                attributes: stateAttributes,
+                metaData: []
+            )
+        ]
+        let expected = MetaMachine(
+            semantics: .vhdl,
+            mutator: SchemaMutator(schema: VHDLSchema(dependencyLayout: [])),
+            name: "Test",
+            initialState: "Initial",
+            states: states,
+            dependencies: [],
+            attributes: machineAttributes,
+            metaData: []
+        )
+        XCTAssertEqual(expected.states.count, machine.states.count)
+        zip(expected.states, machine.states).forEach { exp, mach in
+            XCTAssertEqual(exp.actions, mach.actions)
+            XCTAssertEqual(exp.metaData, mach.metaData)
+            XCTAssertEqual(exp.attributes, mach.attributes)
+            XCTAssertEqual(exp.name, mach.name)
+            XCTAssertEqual(exp.transitions, mach.transitions)
+        }
+        // XCTAssertEqual(expected, machine)
+    }
 
+    /// Test converter creates correct machine.
     func testConverterProducesMachine() throws {
         let vhdlMachine = try converter.convert(machine: machine)
         let states = [
@@ -315,500 +500,6 @@ final class VHDLMachinesConverterTests: XCTestCase {
             initialState: 0,
             suspendedState: 1
         )
-        XCTAssertEqual(vhdlMachine.name, expected.name)
-        XCTAssertEqual(vhdlMachine.includes, expected.includes)
-        XCTAssertEqual(vhdlMachine.externalSignals, expected.externalSignals)
-        XCTAssertEqual(vhdlMachine.generics, expected.generics)
-        XCTAssertEqual(vhdlMachine.clocks, expected.clocks)
-        XCTAssertEqual(vhdlMachine.drivingClock, expected.drivingClock)
-        XCTAssertEqual(vhdlMachine.dependentMachines, expected.dependentMachines)
-        XCTAssertEqual(vhdlMachine.machineVariables, expected.machineVariables)
-        XCTAssertEqual(vhdlMachine.machineSignals, expected.machineSignals)
-        XCTAssertEqual(vhdlMachine.isParameterised, expected.isParameterised)
-        XCTAssertEqual(vhdlMachine.parameterSignals, expected.parameterSignals)
-        XCTAssertEqual(vhdlMachine.returnableSignals, expected.returnableSignals)
-        XCTAssertEqual(vhdlMachine.states.count, expected.states.count)
-        for (state, expectedState) in zip(vhdlMachine.states, expected.states) {
-            XCTAssertEqual(state.name, expectedState.name)
-            XCTAssertEqual(state.actions, expectedState.actions)
-            XCTAssertEqual(state.actionOrder, expectedState.actionOrder)
-            XCTAssertEqual(state.signals, expectedState.signals)
-            XCTAssertEqual(state.variables, expectedState.variables)
-            XCTAssertEqual(state.externalVariables, expectedState.externalVariables)
-        }
-        XCTAssertEqual(vhdlMachine.transitions, expected.transitions)
-        XCTAssertEqual(vhdlMachine.initialState, expected.initialState)
-        XCTAssertEqual(vhdlMachine.suspendedState, expected.suspendedState)
+        XCTAssertEqual(expected, vhdlMachine)
     }
 }
-
-// [
-//     Attributes.AttributeGroup(
-//         name: "variables",
-//         fields: [
-//             Attributes.Field(
-//                 name: "externals",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.enumerableCollection(validValues: Set([]))
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "state_signals",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "type",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "value",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "comment", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "state_variables",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "type",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "lower_range", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "upper_range", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "value",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "comment", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             )
-//         ],
-//         attributes: [
-//             "externals": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.enumerableCollection(Set([]), validValues: Set([]))
-//             ),
-//             "state_signals": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "type",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "value",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "comment", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             ),
-//             "state_variables": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "type",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "lower_range", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "upper_range", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "value",
-//                             type: Attributes.LineAttributeType.expression(
-//                                 language: Attributes.Language.vhdl
-//                             )
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "comment", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             )
-//         ],
-//         metaData: [:]
-//     ),
-//     Attributes.AttributeGroup(
-//         name: "actions",
-//         fields: [
-//             Attributes.Field(
-//                 name: "action_names",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "action_order",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "timeslot", type: Attributes.LineAttributeType.integer
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "action",
-//                                 type: Attributes.LineAttributeType.enumerated(
-//                                     validValues: Set(
-//                                         ["Internal", "OnSuspend", "OnResume", "OnExit", "OnEntry"]
-//                                     )
-//                                 )
-//                             )
-//                         ]
-//                     )
-//                 )
-//             )
-//         ],
-//         attributes: [
-//             "action_names": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [
-//                         [Attributes.LineAttribute.line("Internal")],
-//                         [Attributes.LineAttribute.line("OnExit")],
-//                         [Attributes.LineAttribute.line("OnSuspend")],
-//                         [Attributes.LineAttribute.line("OnEntry")],
-//                         [Attributes.LineAttribute.line("OnResume")]
-//                     ],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             ),
-//             "action_order": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [
-                        
-//                         [
-//                             Attributes.LineAttribute.integer(0),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnResume",
-//                                 validValues: Set(["OnExit", "OnSuspend", "Internal", "OnEntry", "OnResume"])
-//                             ),
-//                             Attributes.LineAttribute.integer(0),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnSuspend",
-//                                 validValues: Set(["OnExit", "OnSuspend", "Internal", "OnEntry", "OnResume"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(1),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnEntry",
-//                                 validValues: Set(["OnExit", "OnSuspend", "Internal", "OnEntry", "OnResume"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(2),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnExit",
-//                                 validValues: Set(["OnExit", "OnSuspend", "Internal", "OnEntry", "OnResume"])
-//                             ),
-//                             Attributes.LineAttribute.integer(2),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "Internal",
-//                                 validValues: Set(["OnExit", "OnSuspend", "Internal", "OnEntry", "OnResume"])
-//                             )
-//                         ]
-//                     ],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "timeslot", type: Attributes.LineAttributeType.integer
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "action",
-//                             type: Attributes.LineAttributeType.enumerated(
-//                                 validValues: Set(["Internal", "OnResume", "OnExit", "OnSuspend", "OnEntry"])
-//                             )
-//                         )
-//                     ]
-//                 )
-//             )
-//         ],
-//         metaData: [:]
-//     )
-// ]
-
-// [
-//     Attributes.AttributeGroup(
-//         name: "variables",
-//         fields: [
-//             Attributes.Field(
-//                 name: "externals",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.enumerableCollection(validValues: Set([]))
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "state_signals",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "type",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "value",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "comment", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "state_variables",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "type",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "lower_range", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "upper_range", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "value",
-//                                 type: Attributes.LineAttributeType.expression(
-//                                     language: Attributes.Language.vhdl
-//                                 )
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "comment", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             )
-//         ],
-//         attributes: [
-//             "state_variables": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "type",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "lower_range", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "upper_range", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "value",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "comment", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             ),
-//             "externals": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.enumerableCollection(Set([]), validValues: Set([]))
-//             ),
-//             "state_signals": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "type",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "value",
-//                             type: Attributes.LineAttributeType.expression(language: Attributes.Language.vhdl)
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "comment", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             )
-//         ],
-//         metaData: [:]
-//     ),
-//     Attributes.AttributeGroup(
-//         name: "actions",
-//         fields: [
-//             Attributes.Field(
-//                 name: "action_names",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "name", type: Attributes.LineAttributeType.line
-//                             )
-//                         ]
-//                     )
-//                 )
-//             ),
-//             Attributes.Field(
-//                 name: "action_order",
-//                 type: Attributes.AttributeType.block(
-//                     Attributes.BlockAttributeType.table(
-//                         columns: [
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "timeslot", type: Attributes.LineAttributeType.integer
-//                             ),
-//                             Attributes.BlockAttributeType.TableColumn(
-//                                 name: "action", 
-//                                 type: Attributes.LineAttributeType.enumerated(
-//                                     validValues: Set(
-//                                         ["OnEntry", "OnSuspend", "OnResume", "Internal", "OnExit"]
-//                                     )
-//                                 )
-//                             )
-//                         ]
-//                     )
-//                 )
-//             )
-//         ],
-//         attributes: [
-//             "action_order": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [
-//                         [
-//                             Attributes.LineAttribute.integer(0),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnResume",
-//                                 validValues: Set(["OnEntry", "OnSuspend", "OnResume", "Internal", "OnExit"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(0),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnSuspend",
-//                                 validValues: Set(["OnEntry", "OnResume", "OnSuspend", "OnExit", "Internal"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(1),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnEntry",
-//                                 validValues: Set(["OnExit", "OnResume", "OnSuspend", "Internal", "OnEntry"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(2),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "OnExit",
-//                                 validValues: Set(["OnResume", "Internal", "OnEntry", "OnExit", "OnSuspend"])
-//                             )
-//                         ],
-//                         [
-//                             Attributes.LineAttribute.integer(2),
-//                             Attributes.LineAttribute.enumerated(
-//                                 "Internal",
-//                                 validValues: Set(["OnSuspend", "Internal", "OnEntry", "OnResume", "OnExit"])
-//                             )
-//                         ]
-//                     ],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "timeslot", type: Attributes.LineAttributeType.integer
-//                         ),
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "action",
-//                             type: Attributes.LineAttributeType.enumerated(
-//                                 validValues: Set(["OnSuspend", "OnExit", "OnResume", "Internal", "OnEntry"])
-//                             )
-//                         )
-//                     ]
-//                 )
-//             ),
-//             "action_names": Attributes.Attribute.block(
-//                 Attributes.BlockAttribute.table(
-//                     [
-//                         [Attributes.LineAttribute.line("Internal")],
-//                         [Attributes.LineAttribute.line("OnEntry")],
-//                         [Attributes.LineAttribute.line("OnExit")],
-//                         [Attributes.LineAttribute.line("OnResume")],
-//                         [Attributes.LineAttribute.line("OnSuspend")]
-//                     ],
-//                     columns: [
-//                         Attributes.BlockAttributeType.TableColumn(
-//                             name: "name", type: Attributes.LineAttributeType.line
-//                         )
-//                     ]
-//                 )
-//             )
-//         ]
-//         metaData: [:]
-//     )
-// ]
