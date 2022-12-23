@@ -237,13 +237,13 @@ extension VHDLMachines.Machine {
         let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
         self.init(
             name: machine.name,
-            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true), //fix later
+            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true),
             includes: machine.vhdlIncludes,
             externalSignals: machine.vhdlExternalSignals,
             generics: machine.vhdlVariables(for: "generics"),
             clocks: machine.vhdlClocks,
             drivingClock: machine.vhdlDrivingClock,
-            dependentMachines: [:],//getDependentMachines(machine: machine),
+            dependentMachines: machine.vhdlDependentMachines,
             machineVariables: machine.vhdlMachineVariables,
             machineSignals: machine.vhdlMachineSignals,
             isParameterised: machine.vhdlIsParameterised,

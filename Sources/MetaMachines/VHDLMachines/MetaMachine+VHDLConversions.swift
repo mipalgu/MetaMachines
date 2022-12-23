@@ -74,6 +74,19 @@ extension MetaMachine {
         }
     }
 
+    var vhdlDependentMachines: [VHDLMachines.MachineName: URL] {
+        Dictionary(uniqueKeysWithValues: self.dependencies.map {
+            (
+                $0.name,
+                URL(
+                    fileURLWithPath: $0.relativePath,
+                    isDirectory: true,
+                    relativeTo: URL(fileURLWithPath: "\(self.name).machine", isDirectory: true)
+                )
+            )
+        })
+    }
+
     var vhdlDrivingClock: Int {
         guard
             self.attributes.count == 4,
