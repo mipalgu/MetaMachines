@@ -92,6 +92,14 @@ final class MetaMachineVHDLConversionsTests: XCTestCase {
         XCTAssertEqual(machine, expected)
     }
 
+    /// Test initial machine delegates correctly.
+    func testInitialMachine() {
+        let path = URL(fileURLWithPath: "NewMachine.machine", isDirectory: true)
+        let expected = MetaMachine(vhdl: VHDLMachines.Machine.initial(path: path))
+        let result = MetaMachine.initialVHDLMachine(filePath: path)
+        XCTAssertEqual(result, expected)
+    }
+
     /// Test computed properties work correctly.
     func testMachineComputedProperties() {
         XCTAssertFalse(machine.dependencies.isEmpty)

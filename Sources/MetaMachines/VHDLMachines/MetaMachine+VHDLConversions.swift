@@ -57,16 +57,20 @@
 import Foundation
 import VHDLMachines
 
+/// Adds properties and initialisers for accessing and creating `VHDLMachines` objects.
 extension MetaMachine {
 
+    /// Fetch the VHDL architecture body from this machines attributes.
     var vhdlArchitectureBody: String? {
         self.vhdlCodeIncludes(for: "architecture_body")
     }
 
+    /// Fetch the VHDL architecture head from this machines attributes.
     var vhdlArchitectureHead: String? {
         self.vhdlCodeIncludes(for: "architecture_head")
     }
 
+    /// Fetch the VHDL clocks from this machines attributes.
     var vhdlClocks: [Clock] {
         guard
             self.attributes.count == 4,
@@ -82,6 +86,7 @@ extension MetaMachine {
         }
     }
 
+    /// Convert this machines dependencies to the `VHDLMachines` equivalent objects.
     var vhdlDependentMachines: [VHDLMachines.MachineName: URL] {
         Dictionary(uniqueKeysWithValues: self.dependencies.map {
             (
@@ -91,17 +96,21 @@ extension MetaMachine {
         })
     }
 
+    /// Fetch the VHDL driving clock from this machines attributes.
     var vhdlDrivingClock: Int {
         guard
             self.attributes.count == 4,
             let clock = self.attributes[0].attributes["driving_clock"]?.enumeratedValue,
-            let index = self.attributes[0].attributes["clocks"]?.tableValue.firstIndex(where: { $0[0].lineValue == clock })
+            let index = self.attributes[0].attributes["clocks"]?.tableValue.firstIndex(where: {
+                $0[0].lineValue == clock
+            })
         else {
             fatalError("Cannot retrieve driving clock")
         }
         return index
     }
 
+    /// Fetch the VHDL external signals from this machines attributes.
     var vhdlExternalSignals: [ExternalSignal] {
         guard
             self.attributes.count == 4,
@@ -110,19 +119,27 @@ extension MetaMachine {
             fatalError("Cannot retrieve external signals")
         }
         return signals.map {
-            let value = $0[3].expressionValue == "" ? nil : $0[3].expressionValue
-            let comment = $0[4].lineValue == "" ? nil : $0[4].lineValue
+            let value = $0[3].expressionValue.isEmpty ? nil : $0[3].expressionValue
+            let comment = $0[4].lineValue.isEmpty ? nil : $0[4].lineValue
             guard let mode = Mode(rawValue: $0[0].enumeratedValue) else {
                 fatalError("Cannot convert Mode!")
             }
-            return ExternalSignal(type: $0[1].expressionValue, name: $0[2].lineValue, mode: mode, defaultValue: value, comment: comment)
+            return ExternalSignal(
+                type: $0[1].expressionValue,
+                name: $0[2].lineValue,
+                mode: mode,
+                defaultValue: value,
+                comment: comment
+            )
         }
     }
 
+    /// Fetch the VHDL generics from this machines attributes.
     var vhdlGenerics: [VHDLVariable] {
         self.vhdlVariables(for: "generics")
     }
 
+    /// Fetch the VHDL includes from this machines attributes.
     var vhdlIncludes: [String] {
         guard
             self.attributes.count == 4,
@@ -135,6 +152,7 @@ extension MetaMachine {
         }
     }
 
+    /// Fetch the VHDL isParameterised property from this machines attributes.
     var vhdlIsParameterised: Bool {
         guard let isParameterised = self.attributes[1].attributes["is_parameterised"]?.boolValue else {
             fatalError("Cannot discern if machine is parameterised")
@@ -142,6 +160,7 @@ extension MetaMachine {
         return isParameterised
     }
 
+    /// Fetch the VHDL machine signals from this machines attributes.
     var vhdlMachineSignals: [MachineSignal] {
         guard
             self.attributes.count == 4,
@@ -153,12 +172,13 @@ extension MetaMachine {
             MachineSignal(
                 type: $0[0].expressionValue,
                 name: $0[1].lineValue,
-                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
-                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+                defaultValue: $0[2].expressionValue.isEmpty ? nil : $0[2].expressionValue,
+                comment: $0[3].lineValue.isEmpty ? nil : $0[3].lineValue
             )
         }
     }
 
+    /// Fetch the VHDL machine variables from this machines attributes.
     var vhdlMachineVariables: [VHDLVariable] {
         guard
             self.attributes.count == 4,
@@ -171,40 +191,48 @@ extension MetaMachine {
                 return VHDLVariable(
                     type: $0[0].expressionValue,
                     name: $0[3].lineValue,
-                    defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                    defaultValue: $0[4].expressionValue.isEmpty ? nil : $0[4].expressionValue,
                     range: nil,
-                    comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                    comment: $0[5].lineValue.isEmpty ? nil : $0[5].lineValue
                 )
             }
             return VHDLVariable(
                 type: $0[0].expressionValue,
                 name: $0[3].lineValue,
-                defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                defaultValue: $0[4].expressionValue.isEmpty ? nil : $0[4].expressionValue,
                 range: (range0, range1),
-                comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                comment: $0[5].lineValue.isEmpty ? nil : $0[5].lineValue
             )
         }
     }
 
+    /// Fetch the VHDL parameter signals from this machines attributes.
     var vhdlParameterSignals: [Parameter] {
         self.vhdlParameters(for: "parameter_signals")
     }
 
+    /// Fetch the VHDL returnable signals from this machines attributes.
     var vhdlReturnableSignals: [ReturnableVariable] {
         self.vhdlParameterOutputs(for: "returnable_signals")
     }
 
+    /// Convert the transitions of this machine into the `VHDLMachines.Transition` format.
     var vhdlTransitions: [VHDLMachines.Transition] {
         self.states.indices.flatMap { stateIndex in
             self.states[stateIndex].transitions.map { transition in
                 guard let targetIndex = self.states.firstIndex(where: { transition.target == $0.name }) else {
-                    fatalError("Cannot find target state \(transition.target) for transition \(transition) from state \(self.states[stateIndex].name)")
+                    fatalError("Cannot find target state \(transition.target) for transition \(transition)" +
+                        " from state \(self.states[stateIndex].name)")
                 }
-                return VHDLMachines.Transition(condition: transition.condition ?? "true", source: stateIndex, target: targetIndex)
+                return VHDLMachines.Transition(
+                    condition: transition.condition ?? "true", source: stateIndex, target: targetIndex
+                )
             }
         }
     }
 
+    /// Initialise a `MetaMachine` from a `VHDLMachines.Machine`.
+    /// - Parameter machine: The `VHDLMachines.Machine` to convert to a `MetaMachine`.
     public init(vhdl machine: VHDLMachines.Machine) {
         self.init(
             semantics: .vhdl,
@@ -219,19 +247,28 @@ extension MetaMachine {
         )
     }
 
+    /// Create an initial MetaMachine that uses the VHDL semantics.
+    /// - Parameter filePath: The file path to the new machine.
+    /// - Returns: An initial `MetaMachine` that uses the VHDL semantics.
     public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
         MetaMachine(vhdl: VHDLMachines.Machine.initial(path: filePath))
     }
 
+    /// Fetch the code values from the includes attribute group.
+    /// - Parameter key: The key of the attribute to fetch within the group.
+    /// - Returns: The code value.
     private func vhdlCodeIncludes(for key: String) -> String? {
         guard
             let val = self.attributes.first(where: { $0.name == "includes" })?.attributes[key]?.codeValue
         else {
             return nil
         }
-        return val == "" ? nil : val
+        return val.isEmpty ? nil : val
     }
 
+    /// Fetch the parameter outputs from the attribute group.
+    /// - Parameter key: The name of the key in the parameters attribute to fetch.
+    /// - Returns: The ReturnableVariable values at the key.
     private func vhdlParameterOutputs(for key: String) -> [ReturnableVariable] {
         guard
             self.attributes.count == 4,
@@ -241,10 +278,15 @@ extension MetaMachine {
         }
         return returns.map {
             let comment = $0[2].lineValue
-            return ReturnableVariable(type: $0[0].expressionValue, name: $0[1].lineValue, comment: comment == "" ? nil : comment)
+            return ReturnableVariable(
+                type: $0[0].expressionValue, name: $0[1].lineValue, comment: comment.isEmpty ? nil : comment
+            )
         }
     }
 
+    /// Fetch VHDL parameters from the attribute group.
+    /// - Parameter key: The key of the attribute to fetch.
+    /// - Returns: The parameters located at the key.
     private func vhdlParameters(for key: String) -> [Parameter] {
         guard
             self.attributes.count == 4,
@@ -256,12 +298,15 @@ extension MetaMachine {
             Parameter(
                 type: $0[0].expressionValue,
                 name: $0[1].lineValue,
-                defaultValue: $0[2].expressionValue == "" ? nil : $0[2].expressionValue,
-                comment: $0[3].lineValue == "" ? nil : $0[3].lineValue
+                defaultValue: $0[2].expressionValue.isEmpty ? nil : $0[2].expressionValue,
+                comment: $0[3].lineValue.isEmpty ? nil : $0[3].lineValue
             )
         }
     }
 
+    /// Fetch the VHDL Variables within the variables attribute group.
+    /// - Parameter key: The key of the attribute to fetch.
+    /// - Returns: The variables located at the key.
     private func vhdlVariables(for key: String) -> [VHDLVariable] {
         guard
             self.attributes.count == 4,
@@ -274,17 +319,17 @@ extension MetaMachine {
                 return VHDLVariable(
                     type: $0[0].expressionValue,
                     name: $0[3].lineValue,
-                    defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                    defaultValue: $0[4].expressionValue.isEmpty ? nil : $0[4].expressionValue,
                     range: nil,
-                    comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                    comment: $0[5].lineValue.isEmpty ? nil : $0[5].lineValue
                 )
             }
             return VHDLVariable(
                 type: $0[0].expressionValue,
                 name: $0[3].lineValue,
-                defaultValue: $0[4].expressionValue == "" ? nil : $0[4].expressionValue,
+                defaultValue: $0[4].expressionValue.isEmpty ? nil : $0[4].expressionValue,
                 range: (range0, range1),
-                comment: $0[5].lineValue == "" ? nil : $0[5].lineValue
+                comment: $0[5].lineValue.isEmpty ? nil : $0[5].lineValue
             )
         }
     }
