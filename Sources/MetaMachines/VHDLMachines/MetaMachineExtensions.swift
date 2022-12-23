@@ -60,7 +60,33 @@ import VHDLMachines
 extension VHDLMachines.Machine {
 
     public init(machine: MetaMachine) throws {
-        self = try VHDLMachinesConverter().convert(machine: machine)
+        let validator = VHDLMachinesValidator()
+        try validator.validate(machine: machine)
+        let vhdlStates = machine.states.map(VHDLMachines.State.init)
+        let suspendedState = machine.attributes.first { $0.name == "settings" }?.attributes["suspended_state"]?.enumeratedValue
+        let suspendedStateName = suspendedState == "" ? nil : suspendedState
+        let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
+        self.init(
+            name: machine.name,
+            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true), //fix later
+            includes: machine.vhdlIncludes,
+            externalSignals: machine.vhdlExternalSignals,
+            generics: machine.vhdlVariables(for: "generics"),
+            clocks: machine.vhdlClocks,
+            drivingClock: machine.vhdlDrivingClock,
+            dependentMachines: [:],//getDependentMachines(machine: machine),
+            machineVariables: machine.vhdlMachineVariables,
+            machineSignals: machine.vhdlMachineSignals,
+            isParameterised: machine.vhdlIsParameterised,
+            parameterSignals: machine.vhdlParameters(for: "parameter_signals"),
+            returnableSignals: machine.vhdlParameterOutputs(for: "returnable_signals"),
+            states: machine.states.map(VHDLMachines.State.init),
+            transitions: machine.vhdlTransitions,
+            initialState: machine.states.firstIndex(where: { machine.initialState == $0.name }) ?? 0,
+            suspendedState: suspendedIndex,
+            architectureHead: machine.vhdlCodeIncludes(for: "architecture_head"),
+            architectureBody: machine.vhdlCodeIncludes(for: "architecture_body")
+        )
     }
 
 }

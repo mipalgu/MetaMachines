@@ -245,7 +245,7 @@ final class VHDLMachinesConverterStatesTests: XCTestCase {
 
     /// Test converter creates correct machine.
     func testConverterProducesMachine() throws {
-        let vhdlMachine = try converter.convert(machine: machine)
+        let vhdlMachine = try VHDLMachines.Machine(machine: machine)
         let states = [
             VHDLMachines.State(
                 name: "Initial",

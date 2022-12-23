@@ -187,11 +187,26 @@ extension MetaMachine {
     }
 
     public init(vhdl machine: VHDLMachines.Machine) {
-        self = VHDLMachinesConverter().toMachine(machine: machine)
+        self.init(
+            semantics: .vhdl,
+            name: machine.name,
+            initialState: machine.states[machine.initialState].name,
+            states: machine.states.map { State(vhdl: $0, in: machine) },
+            dependencies: [],
+            attributes: machine.attributes,
+            metaData: []
+        )
     }
 
     public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
-        VHDLMachinesConverter().toMachine(machine: VHDLMachines.Machine.initial(path: filePath))
+        MetaMachine(vhdl: VHDLMachines.Machine.initial(path: filePath))
+    }
+
+    func vhdlCodeIncludes(for key: String) -> String? {
+        guard let val = self.attributes[1].attributes[key]?.codeValue else {
+            return nil
+        }
+        return val == "" ? nil : val
     }
 
     func vhdlParameterOutputs(for key: String) -> [ReturnableVariable] {

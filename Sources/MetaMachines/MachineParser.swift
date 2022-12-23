@@ -89,7 +89,7 @@ public final class MachineParser {
             guard let vhdlMachine = VHDLParser().parse(wrapper: wrapper) else {
                 return nil
             }
-            return VHDLMachinesConverter().toMachine(machine: vhdlMachine)
+            return MetaMachine(vhdl: vhdlMachine)
         }
         if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
             return parseCXXMachine(wrapper: wrapper)

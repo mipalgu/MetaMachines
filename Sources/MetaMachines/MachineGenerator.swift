@@ -117,7 +117,7 @@ public final class MachineGenerator {
         case .vhdl:
             let vhdlMachine: VHDLMachines.Machine
             do {
-                vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
+                vhdlMachine = try VHDLMachines.Machine(machine: machine)
             } catch let e as ConversionError<MetaMachine> {
                 self.errors.append(e.message)
                 return nil

@@ -103,7 +103,7 @@ final class MachineParserTests: XCTestCase {
             forSemantics: .vhdl,
             filePath: machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
         )
-        let vhdlMachine = try VHDLMachinesConverter().convert(machine: machine)
+        let vhdlMachine = try VHDLMachines.Machine(machine: machine)
         guard let wrapper = VHDLMachines.VHDLGenerator().generate(machine: vhdlMachine) else {
             XCTFail("Failed to generate wrapper.")
             return

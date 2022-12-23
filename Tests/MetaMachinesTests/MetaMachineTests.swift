@@ -151,7 +151,7 @@ final class MetaMachineTests: XCTestCase {
         )
         XCTAssertEqual(
             MetaMachine.initialMachine(forSemantics: .vhdl),
-            VHDLMachinesConverter().toMachine(machine: VHDLMachines.Machine.initial(path: path))
+            MetaMachine(vhdl: VHDLMachines.Machine.initial(path: path))
         )
     }
 

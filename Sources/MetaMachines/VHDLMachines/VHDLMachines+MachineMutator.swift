@@ -9,7 +9,7 @@ import Foundation
 import Attributes
 import VHDLMachines
 
-extension VHDLMachinesConverter: MachineMutator {
+struct VHDLMachinesConverter: MachineMutator {
     
     
     var dependencyLayout: [Field] {
