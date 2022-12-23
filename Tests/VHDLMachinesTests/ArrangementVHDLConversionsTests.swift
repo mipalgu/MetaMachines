@@ -1,4 +1,4 @@
-// Arrangement+VHDLConversions.swift 
+// ArrangementVHDLConversionsTests.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -54,26 +54,51 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
+@testable import MetaMachines
 import VHDLMachines
+import XCTest
 
-/// Add initialiser for VHDL Arrangement.
-extension Arrangement {
+/// Test class for ``Arrangement`` VHDL conversions.
+final class ArrangementVHDLConversionsTests: XCTestCase {
 
-    /// Initialise an `Arrangement` from a `VHDLMachines.Arrangement`.
-    /// - Parameter arrangement: The VHDL arrangement.
-    public init(vhdl arrangement: VHDLMachines.Arrangement) {
-        self.init(
+    /// Test vhdl init converts machine correctly.
+    func testVHDLArrangementInit() {
+        let machine1Path = URL(fileURLWithPath: "/path/to/machine1.machine", isDirectory: true)
+        let machine2Path = URL(fileURLWithPath: "/path/to/machine2.machine", isDirectory: true)
+        let machines = ["machine1": machine1Path, "machine2": machine2Path]
+        let signals = [
+            ExternalSignal(type: "std_logic", name: "x", mode: .input),
+            ExternalSignal(type: "std_logic", name: "y", mode: .output)
+        ]
+        let variables = [
+            VHDLVariable(
+                type: "integer", name: "a", defaultValue: "1", range: (0, 255), comment: "A variable"
+            ),
+            VHDLVariable(
+                type: "integer", name: "b", defaultValue: "2", range: (0, 128), comment: "Another variable"
+            )
+        ]
+        let clocks = [
+            Clock(name: "clk0", frequency: 50, unit: .MHz), Clock(name: "clk1", frequency: 1, unit: .GHz)
+        ]
+        let url = URL(fileURLWithPath: "/path/to/Arrangement0.arrangement", isDirectory: true)
+        let vhdlArrangement = VHDLMachines.Arrangement(
+            machines: machines,
+            externalSignals: signals,
+            externalVariables: variables,
+            clocks: clocks,
+            parents: ["machine2"],
+            path: url
+        )
+        let arrangement = Arrangement(vhdl: vhdlArrangement)
+        let expected = Arrangement(
             semantics: .swiftfsm,
-            name: arrangement.path.lastPathComponent.components(separatedBy: ".")[0],
-            dependencies: arrangement.parents.compactMap {
-                guard let path = arrangement.machines[$0] else {
-                    return nil
-                }
-                return MachineDependency(relativePath: path.relativePathString(relativeto: arrangement.path))
-            },
+            name: "Arrangement0",
+            dependencies: [MachineDependency(relativePath: "machine2.machine")],
             attributes: [],
             metaData: []
         )
+        XCTAssertEqual(arrangement, expected)
     }
 
 }
