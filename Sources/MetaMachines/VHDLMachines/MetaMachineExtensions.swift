@@ -59,7 +59,7 @@ import VHDLMachines
 
 extension MetaMachine {
 
-    public func initialVHDLMachine(filePath: URL) -> MetaMachine {
+    public static func initialVHDLMachine(filePath: URL) -> MetaMachine {
         VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
     }
 
