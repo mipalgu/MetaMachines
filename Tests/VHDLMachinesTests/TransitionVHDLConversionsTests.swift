@@ -1,4 +1,4 @@
-// Transition+VHDLConversions.swift 
+// TransitionVHDLConversionsTests.swift 
 // MetaMachines 
 // 
 // Created by Morgan McColl.
@@ -54,23 +54,22 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
+@testable import MetaMachines
 import VHDLMachines
+import XCTest
 
-/// Add initialiser from `VHDLMachines.Transition`.
-extension Transition {
+/// Test class for ``Transition`` VHDL conversions.
+final class TransitionVHDLConversionsTests: XCTestCase {
 
-    /// Initialise a `Transition` from a `VHDLMachines.Transition`.
-    /// - Parameters:
-    ///   - transition: The `VHDLMachines.Transition` to initialise from.
-    ///   - machine: The `VHDLMachines.Machine` containing the states that the `VHDLMachines.Transition`
-    /// refers to.
-    public init(vhdl transition: VHDLMachines.Transition, in machine: VHDLMachines.Machine) {
-        self.init(
-            condition: transition.condition,
-            target: machine.states[transition.target].name,
-            attributes: [],
-            metaData: []
+    /// Test init from VHDL Transition.
+    func testVHDLInit() {
+        let vhdlTransition = VHDLMachines.Transition(condition: "true", source: 0, target: 1)
+        let vhdlMachine = VHDLMachines.Machine.initial(
+            path: URL(fileURLWithPath: "/path/to/Machine0.machine", isDirectory: true)
         )
+        let transition = Transition(vhdl: vhdlTransition, in: vhdlMachine)
+        let expected = Transition(condition: "true", target: "Suspended", attributes: [], metaData: [])
+        XCTAssertEqual(transition, expected)
     }
 
 }
