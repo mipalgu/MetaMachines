@@ -62,7 +62,7 @@ import Foundation
 /// A state represents a group of actions the execute in a specific order. A machine can have multiple states
 /// and may transition between them using a states transitions.
 /// - SeeAlso: ``Transition``, ``Action``.
-public struct State: Hashable, Codable, Identifiable {
+public struct State: Equatable, Hashable, Codable, Identifiable {
 
     /// The id of this state. This is the same as the name.
     public var id: StateName {
@@ -110,6 +110,20 @@ public struct State: Hashable, Codable, Identifiable {
     /// - Returns: All the transitions that have this state as the target.
     public func targetTransitions(in machine: MetaMachine) -> [Transition] {
         machine.states.flatMap { $0.transitions.filter { $0.target == name } }
+    }
+
+    /// Equality function.
+    /// - Parameters:
+    ///   - lhs: The state on the left hand side of the equation.
+    ///   - rhs: The state on the right hand side of the equation.
+    /// - Returns: Whether lhs is equal to rhs.
+    /// - Warning: This form of equality assumes that the action order doesn't matter. If you need to check
+    /// for this level of equality, then you should implement your own equality function.
+    public static func == (lhs: State, rhs: State) -> Bool {
+        let lhsActions = lhs.actions.sorted { $0.name < $1.name }
+        let rhsActions = rhs.actions.sorted { $0.name < $1.name }
+        return lhs.name == rhs.name && lhsActions == rhsActions && lhs.transitions == rhs.transitions &&
+            lhs.attributes == rhs.attributes && lhs.metaData == rhs.metaData
     }
 
 }
