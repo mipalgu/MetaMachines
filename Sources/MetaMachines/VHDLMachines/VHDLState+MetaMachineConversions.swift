@@ -57,8 +57,42 @@
 import Attributes
 import VHDLMachines
 
+/// Add conversions to MetaMachine types.
 extension VHDLMachines.State {
 
+    /// The `Attributes.AttributeGroup` that represents the action settings for this state.
+    private var actionsGroup: AttributeGroup {
+        AttributeGroup(
+            name: "actions",
+            fields: [
+                Field(name: "action_names", type: .table(columns: [
+                    ("name", .line)
+                ])),
+                Field(name: "action_order", type: .table(columns: [
+                    ("timeslot", .integer),
+                    ("action", .enumerated(validValues: Set(self.actions.keys)))
+                ]))
+            ],
+            attributes: [
+                "action_names": .table(self.actions.keys.sorted().map { [LineAttribute.line($0)] }, columns: [
+                    ("name", .line)
+                ]),
+                "action_order": .table(
+                    self.actionOrder.toLineAttribute(
+                        validValues: Set(self.actions.keys)
+                    ),
+                    columns: [
+                        ("timeslot", .integer),
+                        ("action", .enumerated(validValues: Set(self.actions.keys)))
+                    ]
+                )
+            ],
+            metaData: [:]
+        )
+    }
+
+    /// Create a new `VHDLMachines.State` from a ``MetaMachine.State``.
+    /// - Parameter state: The ``MetaMachine.State`` to convert.
     public init(state: State) {
         self.init(
             name: state.name,
@@ -70,10 +104,22 @@ extension VHDLMachines.State {
         )
     }
 
+    /// The attributes of this state. These attributes can be used to specify additional properties for a
+    /// state in a ``MetaMachine``.
+    /// - Parameter machine: The machine this state belongs too.
+    /// - Returns: The attributes of this state.
     func attributes(for machine: VHDLMachines.Machine) -> [AttributeGroup] {
-        var attributes: [AttributeGroup] = []
-        let externals = machine.externalSignals.map { $0.name }
-        let variables = AttributeGroup(
+        [
+            variablesGroup(externals: machine.externalSignals.map { $0.name }),
+            actionsGroup
+        ]
+    }
+
+    /// Create a new `Attributes.AttributeGroup` for the variables of this state.
+    /// - Parameter externals: The external signals available to this state.
+    /// - Returns: The variable AttributeGroup.
+    private func variablesGroup(externals: [String]) -> AttributeGroup {
+        AttributeGroup(
             name: "variables",
             fields: [
                 Field(name: "externals", type: .enumerableCollection(
@@ -119,31 +165,6 @@ extension VHDLMachines.State {
             ],
             metaData: [:]
         )
-        attributes.append(variables)
-        let order = AttributeGroup(
-            name: "actions",
-            fields: [
-                Field(name: "action_names", type: .table(columns: [
-                    ("name", .line)
-                ])),
-                Field(name: "action_order", type: .table(columns: [
-                    ("timeslot", .integer),
-                    ("action", .enumerated(validValues: Set(self.actions.keys)))
-                ]))
-            ],
-            attributes: [
-                "action_names": .table(self.actions.keys.sorted().map { [LineAttribute.line($0)] }, columns: [
-                    ("name", .line)
-                ]),
-                "action_order": .table(self.actionOrder.toLineAttribute(validValues: Set(self.actions.keys)), columns: [
-                    ("timeslot", .integer),
-                    ("action", .enumerated(validValues: Set(self.actions.keys)))
-                ])
-            ],
-            metaData: [:]
-        )
-        attributes.append(order)
-        return attributes
     }
 
 }
