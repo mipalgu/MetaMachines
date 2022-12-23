@@ -58,15 +58,22 @@ import Attributes
 import Foundation
 import VHDLMachines
 
+/// Add conversion properties to create MetaMachine objects.
 extension VHDLMachines.Machine {
 
+    /// The attributes that match the current instance of this machine.
     var attributes: [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let variableFields: [Field] = [
             Field(name: "clocks", type: .table(columns: [
                 ("name", .line),
                 ("frequency", .integer),
-                ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                (
+                    "unit",
+                    .enumerated(
+                        validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })
+                    )
+                )
             ])),
             Field(name: "external_signals", type: .table(columns: [
                 ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
@@ -105,7 +112,12 @@ extension VHDLMachines.Machine {
                 columns: [
                     ("name", .line),
                     ("frequency", .integer),
-                    ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                    (
+                        "unit",
+                        .enumerated(
+                            validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })
+                        )
+                    )
                 ]
             ),
             "external_signals": .table(
@@ -149,7 +161,9 @@ extension VHDLMachines.Machine {
                     ("comment", .line)
                 ]
             ),
-            "driving_clock": .enumerated(self.clocks[self.drivingClock].name, validValues: Set(self.clocks.map { $0.name }))
+            "driving_clock": .enumerated(
+                self.clocks[self.drivingClock].name, validValues: Set(self.clocks.map { $0.name })
+            )
         ]
         let variables = AttributeGroup(
             name: "variables",
@@ -215,12 +229,22 @@ extension VHDLMachines.Machine {
         let settings = AttributeGroup(
             name: "settings",
             fields: [
-                Field(name: "initial_state", type: .enumerated(validValues: Set([""] + self.states.map(\.name)))),
-                Field(name: "suspended_state", type: .enumerated(validValues: Set([""] + self.states.map(\.name))))
+                Field(
+                    name: "initial_state", type: .enumerated(validValues: Set([""] + self.states.map(\.name)))
+                ),
+                Field(
+                    name: "suspended_state",
+                    type: .enumerated(validValues: Set([""] + self.states.map(\.name)))
+                )
             ],
             attributes: [
-                "initial_state": .enumerated(self.states[self.initialState].name, validValues: Set(self.states.map(\.name) + [""])),
-                "suspended_state": .enumerated(self.suspendedState.map { self.states[$0].name } ?? "", validValues: Set([""] + self.states.map(\.name)))
+                "initial_state": .enumerated(
+                    self.states[self.initialState].name, validValues: Set(self.states.map(\.name) + [""])
+                ),
+                "suspended_state": .enumerated(
+                    self.suspendedState.map { self.states[$0].name } ?? "",
+                    validValues: Set([""] + self.states.map(\.name))
+                )
             ],
             metaData: [:]
         )
@@ -228,13 +252,20 @@ extension VHDLMachines.Machine {
         return attributes
     }
 
+    /// Create a `VHDLMachines.Machine` for the given `MetaMachine`.
+    /// - Parameter machine: The meta machine to convert.
     public init(machine: MetaMachine) {
         // let validator = VHDLMachinesValidator()
         // try validator.validate(machine: machine)
         let vhdlStates = machine.states.map(VHDLMachines.State.init)
-        let suspendedState = machine.attributes.first { $0.name == "settings" }?.attributes["suspended_state"]?.enumeratedValue
-        let suspendedStateName = suspendedState == "" ? nil : suspendedState
-        let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex { $0.name == suspendedStateName! }
+        let suspendedState = machine.attributes.first { $0.name == "settings" }?
+            .attributes["suspended_state"]?
+            .enumeratedValue
+        let suspendedStateName = (suspendedState?.isEmpty ?? true) ? nil : suspendedState
+        let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex {
+            // swiftlint:disable:next force_unwrapping
+            $0.name == suspendedStateName!
+        }
         self.init(
             name: machine.name,
             path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true),
@@ -251,7 +282,7 @@ extension VHDLMachines.Machine {
             returnableSignals: machine.vhdlReturnableSignals,
             states: machine.states.map(VHDLMachines.State.init),
             transitions: machine.vhdlTransitions,
-            initialState: machine.states.firstIndex(where: { machine.initialState == $0.name }) ?? 0,
+            initialState: (machine.states.firstIndex { machine.initialState == $0.name }) ?? 0,
             suspendedState: suspendedIndex,
             architectureHead: machine.vhdlArchitectureHead,
             architectureBody: machine.vhdlArchitectureBody
