@@ -419,6 +419,7 @@ final class VHDLMachinesConverterTests: XCTestCase {
         XCTAssertEqual(attributes, stateAttributes)
     }
 
+    /// Test initial machine is set up correctly.
     func testInitialMachine() {
         let machine = converter.initialVHDLMachine(
             filePath: URL(fileURLWithPath: "Test.machine", isDirectory: true)
@@ -449,15 +450,7 @@ final class VHDLMachinesConverterTests: XCTestCase {
             attributes: machineAttributes,
             metaData: []
         )
-        XCTAssertEqual(expected.states.count, machine.states.count)
-        zip(expected.states, machine.states).forEach { exp, mach in
-            XCTAssertEqual(exp.actions, mach.actions)
-            XCTAssertEqual(exp.metaData, mach.metaData)
-            XCTAssertEqual(exp.attributes, mach.attributes)
-            XCTAssertEqual(exp.name, mach.name)
-            XCTAssertEqual(exp.transitions, mach.transitions)
-        }
-        // XCTAssertEqual(expected, machine)
+        XCTAssertEqual(expected, machine)
     }
 
     /// Test converter creates correct machine.
