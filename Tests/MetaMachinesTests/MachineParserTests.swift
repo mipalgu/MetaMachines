@@ -104,7 +104,9 @@ final class MachineParserTests: XCTestCase {
 
     /// Test that the parser can parse VHDL machines. 
     func testParseVHDLMachines() throws {
-        try writeAndReadMachine(.vhdl)
+        try writeAndReadMachine(.vhdl) {
+            MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: $0))
+        }
     }
 
     // /// Test all semantics can be parsed.
@@ -122,13 +124,16 @@ final class MachineParserTests: XCTestCase {
     /// ``MachineParser``.
     /// - Parameters:
     ///   - semantics: The semantics of the machine to parse.
-    private func writeAndReadMachine(_ semantics: MetaMachine.Semantics) throws {
+    private func writeAndReadMachine(
+        _ semantics: MetaMachine.Semantics, _ newMachine: ((URL) -> MetaMachine)? = nil
+    ) throws {
+        let newMachine = newMachine ?? { MetaMachine.initialMachine(forSemantics: semantics, filePath: $0) }
         let url = machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
         let url1 = machineFolder.appendingPathComponent("Untitled1.machine", isDirectory: true)
         let url2 = machineFolder.appendingPathComponent("Untitled2.machine", isDirectory: true)
-        let machine = MetaMachine.initialMachine(forSemantics: semantics, filePath: url)
-        let machine1 = MetaMachine.initialMachine(forSemantics: semantics, filePath: url1)
-        let machine2 = MetaMachine.initialMachine(forSemantics: semantics, filePath: url2)
+        let machine = newMachine(url)
+        let machine1 = newMachine(url1)
+        let machine2 = newMachine(url2)
         let wrapper = try machine.fileWrapper()
         let wrapper1 = try machine1.fileWrapper()
         let wrapper2 = try machine2.fileWrapper()
