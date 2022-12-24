@@ -55,8 +55,8 @@
 // 
 
 import Attributes
-@testable import MetaMachines
 import IO
+@testable import MetaMachines
 import VHDLMachines
 import XCTest
 
