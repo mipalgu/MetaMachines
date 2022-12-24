@@ -5,8 +5,8 @@
 //  Created by Morgan McColl on 23/7/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 import VHDLMachines
 
 struct VHDLVariablesGroup: GroupProtocol {
@@ -17,20 +17,25 @@ struct VHDLVariablesGroup: GroupProtocol {
     
     @TriggerBuilder<MetaMachine>
     var trigger: some TriggerProtocol {
-        //Trigger for adding and deleting clocks
-        WhenChanged(clocks).sync(target: path.attributes["driving_clock"].wrappedValue, transform: { (clocksAttribute, oldValue) in
+        newClock
+        // Need to add trigger for renaming clock
+        // Need to add trigger for CUD operations on external variables -> Affects state external vars
+    }
+
+    private var newClock: AnyTrigger<MetaMachine> {
+        AnyTrigger(WhenChanged(clocks).sync(
+            target: path.attributes["driving_clock"].wrappedValue
+        ) { clocksAttribute, oldValue in
             let validValues = Set(clocksAttribute.tableValue.map { clockLine in
                 clockLine[0].lineValue
             })
             let enumeratedOldValue = oldValue.enumeratedValue
-            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue : validValues.first ?? ""
+            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
+                validValues.first ?? ""
             return Attribute.enumerated(selected, validValues: validValues)
         })
-        //Need to add trigger for renaming clock
-        
-        //Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
-    
+
     @TableProperty(
         label: "clocks",
         columns: [
