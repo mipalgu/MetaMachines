@@ -56,6 +56,7 @@
 
 import Attributes
 @testable import MetaMachines
+import IO
 import VHDLMachines
 import XCTest
 
@@ -100,6 +101,18 @@ final class MetaMachineTests: XCTestCase {
 
     /// Fake meta data.
     let metaData = [AttributeGroup(name: "Group 2")]
+
+    /// A File helper.
+    let helper = FileHelpers()
+
+    /// The path to the package root.
+    let packageRootPath = URL(fileURLWithPath: #file)
+        .pathComponents.prefix { $0 != "Tests" }.joined(separator: "/").dropFirst()
+
+    /// A path to the machines folder.
+    var machineFolder: URL {
+        URL(fileURLWithPath: "\(packageRootPath)/Tests/MetaMachinesTests/machines", isDirectory: true)
+    }
 
     /// Initialise MetaMachine.
     override func setUp() {
@@ -252,6 +265,26 @@ final class MetaMachineTests: XCTestCase {
         }
         let decoder = JSONDecoder()
         XCTAssertNoThrow(try decoder.decode(VHDLMachines.Machine.self, from: contents))
+    }
+
+    /// Test MetaMachine doesn't corrupt data when using FileWrapper initialiser.
+    func testFileWrapperInit() throws {
+        let machine = MetaMachine.initialMachine(forSemantics: .vhdl)
+        let wrapper = try machine.fileWrapper()
+        let decodedMachine = try MetaMachine(from: wrapper)
+        XCTAssertEqual(decodedMachine, machine)
+    }
+
+    /// Test URL initialiser doesn't corrupt data.
+    func testURLInit() throws {
+        XCTAssertTrue(helper.createDirectory(atPath: machineFolder))
+        defer {  _ = helper.deleteItem(atPath: machineFolder) }
+        let machineURL = machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
+        let machine = MetaMachine.initialMachine(forSemantics: .vhdl, filePath: machineURL)
+        let wrapper = try machine.fileWrapper()
+        try wrapper.write(to: machineFolder, options: .atomic, originalContentsURL: nil)
+        let decodedMachine = try MetaMachine(filePath: machineURL)
+        XCTAssertEqual(decodedMachine, machine)
     }
 
 }

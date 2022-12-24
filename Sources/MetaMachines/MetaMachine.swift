@@ -659,7 +659,7 @@ extension MetaMachine {
     
     public init(filePath: URL) throws {
         let parser = MachineParser()
-        guard let machine = parser.parseMachine(atPath: filePath.path) else {
+        guard let machine = parser.parseMachine(atURL: filePath) else {
             throw ConversionError(message: parser.lastError ?? "Unable to load machine at path \(filePath.path)", path: MetaMachine.path)
         }
         self = machine
