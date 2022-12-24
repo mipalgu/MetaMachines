@@ -26,10 +26,6 @@ let package = Package(
             dependencies: ["Attributes", "Machines"]),
         .testTarget(
             name: "MetaMachinesTests",
-            dependencies: ["MetaMachines"]),
-        .testTarget(
-            name: "VHDLMachinesTests",
-            dependencies: ["MetaMachines"]
-        )
+            dependencies: ["MetaMachines"])
     ]
 )
