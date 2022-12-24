@@ -16,12 +16,13 @@ struct VHDLVariablesGroup: GroupProtocol {
     let path = MetaMachine.path.attributes[0]
     
     @TriggerBuilder<MetaMachine>
-    var trigger: some TriggerProtocol {
+    var triggers: AnyTrigger<Root> {
         newClock
         // Need to add trigger for renaming clock
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
+    @TriggerBuilder<MetaMachine>
     private var newClock: AnyTrigger<MetaMachine> {
         AnyTrigger(WhenChanged(clocks).sync(
             target: path.attributes["driving_clock"].wrappedValue
