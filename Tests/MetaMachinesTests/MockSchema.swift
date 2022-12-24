@@ -107,6 +107,15 @@ final class MockSchema: MachineSchema {
         /// The `update` function.
         case update(metaMachine: MetaMachine)
 
+        /// The `makeValidator` function.
+        case makeValidator(root: MetaMachine)
+
+        /// The `groups` computed property.
+        case groups
+
+        /// The `trigger` computed property.
+        case trigger
+
     }
 
     /// The dependency layout.
@@ -239,6 +248,36 @@ final class MockSchema: MachineSchema {
         }
     }
 
+    /// All `makeValidator` function calls.
+    var makeValidatorCalls: [FunctionsCalled] {
+        functionsCalled.filter {
+            if case .makeValidator = $0 {
+                return true
+            }
+            return false
+        }
+    }
+
+    /// All `groups` function calls.
+    var groupsCalls: [FunctionsCalled] {
+        functionsCalled.filter {
+            if case .groups = $0 {
+                return true
+            }
+            return false
+        }
+    }
+
+    /// All `trigger` function calls.
+    var triggerCalls: [FunctionsCalled] {
+        functionsCalled.filter {
+            if case .trigger = $0 {
+                return true
+            }
+            return false
+        }
+    }
+
     /// The number of times `didCreateDependency` was called.
     var didCreateDependencyTimesCalled: Int {
         didCreateDependencyCalls.count
@@ -292,6 +331,33 @@ final class MockSchema: MachineSchema {
     /// The number of times `update` was called.
     var updateTimesCalled: Int {
         updateCalls.count
+    }
+
+    /// The number of times `makeValidator` was called.
+    var makeValidatorTimesCalled: Int {
+        makeValidatorCalls.count
+    }
+
+    /// The number of times `groups` was called.
+    var groupsTimesCalled: Int {
+        groupsCalls.count
+    }
+
+    /// The number of times `trigger` was called.
+    var triggerTimesCalled: Int {
+        triggerCalls.count
+    }
+
+    /// The `groups` computed property.
+    var groups: [AnyGroup<MetaMachine>] {
+        functionsCalled.append(.groups)
+        return []
+    }
+
+    /// The `trigger` computed property
+    var trigger: AnyTrigger<MetaMachine> {
+        functionsCalled.append(.trigger)
+        return AnyTrigger([])
     }
 
     /// Initialise this mock with a dependency layout.
@@ -407,6 +473,12 @@ final class MockSchema: MachineSchema {
     /// The `update` function.
     func update(from metaMachine: MetaMachine) {
         functionsCalled.append(.update(metaMachine: metaMachine))
+    }
+
+    /// The `makeValidator` function.
+    func makeValidator(root: MetaMachine) -> AnyValidator<MetaMachine> {
+        functionsCalled.append(.makeValidator(root: root))
+        return AnyValidator([])
     }
 
 }

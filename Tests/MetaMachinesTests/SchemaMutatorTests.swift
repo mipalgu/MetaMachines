@@ -62,19 +62,28 @@ import XCTest
 final class SchemaMutatorTests: XCTestCase {
 
     /// The mutator under test.
-    var mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
+    var mutator = SchemaMutator(schema: MockSchema(dependencyLayout: []))
+
+    /// A test machine.
+    var machine = MetaMachine.initialMachine(forSemantics: .vhdl)
+
+    /// A test dependency.
+    var dependency = MachineDependency(relativePath: "dependency")
 
     /// Initialise the mutator under test.
     override func setUp() {
-        self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
+        self.mutator = SchemaMutator(schema: MockSchema(dependencyLayout: []))
+        self.machine = MetaMachine.initialMachine(forSemantics: .vhdl)
+        self.dependency = MachineDependency(relativePath: "dependency")
     }
 
-    /// Test mutator gets dependency layout from schema.
-    func testDependencyLayoutGetter() {
+    /// Test mutator sets stored properties correctly.
+    func testInit() {
         let fields = [Field(name: "test", type: .line)]
-        let schema = VHDLSchema(dependencyLayout: fields)
+        let schema = MockSchema(dependencyLayout: fields)
         let mutator = SchemaMutator(schema: schema)
         XCTAssertEqual(mutator.dependencyLayout, fields)
+        XCTAssertIdentical(mutator.schema, schema)
     }
 
 }
