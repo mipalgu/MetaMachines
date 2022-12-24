@@ -57,8 +57,10 @@
 import Attributes
 import VHDLMachines
 
+/// Adds an attributes property for the ``Arrangement`` in `MetaMachines`.
 extension VHDLMachines.Arrangement {
 
+    /// The equivalent attributes for this arrangement.
     var attributes: [AttributeGroup] {
         var attributes: [AttributeGroup] = []
         let variables = AttributeGroup(
@@ -67,17 +69,26 @@ extension VHDLMachines.Arrangement {
                 Field(name: "clocks", type: .table(columns: [
                     ("name", .line),
                     ("frequency", .integer),
-                    ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                    (
+                        "unit",
+                        .enumerated(
+                            validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })
+                        )
+                    )
                 ])),
                 Field(name: "external_signals", type: .table(columns: [
                     ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
                     ("type", .expression(language: .vhdl)),
                     ("name", .line),
+                    ("value", .expression(language: .vhdl)),
                     ("comment", .line)
                 ])),
                 Field(name: "external_variables", type: .table(columns: [
                     ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
                     ("name", .line),
+                    ("value", .expression(language: .vhdl)),
                     ("comment", .line)
                 ]))
             ],
@@ -87,15 +98,26 @@ extension VHDLMachines.Arrangement {
                     columns: [
                         ("name", .line),
                         ("frequency", .integer),
-                        ("unit", .enumerated(validValues: Set(VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue })))
+                        (
+                            "unit",
+                            .enumerated(
+                                validValues: Set(
+                                    VHDLMachines.Clock.FrequencyUnit.allCases.map { $0.rawValue }
+                                )
+                            )
+                        )
                     ]
                 ),
                 "external_signals": .table(
                     self.externalSignals.map(\.toLineAttribute),
                     columns: [
-                        ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
+                        (
+                            "mode",
+                            .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))
+                        ),
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
+                        ("value", .expression(language: .vhdl)),
                         ("comment", .line)
                     ]
                 ),
@@ -103,7 +125,10 @@ extension VHDLMachines.Arrangement {
                     self.externalVariables.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
+                        ("lower_range", .line),
+                        ("upper_range", .line),
                         ("name", .line),
+                        ("value", .expression(language: .vhdl)),
                         ("comment", .line)
                     ]
                 )
