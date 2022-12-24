@@ -56,6 +56,7 @@
 
 import IO
 @testable import MetaMachines
+import SwiftMachines
 import VHDLMachines
 import XCTest
 
@@ -63,7 +64,7 @@ import XCTest
 final class MachineParserTests: XCTestCase {
 
     /// The parser under test.
-    var parser = MachineParser()
+    var parser = MetaMachines.MachineParser()
 
     /// A helper with IO.
     let helper = FileHelpers()
@@ -101,23 +102,45 @@ final class MachineParserTests: XCTestCase {
         XCTAssertNil(parser.lastError)
     }
 
-    /// Test that the parser can parse a VHDL FileWrapper. 
-    func testParseVHDLWrapper() throws {
-        let machine = MetaMachine.initialMachine(
-            forSemantics: .vhdl,
-            filePath: machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
-        )
-        let vhdlMachine = VHDLMachines.Machine(machine: machine)
-        guard let wrapper = VHDLMachines.VHDLGenerator().generate(machine: vhdlMachine) else {
-            XCTFail("Failed to generate wrapper.")
-            return
+    /// Test that the parser can parse VHDL machines. 
+    func testParseVHDLMachines() throws {
+        try writeAndReadMachine(.vhdl)
+    }
+
+    func testParseAllSemantics() throws {
+        try MetaMachine.supportedSemantics.forEach {
+            try writeAndReadMachine($0)
         }
+    }
+
+    /// Parse and test a machine for a given semantics. This method uses all 3 methods in the
+    /// ``MachineParser``.
+    /// - Parameters:
+    ///   - semantics: The semantics of the machine to parse.
+    private func writeAndReadMachine(_ semantics: MetaMachine.Semantics) throws {
+        let url = machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
+        let url1 = machineFolder.appendingPathComponent("Untitled1.machine", isDirectory: true)
+        let url2 = machineFolder.appendingPathComponent("Untitled2.machine", isDirectory: true)
+        let machine = MetaMachine.initialMachine(forSemantics: semantics, filePath: url)
+        let machine1 = MetaMachine.initialMachine(forSemantics: semantics, filePath: url1)
+        let machine2 = MetaMachine.initialMachine(forSemantics: semantics, filePath: url2)
+        let wrapper = try machine.fileWrapper()
+        let wrapper1 = try machine1.fileWrapper()
+        let wrapper2 = try machine2.fileWrapper()
         try wrapper.write(to: machineFolder, options: .atomic, originalContentsURL: nil)
-        guard let result = parser.parseMachine(fromWrapper: wrapper) else {
-            XCTFail("Failed to parse machine.")
-            return
+        try wrapper1.write(to: machineFolder, options: .atomic, originalContentsURL: nil)
+        try wrapper2.write(to: machineFolder, options: .atomic, originalContentsURL: nil)
+        defer {
+            _ = helper.deleteItem(atPath: url)
+            _ = helper.deleteItem(atPath: url1)
+            _ = helper.deleteItem(atPath: url2)
         }
-        XCTAssertEqual(result, machine)
+        let result = [
+            parser.parseMachine(fromWrapper: wrapper),
+            parser.parseMachine(atURL: url1),
+            parser.parseMachine(atPath: url2.path)
+        ]
+        XCTAssertEqual(result, [machine, machine1, machine2], "Failed for semantics \(semantics)")
     }
 
 }
