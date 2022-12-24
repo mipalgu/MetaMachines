@@ -88,6 +88,11 @@ final class MachineParserTests: XCTestCase {
     /// Initialises the parser under test.
     override func setUp() {
         self.parser = MachineParser()
+        _ = helper.createDirectory(atPath: machineFolder)
+    }
+
+    override func tearDown() {
+        _ = helper.deleteItem(atPath: machineFolder)
     }
 
     /// Test there are no errors when the parser is initialised.
@@ -96,14 +101,13 @@ final class MachineParserTests: XCTestCase {
         XCTAssertNil(parser.lastError)
     }
 
-    func testParseWrapper() throws {
-        _ = helper.createDirectory(atPath: machineFolder)
-        defer { _ = helper.deleteItem(atPath: machineFolder) }
+    /// Test that the parser can parse a VHDL FileWrapper. 
+    func testParseVHDLWrapper() throws {
         let machine = MetaMachine.initialMachine(
             forSemantics: .vhdl,
             filePath: machineFolder.appendingPathComponent("Untitled.machine", isDirectory: true)
         )
-        let vhdlMachine = try VHDLMachines.Machine(machine: machine)
+        let vhdlMachine = VHDLMachines.Machine(machine: machine)
         guard let wrapper = VHDLMachines.VHDLGenerator().generate(machine: vhdlMachine) else {
             XCTFail("Failed to generate wrapper.")
             return
@@ -113,37 +117,7 @@ final class MachineParserTests: XCTestCase {
             XCTFail("Failed to parse machine.")
             return
         }
-        // XCTAssertEqual(result.acceptingStates, machine.acceptingStates)
-        // XCTAssertEqual(result.attributes, machine.attributes)
-        XCTAssertEqual(result.dependencies, machine.dependencies)
-        XCTAssertEqual(result.dependencyAttributes, machine.dependencyAttributes)
-        XCTAssertEqual(result.dependencyAttributeType, machine.dependencyAttributeType)
-        XCTAssertEqual(result.initialState, machine.initialState)
-        XCTAssertEqual(result.metaData, machine.metaData)
-        XCTAssertEqual(result.name, machine.name)
-        XCTAssertEqual(result.path, machine.path)
-        XCTAssertEqual(result.semantics, machine.semantics)
-        guard result.states.count == machine.states.count else {
-            XCTFail("Failed to parse states.")
-            return
-        }
-        zip(result.states, machine.states).forEach{ lhs, rhs in
-            XCTAssertEqual(lhs.name, rhs.name)
-            XCTAssertEqual(lhs.transitions, rhs.transitions)
-            print(lhs.actions.map(\.name))
-            print(rhs.actions.map(\.name))
-            guard lhs.actions.count == rhs.actions.count else {
-                XCTFail("Failed to parse actions.")
-                return
-            }
-            zip(lhs.actions, rhs.actions).forEach{ lhs, rhs in
-                XCTAssertEqual(lhs.name, rhs.name)
-                XCTAssertEqual(lhs.implementation, rhs.implementation)
-                XCTAssertEqual(lhs.language, rhs.language)
-            }
-            XCTAssertEqual(lhs.attributes, rhs.attributes)
-            XCTAssertEqual(lhs.metaData, rhs.metaData)
-        }
+        XCTAssertEqual(result, machine)
     }
 
 }
