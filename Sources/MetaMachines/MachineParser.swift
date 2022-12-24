@@ -56,30 +56,42 @@
  *
  */
 
-import Foundation
-import SwiftMachines
 import CLFSMMachines
-import UCFSMMachines
 import CXXBase
-import VHDLMachines
+import Foundation
 import IO
+import SwiftMachines
+import UCFSMMachines
+import VHDLMachines
 
+/// A class that can parse machines located on the file system. This parser will create a ``MetaMachine``
+/// from a machine with a specific semantics.
 public final class MachineParser {
 
-    public fileprivate(set) var errors: [String] = []
+    /// The errors found when the machine was parsed.
+    public private(set) var errors: [String] = []
 
+    /// The last error found when the machine was parsed.
     public var lastError: String? {
         self.errors.last
     }
 
+    /// A swift parser.
     private let swiftParser: SwiftMachines.MachineParser
 
+    /// A helper for IO operations.
     private let helper = FileHelpers()
 
+    /// Creates a new ``MachineParser``.
+    /// - Parameter swiftParser: The parser to use for swift machines.
     public init(swiftParser: SwiftMachines.MachineParser = SwiftMachines.MachineParser()) {
         self.swiftParser = swiftParser
     }
 
+    /// Parses a machine from a file wrapper. The file wrapper should represent the machine folder.
+    /// - Parameter wrapper: The file wrapper to parse.
+    /// - Returns: A new ``MetaMachine`` that represents the data within the `FileWrapper`, or nil if the
+    /// parsing was unsucessful.
     public func parseMachine(fromWrapper wrapper: FileWrapper) -> MetaMachine? {
         self.errors = []
         guard let files = wrapper.fileWrappers else {
@@ -91,7 +103,7 @@ public final class MachineParser {
             }
             return MetaMachine(vhdl: vhdlMachine)
         }
-        if nil == wrapper.fileWrappers?["SwiftIncludePath"] {
+        if wrapper.fileWrappers?["SwiftIncludePath"] == nil {
             return parseCXXMachine(wrapper: wrapper)
         }
         guard let swiftMachine = self.swiftParser.parseMachine(wrapper) else {
@@ -101,6 +113,11 @@ public final class MachineParser {
         return MetaMachine(from: swiftMachine)
     }
 
+    /// Parses a machine located at a file path. The file path should point to the machine folder with a
+    /// *.machine* extension.
+    /// - Parameter path: The path to the machine folder.
+    /// - Returns: A new ``MetaMachine`` that represents the data within the machine folder, or nil if the
+    /// parsing was unsucessful.
     public func parseMachine(atPath path: String) -> MetaMachine? {
         guard
             helper.directoryExists(path),
@@ -111,6 +128,11 @@ public final class MachineParser {
         return self.parseMachine(fromWrapper: wrapper)
     }
 
+    /// Parses a machine located at a file URL. The file URL should point to the machine folder with a
+    /// *.machine* extension.
+    /// - Parameter url: The URL to the machine folder.
+    /// - Returns: A new ``MetaMachine`` that represents the data within the machine folder, or nil if the
+    /// parsing was unsucessful.
     public func parseMachine(atURL url: URL) -> MetaMachine? {
         guard
             helper.directoryExists(url.path),
@@ -167,17 +189,21 @@ public final class MachineParser {
     //     return MetaMachine(from: swiftMachine)
     // }
 
+    /// Parse a CXX machine represented by a `FileWrapper`.
+    /// - Parameter wrapper: The wrapper that contains the machine.
+    /// - Returns: A new ``MetaMachine`` that represents the data within the machine folder, or nil if the
+    /// parsing was unsucessful.
     private func parseCXXMachine(wrapper: FileWrapper) -> MetaMachine? {
         guard
             let files = wrapper.fileWrappers,
             let nameComponents = wrapper.filename?.components(separatedBy: ".machine"),
-            nameComponents.count > 0
+            !nameComponents.isEmpty
         else {
             return nil
         }
         let name = nameComponents[0]
         guard
-            nil != files["\(name).h"],
+            files["\(name).h"] != nil,
             let statesFile = files["States"],
             let statesData = statesFile.regularFileContents,
             let statesContents = String(data: statesData, encoding: .utf8)
@@ -187,13 +213,13 @@ public final class MachineParser {
         }
         let cxxConverter = CXXBaseConverter()
         let statesComponents = statesContents.components(separatedBy: .newlines)
-        if statesComponents.count == 0 {
+        if statesComponents.isEmpty {
             return nil
         }
         let initialStateName = statesComponents[0]
-        guard nil != files["State_" + initialStateName + "_OnSuspend.mm"] else {
+        guard files["State_" + initialStateName + "_OnSuspend.mm"] != nil else {
             guard
-                nil != files["State_" + initialStateName + "_OnEntry.mm"],
+                files["State_" + initialStateName + "_OnEntry.mm"] != nil,
                 let ucfsmMachine = UCFSMParser().parseMachine(wrapper: wrapper)
             else {
                 return nil
@@ -205,5 +231,5 @@ public final class MachineParser {
         }
         return cxxConverter.toMachine(machine: clfsmMachine, semantics: .clfsm)
     }
-    
+
 }
