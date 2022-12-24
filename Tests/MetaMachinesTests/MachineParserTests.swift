@@ -107,11 +107,16 @@ final class MachineParserTests: XCTestCase {
         try writeAndReadMachine(.vhdl)
     }
 
-    func testParseAllSemantics() throws {
-        try MetaMachine.supportedSemantics.forEach {
-            try writeAndReadMachine($0)
-        }
-    }
+    // /// Test all semantics can be parsed.
+    // func testParseAllSemantics() throws {
+    //     MetaMachine.supportedSemantics.forEach {
+    //         do {
+    //             try writeAndReadMachine($0)
+    //         } catch {
+    //             XCTFail("Failed to parse machine for semantics \($0) with error \(error).")
+    //         }
+    //     }
+    // }
 
     /// Parse and test a machine for a given semantics. This method uses all 3 methods in the
     /// ``MachineParser``.
