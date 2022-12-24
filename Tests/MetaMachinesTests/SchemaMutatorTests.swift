@@ -61,8 +61,11 @@ import XCTest
 /// Test class for ``SchemaMutator``.
 final class SchemaMutatorTests: XCTestCase {
 
+    /// A mock machine schema.
+    var schema = MockSchema(dependencyLayout: [])
+
     /// The mutator under test.
-    var mutator = SchemaMutator(schema: MockSchema(dependencyLayout: []))
+    lazy var mutator = SchemaMutator(schema: schema)
 
     /// A test machine.
     var machine = MetaMachine.initialMachine(forSemantics: .vhdl)
@@ -72,7 +75,8 @@ final class SchemaMutatorTests: XCTestCase {
 
     /// Initialise the mutator under test.
     override func setUp() {
-        self.mutator = SchemaMutator(schema: MockSchema(dependencyLayout: []))
+        self.schema = MockSchema(dependencyLayout: [])
+        self.mutator = SchemaMutator(schema: schema)
         self.machine = MetaMachine.initialMachine(forSemantics: .vhdl)
         self.dependency = MachineDependency(relativePath: "dependency")
     }
@@ -84,6 +88,37 @@ final class SchemaMutatorTests: XCTestCase {
         let mutator = SchemaMutator(schema: schema)
         XCTAssertEqual(mutator.dependencyLayout, fields)
         XCTAssertIdentical(mutator.schema, schema)
+    }
+
+    /// Test the `didCreateDependency` function delegates to the schema.
+    func testDidCreateDependencyDelegatesToSchema() throws {
+        XCTAssertFalse(
+            try mutator.didCreateDependency(machine: &machine, dependency: dependency, index: 1).get()
+        )
+        XCTAssertEqual(schema.functionsCalled.count, 2)
+        let depFnCalls = schema.didCreateDependencyCalls
+        XCTAssertEqual(depFnCalls.count, 1)
+        guard
+            let call = depFnCalls.first,
+            case .didCreateDependency(let machine, let dependency, let index) = call
+        else {
+            XCTFail("Expected a call to didCreateDependency")
+            return
+        }
+        XCTAssertEqual(machine, self.machine)
+        XCTAssertEqual(dependency, self.dependency)
+        XCTAssertEqual(index, 1)
+        let updateCalls = schema.updateCalls
+        XCTAssertEqual(updateCalls.count, 1)
+        guard
+            let updateCall = updateCalls.first,
+            case .update(let updateMachine) = updateCall
+        else {
+            XCTFail("Expected a call to update")
+            return
+        }
+        XCTAssertEqual(updateMachine, self.machine)
+        XCTAssertEqual(depFnCalls + updateCalls, schema.functionsCalled)
     }
 
 }

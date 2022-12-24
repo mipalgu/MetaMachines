@@ -68,7 +68,7 @@ final class MockSchema: MachineSchema {
     typealias TransitionSchema = EmptySchema
 
     /// An enum representing which function within the mock was called.
-    enum FunctionsCalled {
+    enum FunctionsCalled: Equatable {
 
         /// The `didCreateDependency` function.
         case didCreateDependency(machine: MetaMachine, dependency: MachineDependency, index: Int)
