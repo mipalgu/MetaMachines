@@ -67,7 +67,6 @@ struct VHDLParametersGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ]
     )

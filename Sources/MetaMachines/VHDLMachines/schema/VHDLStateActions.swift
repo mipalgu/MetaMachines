@@ -36,7 +36,10 @@ struct VHDLStateActions: GroupProtocol {
         columns: [
             .integer(label: "timeslot", validation: .required().between(min: 0, max: 255)),
             .enumerated(label: "action", validValues: [], validation: .required())
-        ]
+        ],
+        validation: { table in
+            table.notEmpty()
+        }
     )
     var actionOrder
     
