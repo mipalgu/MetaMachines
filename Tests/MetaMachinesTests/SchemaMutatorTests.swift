@@ -226,6 +226,17 @@ final class SchemaMutatorTests: XCTestCase {
         )
     }
 
+    /// Test mutator delegates to the schema for the `makeValidator` function.
+    func testSchemaMutatorUsesSchemaValidator() throws {
+        try mutator.validate(machine: machine)
+        XCTAssertEqual(schema.functionsCalled.count, 1)
+        guard let fn = schema.makeValidatorCalls.first else {
+            XCTFail("Failed to get function.")
+            return
+        }
+        XCTAssertEqual(fn, .makeValidator(root: machine))
+    }
+
     /// Test that a call to the schema mutator delegates to the underlying schema.
     /// - Parameters:
     ///   - expectedCall: The expected result from the schema.
