@@ -83,7 +83,7 @@ extension VHDLMachines.Arrangement {
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
                 ])),
-                Field(name: "external_variables", type: .table(columns: [
+                Field(name: "variables", type: .table(columns: [
                     ("type", .expression(language: .vhdl)),
                     ("lower_range", .line),
                     ("upper_range", .line),
@@ -121,8 +121,8 @@ extension VHDLMachines.Arrangement {
                         ("comment", .line)
                     ]
                 ),
-                "external_variables": .table(
-                    self.externalVariables.map(\.toLineAttribute),
+                "variables": .table(
+                    self.variables.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
                         ("lower_range", .line),

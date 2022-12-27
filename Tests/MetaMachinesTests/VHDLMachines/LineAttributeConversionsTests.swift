@@ -101,7 +101,7 @@ final class LineAttributeConversionsTests: XCTestCase {
 
     /// Test machine signal.
     func testMachineSignal() {
-        let signal = VHDLMachines.MachineSignal(
+        let signal = LocalSignal(
             type: "std_logic", name: "x", defaultValue: "'1'", comment: "Signal x"
         )
         let expected: [LineAttribute] = [

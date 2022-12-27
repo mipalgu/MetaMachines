@@ -400,8 +400,8 @@ extension Machine {
                 )
             ],
             machineSignals: [
-                MachineSignal(type: "std_logic", name: "a", defaultValue: "'0'", comment: "Signal a."),
-                MachineSignal(type: "std_logic", name: "b", defaultValue: "'1'", comment: "Signal b.")
+                LocalSignal(type: "std_logic", name: "a", defaultValue: "'0'", comment: "Signal a."),
+                LocalSignal(type: "std_logic", name: "b", defaultValue: "'1'", comment: "Signal b.")
             ],
             isParameterised: true,
             parameterSignals: [
@@ -424,7 +424,7 @@ extension Machine {
                     actions: actions,
                     actionOrder: actionOrder,
                     signals: [
-                        MachineSignal(
+                        LocalSignal(
                             type: "std_logic",
                             name: "initialX",
                             defaultValue: "'0'",
@@ -447,7 +447,7 @@ extension Machine {
                     actions: actions,
                     actionOrder: actionOrder,
                     signals: [
-                        MachineSignal(
+                        LocalSignal(
                             type: "std_logic",
                             name: "initialY",
                             defaultValue: "'0'",

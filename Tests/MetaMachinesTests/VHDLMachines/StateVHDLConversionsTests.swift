@@ -131,8 +131,8 @@ final class StateVHDLConversionsTests: XCTestCase {
         ]
         state.attributes[0].attributes["state_signals"] = signals
         let expected = [
-            MachineSignal(type: "std_logic", name: "x", defaultValue: "'1'", comment: "Signal x"),
-            MachineSignal(type: "std_logic", name: "y", defaultValue: "'0'", comment: "Signal y")
+            LocalSignal(type: "std_logic", name: "x", defaultValue: "'1'", comment: "Signal x"),
+            LocalSignal(type: "std_logic", name: "y", defaultValue: "'0'", comment: "Signal y")
         ]
         XCTAssertEqual(state.vhdlStateSignals, expected)
     }

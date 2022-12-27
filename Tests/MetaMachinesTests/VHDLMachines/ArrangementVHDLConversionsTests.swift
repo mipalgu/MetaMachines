@@ -85,7 +85,8 @@ final class ArrangementVHDLConversionsTests: XCTestCase {
         let vhdlArrangement = VHDLMachines.Arrangement(
             machines: machines,
             externalSignals: signals,
-            externalVariables: variables,
+            signals: [],
+            variables: variables,
             clocks: clocks,
             parents: ["machine2"],
             path: url

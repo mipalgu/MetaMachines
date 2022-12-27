@@ -73,7 +73,7 @@ extension State {
     }
 
     /// Retrieve the VHDL state signals from the states attributes.
-    var vhdlStateSignals: [VHDLMachines.MachineSignal] {
+    var vhdlStateSignals: [LocalSignal] {
         guard
             let rows = self.attributes.first(where: { $0.name == "variables" })?.attributes["state_signals"]?
                 .tableValue
@@ -81,7 +81,7 @@ extension State {
             return []
         }
         return rows.map {
-            VHDLMachines.MachineSignal(
+            LocalSignal(
                 type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
                 name: $0[1].lineValue.trimmingCharacters(in: .whitespaces),
                 defaultValue: $0[2].expressionValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :

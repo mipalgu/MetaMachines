@@ -161,7 +161,7 @@ extension MetaMachine {
     }
 
     /// Fetch the VHDL machine signals from this machines attributes.
-    var vhdlMachineSignals: [MachineSignal] {
+    var vhdlMachineSignals: [LocalSignal] {
         guard
             self.attributes.count == 4,
             let signals = self.attributes[0].attributes["machine_signals"]?.tableValue
@@ -169,7 +169,7 @@ extension MetaMachine {
             fatalError("Cannot retrieve machine signals")
         }
         return signals.map {
-            MachineSignal(
+            LocalSignal(
                 type: $0[0].expressionValue,
                 name: $0[1].lineValue,
                 defaultValue: $0[2].expressionValue.isEmpty ? nil : $0[2].expressionValue,

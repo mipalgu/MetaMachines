@@ -89,7 +89,7 @@ extension Arrangement {
                     )
                 ),
                 Field(
-                    name: "external_variables",
+                    name: "variables",
                     type: .table(
                         columns: [
                             ("type", .expression(language: .vhdl)),
@@ -147,7 +147,7 @@ extension Arrangement {
                         ("comment", .line)
                     ]
                 ),
-                "external_variables": .table(
+                "variables": .table(
                     [
                         [
                             .expression("integer", language: .vhdl),
@@ -197,7 +197,8 @@ extension Arrangement {
                     type: "std_logic", name: "y", mode: .output, defaultValue: "'0'", comment: "Signal y."
                 )
             ],
-            externalVariables: [
+            signals: [],
+            variables: [
                 VHDLVariable(
                     type: "integer", name: "numA", defaultValue: "0", range: (0, 127), comment: "Int numA."
                 ),
