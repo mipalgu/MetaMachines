@@ -92,22 +92,166 @@ final class SchemaMutatorTests: XCTestCase {
 
     /// Test the `didCreateDependency` function delegates to the schema.
     func testDidCreateDependencyDelegatesToSchema() throws {
-        XCTAssertFalse(
-            try mutator.didCreateDependency(machine: &machine, dependency: dependency, index: 1).get()
+        let expected = MockSchema.FunctionsCalled.didCreateDependency(
+            machine: machine, dependency: dependency, index: 1
         )
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didCreateDependency(machine: &machine, dependency: dependency, index: 1) },
+            getFns: { schema.didCreateDependencyCalls }
+        )
+    }
+
+    /// Test the `didCreateNewState` function delegates to the schema.
+    func testDidCreateNewStateDelegatesToSchema() throws {
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let expected = MockSchema.FunctionsCalled.didCreateNewState(machine: machine, state: state, index: 0)
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didCreateNewState(machine: &machine, state: state, index: 0) },
+            getFns: { schema.didCreateNewStateCalls }
+        )
+    }
+
+    /// Test the `didChangStateName` function delegates to the schema.
+    func testDidChangStateNameDelegatesToSchema() throws {
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let expected = MockSchema.FunctionsCalled.didChangeStatesName(
+            machine: machine, state: state, index: 0, oldName: "Old"
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didChangeStatesName(machine: &machine, state: state, index: 0, oldName: "Old") },
+            getFns: { schema.didChangeStatesNameCalls }
+        )
+    }
+
+    /// Test the `didCreateNewTransition` function delegates to the schema.
+    func testDidCreateNewTransitionDelegatesToSchema() throws {
+        let transition = Transition(target: "Initial")
+        let expected = MockSchema.FunctionsCalled.didCreateNewTransition(
+            machine: machine, transition: transition, stateIndex: 1, transitionIndex: 2
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: {
+                mutator.didCreateNewTransition(
+                    machine: &machine, transition: transition, stateIndex: 1, transitionIndex: 2
+                )
+            },
+            getFns: { schema.didCreateNewTransitionCalls }
+        )
+    }
+
+    /// Test the `didDeleteDependencies` function delegates to the schema.
+    func testDidDeleteDependenciesDelegatesToSchema() throws {
+        let indexes = IndexSet(0...1)
+        let expected = MockSchema.FunctionsCalled.didDeleteDependencies(
+            machine: machine, dependency: [dependency], at: indexes
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didDeleteDependencies(machine: &machine, dependency: [dependency], at: indexes) },
+            getFns: { schema.didDeleteDependenciesCalls }
+        )
+    }
+
+    /// Test the `didDeleteStates` function delegates to the schema.
+    func testDidDeleteStatesDelegatesToSchema() throws {
+        let indexes = IndexSet(0...1)
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let expected = MockSchema.FunctionsCalled.didDeleteStates(
+            machine: machine, state: [state], at: indexes
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didDeleteStates(machine: &machine, state: [state], at: indexes) },
+            getFns: { schema.didDeleteStatesCalls }
+        )
+    }
+
+    /// Test the `didDeleteTransitions` function delegates to the schema.
+    func testDidDeleteTransitionsDelegatesToSchema() throws {
+        let indexes = IndexSet(0...1)
+        let transition = Transition(target: "Initial")
+        let expected = MockSchema.FunctionsCalled.didDeleteTransitions(
+            machine: machine, transition: [transition], stateIndex: 1, at: indexes
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: {
+                mutator.didDeleteTransitions(
+                    machine: &machine, transition: [transition], stateIndex: 1, at: indexes
+                )
+            },
+            getFns: { schema.didDeleteTransitionsCalls }
+        )
+    }
+
+    /// Test the `didDeleteDependency` function delegates to the schema.
+    func testDidDeleteDependencyDelegatesToSchema() throws {
+        let expected = MockSchema.FunctionsCalled.didDeleteDependency(
+            machine: machine, dependency: dependency, at: 1
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didDeleteDependency(machine: &machine, dependency: dependency, at: 1) },
+            getFns: { schema.didDeleteDependencyCalls }
+        )
+    }
+
+    /// Test the `didDeleteState` function delegates to the schema.
+    func testDidDeleteStateDelegatesToSchema() throws {
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let expected = MockSchema.FunctionsCalled.didDeleteState(machine: machine, state: state, at: 1)
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didDeleteState(machine: &machine, state: state, at: 1) },
+            getFns: { schema.didDeleteStateCalls }
+        )
+    }
+
+    /// Test the `didDeleteTransition` function delegates to the schema.
+    func testDidDeleteTransitionDelegatesToSchema() throws {
+        let transition = Transition(target: "Initial")
+        let expected = MockSchema.FunctionsCalled.didDeleteTransition(
+            machine: machine, transition: transition, stateIndex: 1, at: 2
+        )
+        try self.performTest(
+            expectedCall: expected,
+            call: {
+                mutator.didDeleteTransition(machine: &machine, transition: transition, stateIndex: 1, at: 2)
+            },
+            getFns: { schema.didDeleteTransitionCalls }
+        )
+    }
+
+    /// Test that a call to the schema mutator delegates to the underlying schema.
+    /// - Parameters:
+    ///   - expectedCall: The expected result from the schema.
+    ///   - call: A function that calls the mutator.
+    ///   - getFns: All of the functions in the schema that were called.
+    private func performTest(
+        expectedCall: MockSchema.FunctionsCalled,
+        call: () throws -> Result<Bool, AttributeError<MetaMachine>>,
+        getFns: () -> [MockSchema.FunctionsCalled]
+    ) throws {
+        XCTAssertFalse(try call().get())
         XCTAssertEqual(schema.functionsCalled.count, 2)
-        let depFnCalls = schema.didCreateDependencyCalls
-        XCTAssertEqual(depFnCalls.count, 1)
-        guard
-            let call = depFnCalls.first,
-            case .didCreateDependency(let machine, let dependency, let index) = call
-        else {
-            XCTFail("Expected a call to didCreateDependency")
+        let fns = getFns()
+        XCTAssertEqual(fns.count, 1)
+        guard let fn = fns.first else {
+            XCTFail("Failed to get function.")
             return
         }
-        XCTAssertEqual(machine, self.machine)
-        XCTAssertEqual(dependency, self.dependency)
-        XCTAssertEqual(index, 1)
+        XCTAssertEqual(fn, expectedCall)
+        let updateCalls = verifyUpdate()
+        XCTAssertEqual(fns + updateCalls, schema.functionsCalled)
+    }
+
+    /// Verify that the update function is called once.
+    /// - Returns: The calls to the update function.
+    private func verifyUpdate() -> [MockSchema.FunctionsCalled] {
         let updateCalls = schema.updateCalls
         XCTAssertEqual(updateCalls.count, 1)
         guard
@@ -115,10 +259,10 @@ final class SchemaMutatorTests: XCTestCase {
             case .update(let updateMachine) = updateCall
         else {
             XCTFail("Expected a call to update")
-            return
+            return []
         }
         XCTAssertEqual(updateMachine, self.machine)
-        XCTAssertEqual(depFnCalls + updateCalls, schema.functionsCalled)
+        return updateCalls
     }
 
 }
