@@ -65,8 +65,11 @@ final class SchemaMutatorTests: XCTestCase {
     /// The trigger used in the schema.
     var trigger = MockTrigger<MetaMachine>()
 
+    /// The validator used in the schema.
+    var validator = NullValidator<MetaMachine>()
+
     /// A mock machine schema.
-    lazy var schema = MockSchema(dependencyLayout: [], trigger: trigger)
+    lazy var schema = MockSchema(dependencyLayout: [], trigger: trigger, validator: validator)
 
     /// The mutator under test.
     lazy var mutator = SchemaMutator(schema: schema)
@@ -80,7 +83,8 @@ final class SchemaMutatorTests: XCTestCase {
     /// Initialise the mutator under test.
     override func setUp() {
         self.trigger = MockTrigger()
-        self.schema = MockSchema(dependencyLayout: [], trigger: trigger)
+        self.validator = NullValidator()
+        self.schema = MockSchema(dependencyLayout: [], trigger: trigger, validator: validator)
         self.mutator = SchemaMutator(schema: schema)
         self.machine = MetaMachine.initialMachine(forSemantics: .vhdl)
         self.dependency = MachineDependency(relativePath: "dependency")
@@ -89,7 +93,7 @@ final class SchemaMutatorTests: XCTestCase {
     /// Test mutator sets stored properties correctly.
     func testInit() {
         let fields = [Field(name: "test", type: .line)]
-        let schema = MockSchema(dependencyLayout: fields, trigger: trigger)
+        let schema = MockSchema(dependencyLayout: fields, trigger: trigger, validator: validator)
         let mutator = SchemaMutator(schema: schema)
         XCTAssertEqual(mutator.dependencyLayout, fields)
         XCTAssertIdentical(mutator.schema, schema)

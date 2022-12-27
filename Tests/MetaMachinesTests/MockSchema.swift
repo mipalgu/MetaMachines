@@ -134,6 +134,9 @@ final class MockSchema: MachineSchema {
     /// The trigger to use in this schema.
     private let mockTrigger: MockTrigger<MetaMachine>
 
+    /// The validator to use in this schema.
+    private let validator: NullValidator<MetaMachine>
+
     /// The functions called in this mock.
     private(set) var functionsCalled: [FunctionsCalled] = []
 
@@ -371,10 +374,12 @@ final class MockSchema: MachineSchema {
     init(
         dependencyLayout: [Field],
         trigger: MockTrigger<MetaMachine>,
+        validator: NullValidator<MetaMachine>,
         returnType: Result<Bool, AttributeError<MetaMachine>> = .success(false)
     ) {
         self.dependencyLayout = dependencyLayout
         self.mockTrigger = trigger
+        self.validator = validator
         self.returnType = returnType
     }
 
@@ -489,7 +494,7 @@ final class MockSchema: MachineSchema {
     /// The `makeValidator` function.
     func makeValidator(root: MetaMachine) -> AnyValidator<MetaMachine> {
         functionsCalled.append(.makeValidator(root: root))
-        return AnyValidator([])
+        return AnyValidator(validator)
     }
 
 }
