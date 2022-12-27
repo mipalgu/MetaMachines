@@ -250,6 +250,71 @@ final class SchemaMutatorTests: XCTestCase {
         XCTAssertEqual(trigger.rootPassed, machine)
     }
 
+    /// Test the `didDeleteItem` function delegates to the schema.
+    func testDidDeleteItemDelegatesToSchema() throws {
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let path = Path(MetaMachine.self).states
+        let expected = MockSchema.FunctionsCalled.trigger
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didDeleteItem(attribute: path, atIndex: 1, machine: &machine, item: state) },
+            getFns: { schema.triggerCalls }
+        )
+        XCTAssertEqual(trigger.timesCalled, 1)
+        XCTAssertEqual(trigger.pathPassed, AnyPath(path))
+        XCTAssertEqual(trigger.rootPassed, machine)
+    }
+
+    /// Test the `didDeleteItems` function delegates to the schema.
+    func testDidDeleteItemsDelegatesToSchema() throws {
+        let indexes = IndexSet(0...1)
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let path = Path(MetaMachine.self).states
+        let expected = MockSchema.FunctionsCalled.trigger
+        try self.performTest(
+            expectedCall: expected,
+            call: {
+                mutator.didDeleteItems(table: path, indices: indexes, machine: &machine, items: [state])
+            },
+            getFns: { schema.triggerCalls }
+        )
+        XCTAssertEqual(trigger.timesCalled, 1)
+        XCTAssertEqual(trigger.pathPassed, AnyPath(path))
+        XCTAssertEqual(trigger.rootPassed, machine)
+    }
+
+    /// Test the `didMoveItems` function delegates to the schema.
+    func testDidMoveItemsDelegatesToSchema() throws {
+        let indexes = IndexSet(0...1)
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let path = Path(MetaMachine.self).states
+        let expected = MockSchema.FunctionsCalled.trigger
+        try self.performTest(
+            expectedCall: expected,
+            call: {
+                mutator.didMoveItems(attribute: path, machine: &machine, from: indexes, to: 1, items: [state])
+            },
+            getFns: { schema.triggerCalls }
+        )
+        XCTAssertEqual(trigger.timesCalled, 1)
+        XCTAssertEqual(trigger.pathPassed, AnyPath(path))
+        XCTAssertEqual(trigger.rootPassed, machine)
+    }
+
+    /// Test the `didModify` function delegates to the schema.
+    func testDidModifyDelegatesToSchema() throws {
+        let path = Path(MetaMachine.self).states[0].name
+        let expected = MockSchema.FunctionsCalled.trigger
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didModify(attribute: path, oldValue: "", newValue: "", machine: &machine) },
+            getFns: { schema.triggerCalls }
+        )
+        XCTAssertEqual(trigger.timesCalled, 1)
+        XCTAssertEqual(trigger.pathPassed, AnyPath(path))
+        XCTAssertEqual(trigger.rootPassed, machine)
+    }
+
     /// Test mutator delegates to the schema for the `makeValidator` function.
     func testSchemaMutatorUsesSchemaValidator() throws {
         try mutator.validate(machine: machine)
