@@ -231,6 +231,21 @@ final class SchemaMutatorTests: XCTestCase {
         )
     }
 
+    /// Test the `didAddItem` function delegates to the schema.
+    func testDidAddItemDelegatesToSchema() throws {
+        let state = State(name: "Initial", actions: [], transitions: [])
+        let path = Path(MetaMachine.self).states
+        let expected = MockSchema.FunctionsCalled.trigger
+        try self.performTest(
+            expectedCall: expected,
+            call: { mutator.didAddItem(state, to: path, machine: &machine) },
+            getFns: { schema.triggerCalls }
+        )
+        XCTAssertEqual(trigger.timesCalled, 1)
+        XCTAssertEqual(trigger.pathPassed, AnyPath(path))
+        XCTAssertEqual(trigger.rootPassed, machine)
+    }
+
     /// Test mutator delegates to the schema for the `makeValidator` function.
     func testSchemaMutatorUsesSchemaValidator() throws {
         try mutator.validate(machine: machine)
