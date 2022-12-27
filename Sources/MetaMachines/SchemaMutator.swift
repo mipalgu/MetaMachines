@@ -186,43 +186,94 @@ struct SchemaMutator<Schema: MachineSchema>: MachineMutatorResponder, MachineMod
             me.schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
         }
     }
-    
-    mutating func didDeleteItems<Path: PathProtocol, T>(table attribute: Path, indices: IndexSet, machine: inout MetaMachine, items: [T]) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
-        perform(metaMachine: &machine) { (me, machine) in
+
+    /// The function executed after items are removed from an array within a machine.
+    /// - Parameters:
+    ///   - attribute: The path to the array.
+    ///   - indices: The indices of the items that were removed.
+    ///   - machine: The machine containing the array.
+    ///   - items: The items that were removed.
+    /// - Returns: Whether this change affects other attributes within the machine.
+    mutating func didDeleteItems<Path: PathProtocol, T>(
+        table attribute: Path, indices: IndexSet, machine: inout MetaMachine, items: [T]
+    ) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform(metaMachine: &machine) { me, machine in
             me.schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
         }
     }
-    
-    mutating func didDeleteItem<Path: PathProtocol, T>(attribute: Path, atIndex: Int, machine: inout MetaMachine, item: T) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
-        perform(metaMachine: &machine) { (me, machine) in
+
+    /// The function executed after an item is removed from an array within a machine.
+    /// - Parameters:
+    ///   - attribute: The path to the array.
+    ///   - atIndex: The index of the item that was removed.
+    ///   - machine: The machine containing the array.
+    ///   - item: The item that was removed.
+    /// - Returns: Whether this change affects other attributes within the machine.
+    mutating func didDeleteItem<Path: PathProtocol, T>(
+        attribute: Path, atIndex: Int, machine: inout MetaMachine, item: T
+    ) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform(metaMachine: &machine) { me, machine in
             me.schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
         }
     }
-    
-    mutating func didMoveItems<Path: PathProtocol, T>(attribute: Path, machine: inout MetaMachine, from source: IndexSet, to destination: Int, items: [T]) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
-        perform(metaMachine: &machine) { (me, machine) in
+
+    /// The function executed after items are moved within an array within a machine.
+    /// - Parameters:
+    ///   - attribute: The path to the array.
+    ///   - machine: The machine containing the array.
+    ///   - source: The indices of the items that were moved.
+    ///   - destination: The index of the destination of the items.
+    ///   - items: The items that were moved.
+    /// - Returns: Whether this change affects other attributes within the machine.
+    mutating func didMoveItems<Path: PathProtocol, T>(
+        attribute: Path, machine: inout MetaMachine, from source: IndexSet, to destination: Int, items: [T]
+    ) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform(metaMachine: &machine) { me, machine in
             me.schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
         }
     }
-    
-    mutating func didModify<Path: PathProtocol>(attribute: Path, oldValue: Path.Value, newValue: Path.Value, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine {
-        self.perform(metaMachine: &machine) { (me, machine) in
+
+    /// The function executed after an item is modified within a machine.
+    /// - Parameters:
+    ///   - attribute: The path to the item.
+    ///   - oldValue: The old value of the item.
+    ///   - newValue: The new value of the item.
+    ///   - machine: The machine containing the item.
+    /// - Returns: Whether this change affects other attributes within the machine.
+    mutating func didModify<Path: PathProtocol>(
+        attribute: Path, oldValue: Path.Value, newValue: Path.Value, machine: inout MetaMachine
+    ) -> Result<Bool, AttributeError<Path.Root>> where Path.Root == MetaMachine {
+        self.perform(metaMachine: &machine) { me, machine in
             me.schema.trigger.performTrigger(&machine, for: AnyPath(attribute))
         }
     }
-    
+
+    /// Updated the schema with the latest changes from the meta machine.
+    /// - Parameter metaMachine: The machine containing the latest changes.
     mutating func update(from metaMachine: MetaMachine) {
         schema.update(from: metaMachine)
     }
-    
-    private mutating func perform(metaMachine: inout MetaMachine, _ f: (inout Self, inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
+
+    /// Validates the machine against the schema.
+    /// - Parameter machine: The machine to validate.
+    /// - Throws: An error if the machine contains data contrary to the validation rules within the schemas
+    /// validator.
+    func validate(machine: MetaMachine) throws {
+        try schema.makeValidator(root: machine).performValidation(machine)
+    }
+
+    /// Performs a function on the schema and updates the schema after the function has finished.
+    /// - Parameters:
+    ///   - metaMachine: The machine containing the properties that are mutated.
+    ///   - f: The function that mutates the `metaMachine`.
+    /// - Returns: Whether the function affects other attributes within the machine.
+    private mutating func perform(
+        metaMachine: inout MetaMachine,
+        _ f: (inout Self, inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
         let result = f(&self, &metaMachine)
         update(from: metaMachine)
         return result
-    }
-    
-    func validate(machine: MetaMachine) throws {
-        try schema.makeValidator(root: machine).performValidation(machine)
     }
 
 }
