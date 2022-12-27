@@ -259,6 +259,8 @@ final class SchemaMutatorTests: XCTestCase {
             return
         }
         XCTAssertEqual(fn, .makeValidator(root: machine))
+        XCTAssertEqual(validator.timesCalled, 1)
+        XCTAssertEqual(validator.lastParameter, machine)
     }
 
     /// Test that a call to the schema mutator delegates to the underlying schema.
