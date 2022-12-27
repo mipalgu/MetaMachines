@@ -55,6 +55,7 @@
 // 
 
 import Attributes
+import AttributesTestUtils
 import Foundation
 import MetaMachines
 
@@ -129,6 +130,9 @@ final class MockSchema: MachineSchema {
 
     /// The value to return from the functions.
     let returnType: Result<Bool, AttributeError<MetaMachine>>
+
+    /// The trigger to use in this schema.
+    private let mockTrigger: MockTrigger<MetaMachine>
 
     /// The functions called in this mock.
     private(set) var functionsCalled: [FunctionsCalled] = []
@@ -357,13 +361,20 @@ final class MockSchema: MachineSchema {
     /// The `trigger` computed property
     var trigger: AnyTrigger<MetaMachine> {
         functionsCalled.append(.trigger)
-        return AnyTrigger([])
+        return AnyTrigger(mockTrigger)
     }
 
     /// Initialise this mock with a dependency layout.
     /// - Parameter dependencyLayout: The dependency layout.
-    init(dependencyLayout: [Field], returnType: Result<Bool, AttributeError<MetaMachine>> = .success(false)) {
+    /// - Parameter trigger: The trigger used in this schema.
+    /// - Parameter returnType: The return type of the functions.
+    init(
+        dependencyLayout: [Field],
+        trigger: MockTrigger<MetaMachine>,
+        returnType: Result<Bool, AttributeError<MetaMachine>> = .success(false)
+    ) {
         self.dependencyLayout = dependencyLayout
+        self.mockTrigger = trigger
         self.returnType = returnType
     }
 
@@ -480,13 +491,5 @@ final class MockSchema: MachineSchema {
         functionsCalled.append(.makeValidator(root: root))
         return AnyValidator([])
     }
-
-}
-
-/// An empty schema.
-final class EmptySchema: SchemaProtocol {
-
-    /// The root is a meta machine.
-    typealias Root = MetaMachine
 
 }
