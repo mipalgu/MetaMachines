@@ -83,6 +83,12 @@ extension VHDLMachines.Arrangement {
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
                 ])),
+                Field(name: "signals", type: .table(columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ])),
                 Field(name: "variables", type: .table(columns: [
                     ("type", .expression(language: .vhdl)),
                     ("lower_range", .line),
@@ -115,6 +121,15 @@ extension VHDLMachines.Arrangement {
                             "mode",
                             .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))
                         ),
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]
+                ),
+                "signals": .table(
+                    self.signals.map(\.toLineAttribute),
+                    columns: [
                         ("type", .expression(language: .vhdl)),
                         ("name", .line),
                         ("value", .expression(language: .vhdl)),

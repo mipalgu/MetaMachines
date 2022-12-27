@@ -88,6 +88,12 @@ extension Arrangement {
                         ]
                     )
                 ),
+                Field(name: "signals", type: .table(columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ])),
                 Field(
                     name: "variables",
                     type: .table(
@@ -147,6 +153,28 @@ extension Arrangement {
                         ("comment", .line)
                     ]
                 ),
+                "signals": .table(
+                    [
+                        [
+                            .expression("std_logic", language: .vhdl),
+                            .line("a"),
+                            .expression("'1'", language: .vhdl),
+                            .line("Signal a.")
+                        ],
+                        [
+                            .expression("std_logic", language: .vhdl),
+                            .line("b"),
+                            .expression("'0'", language: .vhdl),
+                            .line("Signal b.")
+                        ]
+                    ],
+                    columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]
+                ),
                 "variables": .table(
                     [
                         [
@@ -197,7 +225,10 @@ extension Arrangement {
                     type: "std_logic", name: "y", mode: .output, defaultValue: "'0'", comment: "Signal y."
                 )
             ],
-            signals: [],
+            signals: [
+                LocalSignal(type: "std_logic", name: "a", defaultValue: "'1'", comment: "Signal a."),
+                LocalSignal(type: "std_logic", name: "b", defaultValue: "'0'", comment: "Signal b.")
+            ],
             variables: [
                 VHDLVariable(
                     type: "integer", name: "numA", defaultValue: "0", range: (0, 127), comment: "Int numA."
