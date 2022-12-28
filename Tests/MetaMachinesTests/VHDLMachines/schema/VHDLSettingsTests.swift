@@ -112,4 +112,21 @@ final class VHDLSettingsTests: XCTestCase {
     //     XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
     // }
 
+    /// Test the validation passes for correct machine.
+    func testValidationPasses() throws {
+        XCTAssertNoThrow(try settings.propertiesValidator.performValidation(expected))
+    }
+
+    /// Test that the validation fails for empty initial state.
+    func testValidationFailsForEmptyInitialState() {
+        var expected = expected
+        guard var values = expected.attributes["initial_state"]?.enumeratedValidValues else {
+            XCTFail("Could not get valid values in initial_state.")
+            return
+        }
+        values.remove("") // Make sure this is not in the valid values.
+        expected.attributes["initial_state"] = .enumerated("", validValues: values)
+        XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
+    }
+
 }
