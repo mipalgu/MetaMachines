@@ -383,6 +383,17 @@ final class MockSchema: MachineSchema {
         self.returnType = returnType
     }
 
+    init(
+        name: String,
+        initialState: StateName,
+        states: [State],
+        dependencies: [MachineDependency],
+        attributes: [AttributeGroup],
+        metaData: [AttributeGroup]
+    ) {
+        fatalError("Not supported")
+    }
+
     /// The `didCreateDependency` function.
     func didCreateDependency(
         machine: inout MetaMachine, dependency: MachineDependency, index: Int

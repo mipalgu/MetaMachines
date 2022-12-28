@@ -5,28 +5,60 @@
 //  Created by Morgan McColl on 7/6/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
 struct VHDLSchema: MachineSchema {
-    
+
     var dependencyLayout: [Field]
-    
-    var stateSchema = VHDLStateSchema()
-    
-    var transitionSchema = VHDLTransitionsSchema()
-    
+
+    var stateSchema: VHDLStateSchema
+
+    var transitionSchema: VHDLTransitionsSchema
+
     @Group
-    var variables = VHDLVariablesGroup()
-    
+    var variables: VHDLVariablesGroup
+
     @Group
-    var parameters = VHDLParametersGroup()
-    
+    var parameters: VHDLParametersGroup
+
     @Group
-    var includes = VHDLIncludes()
-    
+    var includes: VHDLIncludes
+
     @Group
-    var settings = VHDLSettings()
+    var settings: VHDLSettings
+
+    init(
+        name: String,
+        initialState: StateName,
+        states: [State],
+        dependencies: [MachineDependency],
+        attributes: [AttributeGroup],
+        metaData: [AttributeGroup]
+    ) {
+        self.init()
+        let stateNames = Set(states.map(\.name))
+        self.settings.initialState.type = .enumerated(validValues: stateNames)
+        self.settings.suspendedState.type = .enumerated(validValues: stateNames)
+    }
+
+    init(
+        dependencyLayout: [Field] = [],
+        stateSchema: VHDLStateSchema = VHDLStateSchema(),
+        transitionSchema: VHDLTransitionsSchema = VHDLTransitionsSchema(),
+        variables: VHDLVariablesGroup = VHDLVariablesGroup(),
+        parameters: VHDLParametersGroup = VHDLParametersGroup(),
+        includes: VHDLIncludes = VHDLIncludes(),
+        settings: VHDLSettings = VHDLSettings()
+    ) {
+        self.dependencyLayout = dependencyLayout
+        self.stateSchema = stateSchema
+        self.transitionSchema = transitionSchema
+        self.variables = variables
+        self.parameters = parameters
+        self.includes = includes
+        self.settings = settings
+    }
 
     func didChangeStatesName(
         machine: inout MetaMachine, state: State, index: Int, oldName: String

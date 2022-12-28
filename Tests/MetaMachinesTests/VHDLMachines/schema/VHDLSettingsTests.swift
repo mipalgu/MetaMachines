@@ -94,9 +94,9 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: []))
     }
 
-    /// Test initial schema fails validation.
-    func testInitialSchemaFailsValidation() throws {
-        XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
-    }
+    // /// Test initial schema fails validation.
+    // func testInitialSchemaFailsValidation() throws {
+    //     XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
+    // }
 
 }

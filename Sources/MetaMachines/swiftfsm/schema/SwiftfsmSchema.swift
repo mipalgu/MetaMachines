@@ -76,6 +76,19 @@ public struct SwiftfsmSchema: MachineSchema {
     
     @Group(wrappedValue: SwiftfsmSettings())
     var settings
+
+    public init(
+        name: String,
+        initialState: StateName,
+        states: [State],
+        dependencies: [MachineDependency],
+        attributes: [AttributeGroup],
+        metaData: [AttributeGroup]
+    ) {
+        self.init()
+    }
+
+    init() {}
     
     public mutating func update(from metaMachine: MetaMachine) {
         self.stateSchema.update(from: metaMachine)

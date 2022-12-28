@@ -5,8 +5,8 @@
 //  Created by Morgan McColl on 2/6/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
 public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Root == MetaMachine {
     
@@ -17,7 +17,16 @@ public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Roo
     var stateSchema: StateSchema { get }
     
     var transitionSchema: TransitionSchema { get }
-    
+
+    init(
+        name: String,
+        initialState: StateName,
+        states: [State],
+        dependencies: [MachineDependency],
+        attributes: [AttributeGroup],
+        metaData: [AttributeGroup]
+    )
+
 }
 
 public extension MachineSchema {

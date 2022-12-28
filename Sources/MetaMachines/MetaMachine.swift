@@ -232,9 +232,27 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.name = name
         switch semantics {
         case .vhdl:
-            self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
+            self.mutator = SchemaMutator(
+                schema: VHDLSchema(
+                    name: name,
+                    initialState: initialState,
+                    states: states,
+                    dependencies: dependencies,
+                    attributes: attributes,
+                    metaData: metaData
+                )
+            )
         case .swiftfsm:
-            self.mutator = SchemaMutator(schema: SwiftfsmSchema())
+            self.mutator = SchemaMutator(
+                schema: SwiftfsmSchema(
+                    name: name,
+                    initialState: initialState,
+                    states: states,
+                    dependencies: dependencies,
+                    attributes: attributes,
+                    metaData: metaData
+                )
+            )
         case .ucfsm, .clfsm, .spartanfsm:
             guard let schema = CXXSchema(semantics: semantics) else {
                 fatalError("Tried to create CXXSchema for unsupported semantics")
@@ -242,15 +260,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.mutator = SchemaMutator(schema: schema)
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
-//        default:
-//            fatalError("Semantics not supported")
+        // default:
+        //    fatalError("Semantics not supported")
         }
         self.initialState = initialState
         self.states = states
         self.dependencies = dependencies
         self.attributes = attributes
         self.metaData = metaData
-        self.mutator.update(from: self)
     }
     
     /// Create a new `Machine`.
