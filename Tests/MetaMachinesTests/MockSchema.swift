@@ -59,6 +59,8 @@ import AttributesTestUtils
 import Foundation
 import MetaMachines
 
+// swiftlint:disable file_length
+
 /// A mock schema.
 final class MockSchema: MachineSchema {
 
@@ -383,6 +385,7 @@ final class MockSchema: MachineSchema {
         self.returnType = returnType
     }
 
+    /// MachineSchema conformance initialiser. Currently not supported!
     init(
         name: String,
         initialState: StateName,
@@ -509,3 +512,5 @@ final class MockSchema: MachineSchema {
     }
 
 }
+
+// swiftlint:enable file_length
