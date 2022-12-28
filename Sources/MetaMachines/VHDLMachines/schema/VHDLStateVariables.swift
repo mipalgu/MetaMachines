@@ -5,18 +5,20 @@
 //  Created by Morgan McColl on 28/7/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
 struct VHDLStateVariables: GroupProtocol {
-    
+
     public typealias Root = MetaMachine
-    
-    let path = CollectionSearchPath(collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0])
-    
+
+    let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0]
+    )
+
     @EnumerableCollectionProperty(label: "externals", validValues: [])
     var externals
-    
+
     @TableProperty(
         label: "state_signals",
         columns: [
@@ -44,7 +46,7 @@ struct VHDLStateVariables: GroupProtocol {
         ]
     )
     var stateSignals
-    
+
     @TableProperty(
         label: "state_variables",
         columns: [
@@ -80,5 +82,5 @@ struct VHDLStateVariables: GroupProtocol {
         ]
     )
     var stateVariables
-    
+
 }
