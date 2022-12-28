@@ -94,7 +94,7 @@ final class VHDLStateMetaMachineConversionsTests: XCTestCase {
 
     /// Test attributes are created correctly.
     func testAttributes() {
-        XCTAssertEqual(state.attributes(for: machine), State.testAttributes)
+        XCTAssertEqual(state.attributes(for: machine), State.testAttributes(name: state.name))
     }
 
 }

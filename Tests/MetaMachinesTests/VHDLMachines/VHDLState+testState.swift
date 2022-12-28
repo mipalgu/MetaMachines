@@ -61,25 +61,50 @@ extension State {
 
     private static let actionNames = Set(["OnEntry", "OnExit", "Internal", "OnResume", "OnSuspend"])
 
-    static let testAttributes: [AttributeGroup] = [
-        AttributeGroup(
-            name: "variables",
-            fields: [
-                Field(name: "externals", type: .enumerableCollection(validValues: [])),
-                Field(
-                    name: "state_signals",
-                    type: .table(
+    static func testAttributes(name: String) -> [AttributeGroup] {
+        [
+            AttributeGroup(
+                name: "variables",
+                fields: [
+                    Field(name: "externals", type: .enumerableCollection(validValues: [])),
+                    Field(
+                        name: "state_signals",
+                        type: .table(
+                            columns: [
+                                ("type", .expression(language: .vhdl)),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    ),
+                    Field(
+                        name: "state_variables",
+                        type: .table(
+                            columns: [
+                                ("type", .expression(language: .vhdl)),
+                                ("lower_range", .line),
+                                ("upper_range", .line),
+                                ("name", .line),
+                                ("value", .expression(language: .vhdl)),
+                                ("comment", .line)
+                            ]
+                        )
+                    )
+                ],
+                attributes: [
+                    "externals": .enumerableCollection([], validValues: []),
+                    "state_signals": .table(
+                        [],
                         columns: [
                             ("type", .expression(language: .vhdl)),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
                         ]
-                    )
-                ),
-                Field(
-                    name: "state_variables",
-                    type: .table(
+                    ),
+                    "state_variables": .table(
+                        [],
                         columns: [
                             ("type", .expression(language: .vhdl)),
                             ("lower_range", .line),
@@ -89,77 +114,54 @@ extension State {
                             ("comment", .line)
                         ]
                     )
-                )
-            ],
-            attributes: [
-                "externals": .enumerableCollection([], validValues: []),
-                "state_signals": .table(
-                    [],
-                    columns: [
-                        ("type", .expression(language: .vhdl)),
-                        ("name", .line),
-                        ("value", .expression(language: .vhdl)),
-                        ("comment", .line)
-                    ]
-                ),
-                "state_variables": .table(
-                    [],
-                    columns: [
-                        ("type", .expression(language: .vhdl)),
-                        ("lower_range", .line),
-                        ("upper_range", .line),
-                        ("name", .line),
-                        ("value", .expression(language: .vhdl)),
-                        ("comment", .line)
-                    ]
-                )
-            ],
-            metaData: [:]
-        ),
-        AttributeGroup(
-            name: "actions",
-            fields: [
-                Field(
-                    name: "action_names", type: .table(columns: [("name", .line)])
-                ),
-                Field(
-                    name: "action_order",
-                    type: .table(
+                ],
+                metaData: [:]
+            ),
+            AttributeGroup(
+                name: "actions",
+                fields: [
+                    Field(
+                        name: "action_names", type: .table(columns: [("name", .line)])
+                    ),
+                    Field(
+                        name: "action_order",
+                        type: .table(
+                            columns: [
+                                ("timeslot", .integer),
+                                ("action", .enumerated(validValues: actionNames))
+                            ]
+                        )
+                    )
+                ],
+                attributes: [
+                    "action_names": .table(
+                        [
+                            [.line("Internal")],
+                            [.line("OnEntry")],
+                            [.line("OnExit")],
+                            [.line("OnResume")],
+                            [.line("OnSuspend")]
+
+                        ],
+                        columns: [("name", .line)]
+                    ),
+                    "action_order": .table(
+                        [
+                            [.integer(0), .enumerated("OnResume", validValues: actionNames)],
+                            [.integer(0), .enumerated("OnSuspend", validValues: actionNames)],
+                            [.integer(1), .enumerated("OnEntry", validValues: actionNames)],
+                            [.integer(2), .enumerated("OnExit", validValues: actionNames)],
+                            [.integer(2), .enumerated("Internal", validValues: actionNames)]
+                        ],
                         columns: [
                             ("timeslot", .integer),
                             ("action", .enumerated(validValues: actionNames))
                         ]
                     )
-                )
-            ],
-            attributes: [
-                "action_names": .table(
-                    [
-                        [.line("Internal")],
-                        [.line("OnEntry")],
-                        [.line("OnExit")],
-                        [.line("OnResume")],
-                        [.line("OnSuspend")]
-
-                    ],
-                    columns: [("name", .line)]
-                ),
-                "action_order": .table(
-                    [
-                        [.integer(0), .enumerated("OnResume", validValues: actionNames)],
-                        [.integer(0), .enumerated("OnSuspend", validValues: actionNames)],
-                        [.integer(1), .enumerated("OnEntry", validValues: actionNames)],
-                        [.integer(2), .enumerated("OnExit", validValues: actionNames)],
-                        [.integer(2), .enumerated("Internal", validValues: actionNames)]
-                    ],
-                    columns: [
-                        ("timeslot", .integer),
-                        ("action", .enumerated(validValues: actionNames))
-                    ]
-                )
-            ],
-            metaData: [:]
-        )
-    ]
+                ],
+                metaData: [:]
+            )
+        ]
+    }
 
 }
