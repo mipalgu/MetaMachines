@@ -94,6 +94,19 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: []))
     }
 
+    /// Test the group is set up correctly when loaded from a machine.
+    func testInitialPropertiesAreUpdatedFromMachine() {
+        guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        let states: Set<String> = ["Initial", "Suspended"]
+        XCTAssertEqual(settings.suspendedState.label, "suspended_state")
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: states))
+        XCTAssertEqual(settings.initialState.label, "initial_state")
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: states))
+    }
+
     // /// Test initial schema fails validation.
     // func testInitialSchemaFailsValidation() throws {
     //     XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
