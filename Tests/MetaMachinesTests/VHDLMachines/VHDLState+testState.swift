@@ -57,16 +57,21 @@
 import Attributes
 import VHDLMachines
 
+/// Add test data to state.
 extension State {
 
+    /// The names of the actions in every state.
     private static let actionNames = Set(["OnEntry", "OnExit", "Internal", "OnResume", "OnSuspend"])
 
+    // swiftlint:disable function_body_length
+
+    /// The attributes matching the test state with name `name`.
     static func testAttributes(name: String) -> [AttributeGroup] {
         [
             AttributeGroup(
                 name: "variables",
                 fields: [
-                    Field(name: "externals", type: .enumerableCollection(validValues: [])),
+                    Field(name: "externals", type: .enumerableCollection(validValues: ["x", "y"])),
                     Field(
                         name: "state_signals",
                         type: .table(
@@ -93,9 +98,16 @@ extension State {
                     )
                 ],
                 attributes: [
-                    "externals": .enumerableCollection([], validValues: []),
+                    "externals": .enumerableCollection([], validValues: ["x", "y"]),
                     "state_signals": .table(
-                        [],
+                        [
+                            [
+                                .expression("std_logic", language: .vhdl),
+                                .line("initialX"),
+                                .expression("'0'", language: .vhdl),
+                                .line("Signal initialX.")
+                            ]
+                        ],
                         columns: [
                             ("type", .expression(language: .vhdl)),
                             ("name", .line),
@@ -104,7 +116,16 @@ extension State {
                         ]
                     ),
                     "state_variables": .table(
-                        [],
+                        [
+                            [
+                                .expression("integer", language: .vhdl),
+                                .line("0"),
+                                .line("1024"),
+                                .line("initialA"),
+                                .expression("0", language: .vhdl),
+                                .line("Int initialA.")
+                            ]
+                        ],
                         columns: [
                             ("type", .expression(language: .vhdl)),
                             ("lower_range", .line),
@@ -162,6 +183,43 @@ extension State {
                 metaData: [:]
             )
         ]
+    }
+
+    // swiftlint:enable function_body_length
+
+    /// Create a test state with name `name`.
+    static func testState(name: String) -> State {
+        let actions = [
+            "OnEntry": "y <= x;",
+            "OnExit": "",
+            "Internal": "",
+            "OnResume": "",
+            "OnSuspend": "y <= '0';"
+        ]
+        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+        return State(
+            name: name,
+            actions: actions,
+            actionOrder: actionOrder,
+            signals: [
+                LocalSignal(
+                    type: "std_logic",
+                    name: "initialX",
+                    defaultValue: "'0'",
+                    comment: "Signal initialX."
+                )
+            ],
+            variables: [
+                VHDLVariable(
+                    type: "integer",
+                    name: "initialA",
+                    defaultValue: "0",
+                    range: (0, 1024),
+                    comment: "Int initialA."
+                )
+            ],
+            externalVariables: []
+        )
     }
 
 }

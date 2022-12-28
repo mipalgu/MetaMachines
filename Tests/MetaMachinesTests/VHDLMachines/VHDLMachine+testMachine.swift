@@ -355,14 +355,6 @@ extension Machine {
     /// Test machine used as test data.
     static func testMachine(path: URL) -> Machine {
         let name = path.lastPathComponent.components(separatedBy: ".machine").first ?? path.lastPathComponent
-        let actions = [
-            "OnEntry": "y <= x;",
-            "OnExit": "",
-            "Internal": "",
-            "OnResume": "",
-            "OnSuspend": "y <= '0';"
-        ]
-        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
         return Machine(
             name: name,
             path: path,
@@ -419,52 +411,8 @@ extension Machine {
                 ReturnableVariable(type: "std_logic", name: "return", comment: "Signal return.")
             ],
             states: [
-                State(
-                    name: "Initial",
-                    actions: actions,
-                    actionOrder: actionOrder,
-                    signals: [
-                        LocalSignal(
-                            type: "std_logic",
-                            name: "initialX",
-                            defaultValue: "'0'",
-                            comment: "Signal initialX."
-                        )
-                    ],
-                    variables: [
-                        VHDLVariable(
-                            type: "integer",
-                            name: "initialA",
-                            defaultValue: "0",
-                            range: (0, 1024),
-                            comment: "Int initialA."
-                        )
-                    ],
-                    externalVariables: ["x", "y"]
-                ),
-                State(
-                    name: "Suspended",
-                    actions: actions,
-                    actionOrder: actionOrder,
-                    signals: [
-                        LocalSignal(
-                            type: "std_logic",
-                            name: "initialY",
-                            defaultValue: "'0'",
-                            comment: "Signal initialY."
-                        )
-                    ],
-                    variables: [
-                        VHDLVariable(
-                            type: "integer",
-                            name: "initialB",
-                            defaultValue: "0",
-                            range: (0, 1024),
-                            comment: "Int initialB."
-                        )
-                    ],
-                    externalVariables: ["x", "y"]
-                )
+                State.testState(name: "Initial"),
+                State.testState(name: "Suspended")
             ],
             transitions: [Transition(condition: "true", source: 0, target: 1)],
             initialState: 0,

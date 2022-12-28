@@ -63,7 +63,7 @@ import XCTest
 final class VHDLStateMetaMachineConversionsTests: XCTestCase {
 
     /// A machine to use for testing.
-    let machine = VHDLMachines.Machine.initial(
+    let machine = VHDLMachines.Machine.testMachine(
         path: URL(fileURLWithPath: "Machine.machine", isDirectory: true)
     )
 
@@ -75,9 +75,9 @@ final class VHDLStateMetaMachineConversionsTests: XCTestCase {
     /// Test state is successfully created from the MetaMachines state.
     func testConversionInit() {
         let actions = [
-            Action(name: "OnEntry", implementation: "", language: .vhdl),
+            Action(name: "OnEntry", implementation: "y <= x;", language: .vhdl),
             Action(name: "OnExit", implementation: "", language: .vhdl),
-            Action(name: "OnSuspend", implementation: "", language: .vhdl),
+            Action(name: "OnSuspend", implementation: "y <= '0';", language: .vhdl),
             Action(name: "OnResume", implementation: "", language: .vhdl),
             Action(name: "Internal", implementation: "", language: .vhdl)
         ]
