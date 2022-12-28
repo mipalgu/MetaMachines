@@ -127,6 +127,44 @@ final class VHDLStateVariablesTests: XCTestCase {
         )
     }
 
+    /// Test that the external variables are updated with the machines external variables.
+    func testInitialPropertiesAreUpdatedWhenLoadingMachine() {
+        guard
+            let variables = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.stateSchema.variables
+        else {
+            XCTFail("Could not get variables from machine.")
+            return
+        }
+        XCTAssertEqual(variables.externals.label, "externals")
+        XCTAssertEqual(variables.externals.type, .enumerableCollection(validValues: ["x", "y"]))
+        XCTAssertEqual(variables.stateSignals.label, "state_signals")
+        XCTAssertEqual(
+            variables.stateSignals.type,
+            .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]
+            )
+        )
+        XCTAssertEqual(variables.stateVariables.label, "state_variables")
+        XCTAssertEqual(
+            variables.stateVariables.type,
+            .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]
+            )
+        )
+    }
+
     /// Test that valid data causes the validator to pass.
     func testValidatorPassesWithValidData() {
         XCTAssertNoThrow(try variables.propertiesValidator.performValidation(expected))
