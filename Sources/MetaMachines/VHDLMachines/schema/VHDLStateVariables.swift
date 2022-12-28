@@ -16,7 +16,7 @@ struct VHDLStateVariables: GroupProtocol {
         collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0]
     )
 
-    @EnumerableCollectionProperty(label: "externals", validValues: [])
+    @EnumerableCollectionProperty(label: "externals", validValues: [], validation: { $0.unique() })
     var externals
 
     @TableProperty(
