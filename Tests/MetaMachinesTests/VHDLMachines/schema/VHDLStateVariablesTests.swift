@@ -76,6 +76,11 @@ final class VHDLStateVariablesTests: XCTestCase {
         machine.states[0].attributes[0]
     }
 
+    /// The state signals validator.
+    var signalValidator: AnyValidator<Attribute> {
+        variables.stateSignals.validate
+    }
+
     /// Initialise the test data.
     override func setUp() {
         self.machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
@@ -90,8 +95,66 @@ final class VHDLStateVariablesTests: XCTestCase {
         XCTAssertEqual(variables.path.paths(in: machine), paths)
     }
 
+    /// Test that the initial properties have the correct values.
     func testInitialPropertiesAreCorrect() {
         XCTAssertEqual(variables.externals.label, "externals")
+        XCTAssertEqual(variables.externals.type, .enumerableCollection(validValues: []))
+        XCTAssertEqual(variables.stateSignals.label, "state_signals")
+        XCTAssertEqual(
+            variables.stateSignals.type,
+            .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]
+            )
+        )
+        XCTAssertEqual(variables.stateVariables.label, "state_variables")
+        XCTAssertEqual(
+            variables.stateVariables.type,
+            .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]
+            )
+        )
+    }
+
+    /// Test that valid data causes the validator to pass.
+    func testValidatorPassesWithValidData() {
+        XCTAssertNoThrow(try variables.propertiesValidator.performValidation(expected))
+    }
+
+    /// Test that the validator rules throw errors for an invalid type.
+    func testSignalValidatorFailsForInvalidType() {
+        let data = signalTable(type: "abcd")
+        XCTAssertThrowsError(try signalValidator.performValidation(data))
+    }
+
+    /// Create a table for a state signal.
+    private func signalTable(type: String = "std_logic", name: String = "x") -> Attribute {
+        let row: [LineAttribute] = [
+            .expression(type, language: .vhdl),
+            .line(name),
+            .expression("", language: .vhdl),
+            .line("")
+        ]
+        return .table(
+            [row],
+            columns: [
+                ("type", .expression(language: .vhdl)),
+                ("name", .line),
+                ("value", .expression(language: .vhdl)),
+                ("comment", .line)
+            ]
+        )
     }
 
 }
