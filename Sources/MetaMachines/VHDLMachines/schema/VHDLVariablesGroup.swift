@@ -281,7 +281,6 @@ struct VHDLVariablesGroup: GroupProtocol {
                     clockLine[0].lineValue
                 })
                 let enumeratedOldValue = drivingClock.enumeratedValue
-                print(enumeratedOldValue)
                 let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
                     machine[keyPath: clockNamePath.keyPath]
                 machine.attributes[0].attributes["driving_clock"] = Attribute.enumerated(
