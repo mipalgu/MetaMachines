@@ -5,18 +5,23 @@
 //  Created by Morgan McColl on 7/6/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
+/// The group responsible for defining the signals for a *parameterised* VHDL machine.
 struct VHDLParametersGroup: GroupProtocol {
-  
-    public typealias Root = MetaMachine
-    
+
+    /// The root is a `MetaMachine`.
+    typealias Root = MetaMachine
+
+    /// The path to the group this schema corresponds too.
     let path = MetaMachine.path.attributes[1]
-    
+
+    /// Whether the machine is parameterised.
     @BoolProperty(label: "is_parameterised")
     var isParameterised
-    
+
+    /// The input signals to the parameterised machine.
     @TableProperty(
         label: "parameter_signals",
         columns: [
@@ -44,7 +49,8 @@ struct VHDLParametersGroup: GroupProtocol {
         ]
     )
     var parameters
-    
+
+    /// The signals returned by the parameterised machine.
     @TableProperty(
         label: "returnable_signals",
         columns: [
@@ -71,7 +77,8 @@ struct VHDLParametersGroup: GroupProtocol {
         ]
     )
     var returns
-    
+
+    /// The triggers that make the signals available/unavailable when the machine is parameterised.
     @TriggerBuilder<MetaMachine>
     var triggers: AnyTrigger<MetaMachine> {
         WhenTrue(isParameterised, makeAvailable: parameters)
@@ -79,5 +86,5 @@ struct VHDLParametersGroup: GroupProtocol {
         WhenFalse(isParameterised, makeUnavailable: parameters)
         WhenFalse(isParameterised, makeUnavailable: returns)
     }
-    
+
 }
