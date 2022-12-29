@@ -68,9 +68,40 @@ final class VHDLParametersGroupTests: XCTestCase {
     /// A meta machine to use as test data.
     lazy var machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
 
+    /// All of the fields in the group.
+    let fields = [
+        Field(name: "is_parameterised", type: .bool),
+        Field(
+            name: "parameter_signals",
+            type: .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]
+            )
+        ),
+        Field(
+            name: "returnable_signals",
+            type: .table(
+                columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("comment", .line)
+                ]
+            )
+        )
+    ]
+
+    /// The schema containing the group.
+    var schema: VHDLSchema? {
+        (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema
+    }
+
     /// The schema group under test.
     var parameters: VHDLParametersGroup? {
-        (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.parameters
+        schema?.parameters
     }
 
     /// Initialise the test data.
@@ -203,6 +234,49 @@ final class VHDLParametersGroupTests: XCTestCase {
         .forEach {
             XCTAssertNoThrow(try parameters?.returns.validate.performValidation($0))
         }
+    }
+
+    /// Test that parameters are available by default.
+    func testParametersAreAvailableWhenParameterised() {
+        XCTAssertEqual(machine.attributes[1].fields.count, 3)
+        XCTAssertEqual(machine.attributes[1].fields, fields)
+        XCTAssertEqual(machine.attributes[1].attributes["is_parameterised"], .bool(true))
+    }
+
+    /// Test triggers make fields unavailable when `isParameterised` is `false`.
+    func testMakeFieldsUnavailable() throws {
+        guard let trigger = parameters?.allTriggers else {
+            XCTFail("failed to get trigger.")
+            return
+        }
+        machine.attributes[1].attributes["is_parameterised"] = .bool(false)
+        let path = AnyPath(
+            Path(MetaMachine.self).attributes[1].attributes["is_parameterised"].wrappedValue.boolValue
+        )
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        XCTAssertEqual(machine.attributes[1].fields.count, 1)
+        XCTAssertEqual(machine.attributes[1].fields.first, Field(name: "is_parameterised", type: .bool))
+    }
+
+    /// Test triggers make parameters available when `isParameterised` is `true`.
+    func testMakeFieldsAvailable() throws {
+        guard let trigger = parameters?.allTriggers else {
+            XCTFail("failed to get trigger.")
+            return
+        }
+        machine.attributes[1].attributes["is_parameterised"] = .bool(false)
+        let path = AnyPath(
+            Path(MetaMachine.self).attributes[1].attributes["is_parameterised"].wrappedValue.boolValue
+        )
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        XCTAssertEqual(machine.attributes[1].fields.count, 1)
+        XCTAssertEqual(machine.attributes[1].fields.first, Field(name: "is_parameterised", type: .bool))
+        machine.attributes[1].attributes["is_parameterised"] = .bool(true)
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        XCTAssertEqual(machine.attributes[1].fields.count, 3)
+        XCTAssertEqual(machine.attributes[1].fields.sorted { $0.name < $1.name }, fields)
     }
 
     /// Create a table for a parameter signal.

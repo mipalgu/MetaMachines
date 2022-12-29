@@ -73,7 +73,7 @@ struct VHDLParametersGroup: GroupProtocol {
     var returns
     
     @TriggerBuilder<MetaMachine>
-    var triggers: some TriggerProtocol {
+    var triggers: AnyTrigger<MetaMachine> {
         WhenTrue(isParameterised, makeAvailable: parameters)
         WhenTrue(isParameterised, makeAvailable: returns)
         WhenFalse(isParameterised, makeUnavailable: parameters)
