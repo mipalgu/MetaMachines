@@ -22,8 +22,8 @@ struct VHDLVariablesGroup: GroupProtocol {
     /// The triggers for this group.
     @TriggerBuilder<MetaMachine>
     var triggers: AnyTrigger<Root> {
+        renameClocks
         newClocks
-        // Need to add trigger for renaming clock
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
@@ -197,11 +197,10 @@ struct VHDLVariablesGroup: GroupProtocol {
     )
     var machineSignals
 
-    /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
-    /// include the new clock in its valid values.
+    /// The trigger that causes the driving clock valid values to update when a clock is renamed.
     @TriggerBuilder<MetaMachine>
-    private var newClocks: AnyTrigger<MetaMachine> {
-        Attributes.ForEach(
+    private var renameClocks: AnyTrigger<MetaMachine> {
+        AnyTrigger(Attributes.ForEach(
             CollectionSearchPath(
                 collectionPath: path.attributes["clocks"].wrappedValue.tableValue,
                 elementPath: Path([LineAttribute].self)[0].lineValue
@@ -232,7 +231,13 @@ struct VHDLVariablesGroup: GroupProtocol {
                 machine.vhdlSchema = schema
                 return .success(true)
             }
-        }
+        })
+    }
+
+    /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
+    /// include the new clock in its valid values.
+    @TriggerBuilder<MetaMachine>
+    private var newClocks: AnyTrigger<MetaMachine> {
         WhenChanged(clocks).sync(
             target: path.attributes["driving_clock"].wrappedValue
         ) { clocksAttribute, oldValue in
@@ -245,6 +250,7 @@ struct VHDLVariablesGroup: GroupProtocol {
         }
     }
 
+    /// Update the driving_clock attributes from the clocks attribute.
     private func syncAttributes(clocksAttribute: Attribute, oldValue: Attribute) -> Attribute {
         let validValues = Set(clocksAttribute.tableValue.map { clockLine in
             clockLine[0].lineValue
@@ -255,6 +261,7 @@ struct VHDLVariablesGroup: GroupProtocol {
         return Attribute.enumerated(selected, validValues: validValues)
     }
 
+    /// Update the driving_clock schema property from the clocks attribute.
     private func syncSchema(clockAttribute: Attribute) -> EnumeratedProperty {
         let validValues = Set(clockAttribute.tableValue.map { clockLine in
             clockLine[0].lineValue
