@@ -41,12 +41,23 @@ struct VHDLSchema: MachineSchema {
         self.settings.$initialState.update(validValues: stateNames) { $0.notEmpty() }
         self.settings.$suspendedState.update(validValues: stateNames)
         let externals: [String]
+        let clocks: [String]
         if attributes.isEmpty {
             externals = []
+            clocks = []
         } else {
             externals = attributes[0].attributes["external_signals"]?.tableValue.map {
                 $0[2].lineValue
             } ?? []
+            clocks = (attributes[0].attributes["clocks"]?.tableValue.compactMap {
+                guard $0.count >= 1 else {
+                    return nil
+                }
+                return $0[0].lineValue
+            }) ?? []
+        }
+        self.variables.$drivingClock = EnumeratedProperty(label: "driving_clock", validValues: Set(clocks)) {
+            $0.notEmpty()
         }
         self.stateSchema.variables.$externals.update(validValues: Set(externals))
         let stateActions = states.first?.actions.map(\.name) ??
