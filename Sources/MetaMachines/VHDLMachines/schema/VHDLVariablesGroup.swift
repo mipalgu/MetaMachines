@@ -24,6 +24,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     var triggers: AnyTrigger<Root> {
         renameClocks
         newClocks
+        newExternalVariable
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
@@ -196,6 +197,27 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var machineSignals
+
+    /// Triggers that update the states external variables when a new one is added to the machine.
+    @TriggerBuilder<MetaMachine>
+    private var newExternalVariable: AnyTrigger<MetaMachine> {
+        WhenChanged(externalVariables).sync(
+            target: Path(MetaMachine.self).vhdlSchema.wrappedValue.stateSchema.variables.$externals
+        ) { externalsNow, _ in
+            let newExternals = Set(externalsNow.tableValue.map { $0[2].lineValue })
+            return EnumerableCollectionProperty(label: "externals", validValues: newExternals) { $0.unique() }
+        }
+        WhenChanged(externalVariables).sync(
+            target: CollectionSearchPath(
+                collectionPath: Path(MetaMachine.self).states,
+                elementPath: Path(State.self).attributes[0].attributes["externals"].wrappedValue
+            )
+        ) { externalsNow, oldStateExternals in
+            let newExternals = Set(externalsNow.tableValue.map { $0[2].lineValue })
+            let newValues = oldStateExternals.enumerableCollectionValue.filter { newExternals.contains($0) }
+            return Attribute.enumerableCollection(newValues, validValues: newExternals)
+        }
+    }
 
     /// The trigger that causes the driving clock valid values to update when a clock is renamed.
     @TriggerBuilder<MetaMachine>
