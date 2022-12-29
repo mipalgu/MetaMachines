@@ -141,6 +141,28 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(variables?.properties.count, 6)
     }
 
+    /// Test trigger only fires for correct path.
+    func testTriggersForPath() {
+        guard let trigger = variables?.allTriggers else {
+            XCTFail("Failed to get triggers.")
+            return
+        }
+        let attributesPath = Path(MetaMachine.self).attributes
+        XCTAssertFalse(trigger.isTriggerForPath(AnyPath(attributesPath), in: machine))
+        XCTAssertFalse(trigger.isTriggerForPath(AnyPath(attributesPath[0]), in: machine))
+        XCTAssertFalse(trigger.isTriggerForPath(AnyPath(attributesPath[0].attributes), in: machine))
+        XCTAssertFalse(trigger.isTriggerForPath(AnyPath(attributesPath[0].attributes["clocks"]), in: machine))
+        XCTAssertFalse(trigger.isTriggerForPath(
+            AnyPath(attributesPath[0].attributes["external_signals"]), in: machine
+        ))
+        XCTAssertTrue(trigger.isTriggerForPath(
+            AnyPath(attributesPath[0].attributes["clocks"].wrappedValue), in: machine
+        ))
+        XCTAssertTrue(trigger.isTriggerForPath(
+            AnyPath(attributesPath[0].attributes["external_signals"].wrappedValue), in: machine
+        ))
+    }
+
     /// Test the valid values of the driving clock are updated when a new clock is added.
     func testNewClockTriggerUpdatesDrivingClock() {
         guard let trigger = variables?.allTriggers else {
