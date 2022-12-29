@@ -146,6 +146,7 @@ final class VHDLSchemaTests: XCTestCase {
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
+    /// Make sure triggers fire correctly when a state is deleted.
     func testInitialStateDeletion() throws {
         let removedState = machine.states.remove(at: 0)
         XCTAssertTrue(
@@ -167,6 +168,7 @@ final class VHDLSchemaTests: XCTestCase {
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
+    /// Make sure triggers fire when an external variable is deleted.
     func testDeleteExternalVariables() throws {
         let path = Path(MetaMachine.self)
             .attributes[0].attributes["external_signals"].wrappedValue.tableValue
@@ -200,6 +202,7 @@ final class VHDLSchemaTests: XCTestCase {
             (mutator as? SchemaMutator<VHDLSchema>)?.schema.stateSchema.variables.externals.type,
             .enumerableCollection(validValues: externalNames)
         )
+        try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
 }
