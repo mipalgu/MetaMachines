@@ -9,12 +9,17 @@ import Attributes
 import Foundation
 import VHDLMachines
 
+/// The group for defining variables and signals that have machine scope. This group also handles the external
+/// variables that the machine is using.
 struct VHDLVariablesGroup: GroupProtocol {
-    
-    public typealias Root = MetaMachine
-    
+
+    /// The root is the `MetaMachine` that this group is a part of.
+    typealias Root = MetaMachine
+
+    /// The group that this schema is responsible for.
     let path = MetaMachine.path.attributes[0]
-    
+
+    /// The triggers for this group.
     @TriggerBuilder<MetaMachine>
     var triggers: AnyTrigger<Root> {
         newClock
@@ -22,6 +27,8 @@ struct VHDLVariablesGroup: GroupProtocol {
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
+    /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
+    /// include the new clock in its valid values.
     @TriggerBuilder<MetaMachine>
     private var newClock: AnyTrigger<MetaMachine> {
         AnyTrigger(WhenChanged(clocks).sync(
@@ -37,6 +44,7 @@ struct VHDLVariablesGroup: GroupProtocol {
         })
     }
 
+    /// All of the clocks available to this machine.
     @TableProperty(
         label: "clocks",
         columns: [
@@ -67,14 +75,18 @@ struct VHDLVariablesGroup: GroupProtocol {
         }
     )
     var clocks
-    
+
+    /// The clock causing the machine to execute. The machine will continuously check the rising edge of the
+    /// driving clock to control it's states execution.
     @EnumeratedProperty(
         label: "driving_clock",
         validValues: [],
         validation: { $0.notEmpty() }
     )
     var drivingClock
-    
+
+    /// The external signals available to the machine. These signals are not owned by the machine, but are
+    /// used by the machine to drive/control external actuators/sensors.
     @TableProperty(
         label: "external_signals",
         columns: [
@@ -107,7 +119,9 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var externalVariables
-    
+
+    /// The generics that generalise the behaviour of the machine. This property directly maps to the generics
+    /// in the entity statement of a VHDL file.
     @TableProperty(
         label: "generics",
         columns: [
@@ -137,7 +151,10 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var generics
-    
+
+    /// The machine variables defined local to the machine and accessible to every state within the machine.
+    /// Please note that these variables are not true signals, and therefore do not execute asynchronously
+    /// like signals do. They are instead updated immediately with the machines clock without jitter.
     @TableProperty(
         label: "machine_variables",
         columns: [
@@ -167,7 +184,8 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var machineVariables
-    
+
+    /// The machine signals local to the machine and accessible to every state within the machine.
     @TableProperty(
         label: "machine_signals",
         columns: [
@@ -195,5 +213,5 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var machineSignals
-    
+
 }
