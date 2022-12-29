@@ -38,8 +38,8 @@ struct VHDLSchema: MachineSchema {
     ) {
         self.init()
         let stateNames = Set(states.map(\.name))
-        self.settings.initialState.type = .enumerated(validValues: stateNames)
-        self.settings.suspendedState.type = .enumerated(validValues: stateNames)
+        self.settings.$initialState.update(validValues: stateNames) { $0.notEmpty() }
+        self.settings.$suspendedState.update(validValues: stateNames)
         let externals: [String]
         if attributes.isEmpty {
             externals = []
@@ -48,7 +48,7 @@ struct VHDLSchema: MachineSchema {
                 $0[2].lineValue
             } ?? []
         }
-        self.stateSchema.variables.externals.type = .enumerableCollection(validValues: Set(externals))
+        self.stateSchema.variables.$externals.update(validValues: Set(externals))
     }
 
     init(
