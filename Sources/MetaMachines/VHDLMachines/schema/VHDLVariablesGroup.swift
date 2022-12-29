@@ -22,7 +22,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     /// The triggers for this group.
     @TriggerBuilder<MetaMachine>
     var triggers: AnyTrigger<Root> {
-        newClock
+        newClocks
         // Need to add trigger for renaming clock
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
@@ -200,7 +200,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
     /// include the new clock in its valid values.
     @TriggerBuilder<MetaMachine>
-    private var newClock: AnyTrigger<MetaMachine> {
+    private var newClocks: AnyTrigger<MetaMachine> {
         WhenChanged(clocks).sync(
             target: path.attributes["driving_clock"].wrappedValue
         ) { clocksAttribute, oldValue in
