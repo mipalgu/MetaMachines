@@ -141,6 +141,7 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(variables?.properties.count, 6)
     }
 
+    /// Test the valid values of the driving clock are updated when a new clock is added.
     func testNewClockTriggerUpdatesDrivingClock() {
         guard let trigger = variables?.allTriggers else {
             XCTFail("Failed to get triggers.")
@@ -167,6 +168,31 @@ final class VHDLVariablesGroupTests: XCTestCase {
         let validValues: Set<String> = ["clk", "clk1", "clk2"]
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "clk")
+        XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
+    }
+
+    /// Test the valid values of the driving clock are updated when a clock is deleted.
+    func testDeletedClockTriggerUpdatesDrivingClock() {
+        guard let trigger = variables?.allTriggers else {
+            XCTFail("Failed to get triggers.")
+            return
+        }
+        guard let existingClocks = machine.attributes[0].attributes["clocks"]?.tableValue else {
+            XCTFail("Failed to get clocks.")
+            return
+        }
+        let newClocks = Attribute.table(Array(existingClocks.dropFirst()), columns: [
+            ("name", .line),
+            ("frequency", .integer),
+            ("unit", .enumerated(validValues: frequencies))
+        ])
+        machine.attributes[0].attributes["clocks"] = newClocks
+        let path = AnyPath(Path(MetaMachine.self).attributes[0].attributes["clocks"].wrappedValue.tableValue)
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let validValues: Set<String> = ["clk1"]
+        XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
+        XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "clk1")
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
     }
 
