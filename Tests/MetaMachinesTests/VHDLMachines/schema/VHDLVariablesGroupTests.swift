@@ -132,6 +132,7 @@ final class VHDLVariablesGroupTests: XCTestCase {
         ]))
         XCTAssertEqual(variables?.drivingClock.label, "driving_clock")
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: ["clk", "clk1"]))
+        XCTAssertEqual(variables?.properties.count, 6)
     }
 
 }
