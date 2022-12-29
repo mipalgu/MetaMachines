@@ -304,8 +304,8 @@ extension Machine {
                         [
                             [
                                 .expression("std_logic", language: .vhdl),
-                                .line("return"),
-                                .line("Signal return.")
+                                .line("returnSignal"),
+                                .line("Signal returnSignal.")
                             ]
                         ],
                         columns: [
@@ -408,7 +408,7 @@ extension Machine {
                 )
             ],
             returnableSignals: [
-                ReturnableVariable(type: "std_logic", name: "return", comment: "Signal return.")
+                ReturnableVariable(type: "std_logic", name: "returnSignal", comment: "Signal returnSignal.")
             ],
             states: [
                 State.testState(name: "Initial"),
