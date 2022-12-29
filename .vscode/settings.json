@@ -1,7 +1,8 @@
 {
+    "swift.disableAutoResolve": true,
     "swift.buildArguments": [
-        "-Xswiftc",
-        "-DMACHINES_USE_LOCAL_DEPS"
+        "-Xswiftc", "-emit-symbol-graph",
+        "-Xswiftc", "-DMACHINES_USE_LOCAL_DEPS"
     ],
     "swift.testEnvironmentVariables": {
         "MACHINES_USE_LOCAL_DEPS": "1"
