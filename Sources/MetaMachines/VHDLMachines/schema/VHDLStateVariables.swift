@@ -8,17 +8,22 @@
 import Attributes
 import Foundation
 
+/// The group providing the state variables for a particular state in a VHDL machine.
 struct VHDLStateVariables: GroupProtocol {
 
-    public typealias Root = MetaMachine
+    /// The root is a ``MetaMachine``.
+    typealias Root = MetaMachine
 
+    /// The search path to the attribute group this ``GroupProtocol`` represents.
     let path = CollectionSearchPath(
         collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0]
     )
 
+    /// The external variables used in this states execution.
     @EnumerableCollectionProperty(label: "externals", validValues: [], validation: { $0.unique() })
     var externals
 
+    /// Any signals local to this state.
     @TableProperty(
         label: "state_signals",
         columns: [
@@ -48,6 +53,7 @@ struct VHDLStateVariables: GroupProtocol {
     )
     var stateSignals
 
+    /// Any variables local to this state.
     @TableProperty(
         label: "state_variables",
         columns: [
