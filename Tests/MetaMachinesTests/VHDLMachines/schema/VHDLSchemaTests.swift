@@ -70,12 +70,136 @@ final class VHDLSchemaTests: XCTestCase {
 
     /// The schema containing the group.
     var schema: VHDLSchema? {
-        (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema
+        get {
+            machine.vhdlSchema
+        }
+        set {
+            machine.vhdlSchema = newValue
+        }
     }
 
     /// Initialise the test data.
     override func setUp() {
         self.machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
+    }
+
+    /// Test that settings triggers are available in top-level schema.
+    func testTriggersAddStatesCorrectlyManually() {
+        let actions = machine.states[0].actions
+        let transitions = machine.states[0].transitions
+        let newState = MetaMachines.State(
+            name: "State0",
+            actions: actions,
+            transitions: transitions,
+            attributes: VHDLMachines.State.testAttributes(name: "State0")
+        )
+        machine.states.append(newState)
+        let path = AnyPath(Path(MetaMachine.self).states[3])
+        guard let trigger = schema?.trigger else {
+            XCTFail("Failed to get trigger!")
+            return
+        }
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "Initial")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = schema?.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+    }
+
+    /// Test that settings triggers are available using delegates.
+    func testTriggersAddStatesCorrectly() throws {
+        let actions = machine.states[0].actions
+        let transitions = machine.states[0].transitions
+        let newState = MetaMachines.State(
+            name: "State0",
+            actions: actions,
+            transitions: transitions,
+            attributes: VHDLMachines.State.testAttributes(name: "State0")
+        )
+        machine.states.append(newState)
+        XCTAssertTrue(
+            try schema?.didCreateNewState(machine: &machine, state: newState, index: 3).get() ?? false
+        )
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "Initial")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = self.schema?.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        try schema?.makeValidator(root: machine).performValidation(machine)
+    }
+
+    func testInitialStateDeletion() throws {
+        let removedState = machine.states.remove(at: 0)
+        XCTAssertTrue(
+            try schema?.didDeleteState(machine: &machine, state: removedState, at: 0).get() ?? false
+        )
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["Suspended"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "Suspended")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = self.schema?.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        try schema?.makeValidator(root: machine).performValidation(machine)
+    }
+
+    func testDeleteExternalVariables() throws {
+        let path = Path(MetaMachine.self)
+            .attributes[0].attributes["external_signals"].wrappedValue.tableValue
+        guard
+            let attribute = machine.attributes[0].attributes["external_signals"]?.tableValue.remove(at: 0)
+        else {
+            XCTFail("Didn't delete attribute.")
+            return
+        }
+        var mutator = machine.mutator
+        XCTAssertTrue(
+            try mutator.didDeleteItem(attribute: path, atIndex: 0, machine: &machine, item: attribute).get()
+        )
+        guard let externals = machine.attributes[0].attributes["external_signals"]?.tableValue else {
+            XCTFail("Cannot get externals!")
+            return
+        }
+        XCTAssertEqual(externals.count, 1)
+        let externalNames = Set(externals.map { $0[2].lineValue })
+        machine.states.forEach {
+            let stateExternals = $0.attributes[0].attributes["externals"]
+            XCTAssertEqual(stateExternals?.enumerableCollectionValidValues, externalNames)
+            XCTAssertTrue(
+                stateExternals?.enumerableCollectionValue.allSatisfy { externalNames.contains($0) } ?? false
+            )
+        }
+        XCTAssertEqual(
+            schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: externalNames)
+        )
+        XCTAssertEqual(
+            (mutator as? SchemaMutator<VHDLSchema>)?.schema.stateSchema.variables.externals.type,
+            .enumerableCollection(validValues: externalNames)
+        )
     }
 
 }

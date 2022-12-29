@@ -87,4 +87,44 @@ struct VHDLSchema: MachineSchema {
         self.settings = settings
     }
 
+    func didCreateNewState(
+        machine: inout MetaMachine, state: State, index: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        statesTrigger(machine: &machine)
+    }
+
+    func didChangeStatesName(
+        machine: inout MetaMachine, state: State, index: Int, oldName: String
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        let path = AnyPath(Path(MetaMachine.self).states[index].name)
+        guard self.trigger.isTriggerForPath(path, in: machine) else {
+            return .success(false)
+        }
+        return self.trigger.performTrigger(&machine, for: path)
+    }
+
+    func didDeleteState(
+        machine: inout MetaMachine, state: State, at: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        statesTrigger(machine: &machine)
+    }
+
+    func didDeleteStates(
+        machine: inout MetaMachine, state: [State], at: IndexSet
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        statesTrigger(machine: &machine)
+    }
+
+    mutating func update(from metaMachine: MetaMachine) {
+        self = metaMachine.vhdlSchema.wrappedValue
+    }
+
+    private func statesTrigger(machine: inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>> {
+        let path = AnyPath(Path(MetaMachine.self).states)
+        guard self.trigger.isTriggerForPath(path, in: machine) else {
+            return .success(false)
+        }
+        return self.trigger.performTrigger(&machine, for: path)
+    }
+
 }
