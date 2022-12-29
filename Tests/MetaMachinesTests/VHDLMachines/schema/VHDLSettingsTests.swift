@@ -133,4 +133,93 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
     }
 
+    /// Test that the initial and suspended state settings are updated when a new state is added.
+    func testValidValuesAreUpdatedOnNewState() throws {
+        let actions = machine.states[0].actions
+        let transitions = machine.states[0].transitions
+        let newState = MetaMachines.State(
+            name: "State0",
+            actions: actions,
+            transitions: transitions,
+            attributes: VHDLMachines.State.testAttributes(name: "State0")
+        )
+        machine.states.append(newState)
+        let path = AnyPath(Path(MetaMachine.self).states[3])
+        guard
+            let trigger = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings.allTriggers
+        else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "Initial")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+    }
+
+    /// Test that the initial and suspended state settings are updated when a state is deleted.
+    func testValidValuesAreUpdatedOnDeletedState() throws {
+        _ = machine.states.remove(at: 0)
+        let path = AnyPath(Path(MetaMachine.self).states[0])
+        guard
+            let trigger = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings.allTriggers
+        else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["Suspended"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "Suspended")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+    }
+
+    /// Test that the initial and suspended state settings are updated when a state is renamed.
+    func testValidValuesAreUpdatedOnRenamedState() throws {
+        machine.states[0].name = "zState0"
+        let path = AnyPath(Path(MetaMachine.self).states[0].name)
+        guard
+            let trigger = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings.allTriggers
+        else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let initialState = machine.attributes[3].attributes["initial_state"]
+        let newValidValues: Set<String> = ["zState0", "Suspended"]
+        XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(initialState?.enumeratedValue, "zState0")
+        let suspendedState = machine.attributes[3].attributes["suspended_state"]
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
+        guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+    }
+
 }
