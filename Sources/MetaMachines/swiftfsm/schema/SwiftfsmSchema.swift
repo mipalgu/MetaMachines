@@ -206,7 +206,7 @@ public struct SwiftfsmStateSettings: GroupProtocol {
     
     mutating func update(from metaMachine: MetaMachine) {
         let externals = Set(metaMachine.attributes[0].attributes["external_variables"]?.tableValue.map { $0[1].lineValue } ?? [])
-        self._externalVariables.wrappedValue.type = AttributeType.enumerableCollection(validValues: externals)
+        self.$externalVariables.update(validValues: externals)
     }
 
 }
@@ -429,7 +429,7 @@ public struct SwiftfsmSettings: GroupProtocol {
     }
     
     public mutating func updateSuspendValues(_ validValues: Set<String>) {
-        self.suspendState.type = .enumerated(validValues: validValues)
+        self.$suspendState.update(validValues: validValues)
     }
     
 }

@@ -1,0 +1,12 @@
+{
+    "swift.buildArguments": [
+        "-Xswiftc",
+        "-DMACHINES_USE_LOCAL_DEPS"
+    ],
+    "swift.testEnvironmentVariables": {
+        "MACHINES_USE_LOCAL_DEPS": "1"
+    },
+    "swift.swiftEnvironmentVariables": {
+        "MACHINES_USE_LOCAL_DEPS": "1"
+    }
+}
