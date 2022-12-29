@@ -50,10 +50,7 @@ struct VHDLSchema: MachineSchema {
                 $0[2].lineValue
             } ?? []
             clocks = (attributes[0].attributes["clocks"]?.tableValue.compactMap {
-                guard $0.count >= 1 else {
-                    return nil
-                }
-                return $0[0].lineValue
+                $0.first?.lineValue
             }) ?? []
         }
         self.variables.$drivingClock = EnumeratedProperty(label: "driving_clock", validValues: Set(clocks)) {
