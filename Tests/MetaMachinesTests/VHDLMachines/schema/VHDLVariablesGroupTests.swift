@@ -221,6 +221,27 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
     }
 
+    /// Test the external variables are available in every state.
+    func testStateExternalVariablesMatchMachineExternalVariables() {
+        guard
+            let externalSignals = (machine.attributes[0].attributes["external_signals"]?.tableValue.map {
+                $0[2].lineValue
+            })
+        else {
+            XCTFail("Failed to retrieve external signals in machine.")
+            return
+        }
+        let externalSet = Set(externalSignals)
+        XCTAssertEqual(
+            schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: externalSet)
+        )
+        machine.states.forEach {
+            XCTAssertEqual(
+                externalSet, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
+            )
+        }
+    }
+
     /// Test that the validator rules throw errors for an invalid name.
     func testClockNameValidatorRules() throws {
         try [
