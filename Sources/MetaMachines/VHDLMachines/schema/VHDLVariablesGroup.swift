@@ -209,7 +209,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             })
             let enumeratedOldValue = oldValue.enumeratedValue
             let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
-                validValues.sorted().first ?? ""
+                validValues.min() ?? ""
             return Attribute.enumerated(selected, validValues: validValues)
         }
         WhenChanged(clocks).sync(
