@@ -188,6 +188,105 @@ final class VHDLStateVariablesTests: XCTestCase {
         XCTAssertThrowsError(try variables.stateSignals.validate.performValidation(data))
     }
 
+    /// Test that the validator rules throw errors for an invalid name.
+    func testSignalNameValidatorRules() throws {
+        try [
+            signalTable(name: "a%^&"),
+            signalTable(name: "std_logic"),
+            signalTable(name: "integer"),
+            signalTable(name: "abs"),
+            signalTable(name: "")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables.stateSignals.validate.performValidation($0))
+        }
+        try [
+            signalTable(name: "x"),
+            signalTable(name: "y"),
+            signalTable(name: "x_1"),
+            signalTable(name: "_x"),
+            signalTable(name: "abs3")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables.stateSignals.validate.performValidation($0))
+        }
+    }
+
+    /// Test that the validator rules throw errors for an invalid type.
+    func testSignalTypeValidatorRules() throws {
+        try [
+            signalTable(type: "integer"),
+            signalTable(type: "boolean"),
+            signalTable(type: "all"),
+            signalTable(type: "my_integers")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables.stateSignals.validate.performValidation($0))
+        }
+        try [
+            signalTable(type: "std_logic"),
+            signalTable(type: "std_logic_vector"),
+            signalTable(type: "signed"),
+            signalTable(type: "unsigned"),
+            signalTable(type: "bit"),
+            signalTable(type: "bit_vector")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables.stateSignals.validate.performValidation($0))
+        }
+    }
+
+    /// Test that the validator rules throw errors for an invalid type.
+    func testVariableTypeValidatorRules() throws {
+        try [
+            variableTable(type: "std_logic"),
+            variableTable(type: "std_logic_vector"),
+            variableTable(type: "signed"),
+            variableTable(type: "unsigned"),
+            variableTable(type: "bit"),
+            variableTable(type: "bit_vector"),
+            variableTable(type: "all"),
+            variableTable(type: "my_integers")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables.stateVariables.validate.performValidation($0))
+        }
+        try [
+            variableTable(type: "integer"),
+            variableTable(type: "boolean"),
+            variableTable(type: "natural"),
+            variableTable(type: "positive"),
+            variableTable(type: "real")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables.stateVariables.validate.performValidation($0))
+        }
+    }
+
+    /// Test that the validator rules throw errors for an invalid name.
+    func testVariableNameValidatorRules() throws {
+        try [
+            variableTable(name: "a%^&"),
+            variableTable(name: "std_logic"),
+            variableTable(name: "integer"),
+            variableTable(name: "abs"),
+            variableTable(name: "")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables.stateVariables.validate.performValidation($0))
+        }
+        try [
+            variableTable(name: "x"),
+            variableTable(name: "y"),
+            variableTable(name: "x_1"),
+            variableTable(name: "_x"),
+            variableTable(name: "abs3")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables.stateVariables.validate.performValidation($0))
+        }
+    }
+
     /// Create a table for a state signal.
     private func signalTable(type: String = "std_logic", name: String = "x") -> Attribute {
         let row: [LineAttribute] = [
@@ -200,6 +299,31 @@ final class VHDLStateVariablesTests: XCTestCase {
             [row],
             columns: [
                 ("type", .expression(language: .vhdl)),
+                ("name", .line),
+                ("value", .expression(language: .vhdl)),
+                ("comment", .line)
+            ]
+        )
+    }
+
+    /// Create a table for a state signal.
+    private func variableTable(
+        type: String = "integer", name: String = "x", lowerRange: String = "", upperRange: String = ""
+    ) -> Attribute {
+        let row: [LineAttribute] = [
+            .expression(type, language: .vhdl),
+            .line(lowerRange),
+            .line(upperRange),
+            .line(name),
+            .expression("", language: .vhdl),
+            .line("")
+        ]
+        return .table(
+            [row],
+            columns: [
+                ("type", .expression(language: .vhdl)),
+                ("lower_range", .line),
+                ("upper_range", .line),
                 ("name", .line),
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)

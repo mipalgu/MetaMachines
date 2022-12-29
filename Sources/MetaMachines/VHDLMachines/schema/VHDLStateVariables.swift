@@ -56,17 +56,17 @@ struct VHDLStateVariables: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greyList(VHDLReservedWords.variableTypes)
+                    .whitelist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
             .line(
                 label: "lower_range",
-                validation: .optional().numeric().minLength(1).maxLength(255)
+                validation: .optional().numeric().maxLength(255)
             ),
             .line(
                 label: "upper_range",
-                validation: .optional().numeric().minLength(1).maxLength(255)
+                validation: .optional().numeric().maxLength(255)
             ),
             .line(
                 label: "name",
