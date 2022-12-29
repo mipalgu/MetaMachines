@@ -49,9 +49,8 @@ struct VHDLSchema: MachineSchema {
             } ?? []
         }
         self.stateSchema.variables.$externals.update(validValues: Set(externals))
-        guard let stateActions = states.first?.actions.map(\.name) else {
-            return
-        }
+        let stateActions = states.first?.actions.map(\.name) ??
+            ["OnEntry", "OnExit", "Internal", "OnSuspend", "OnResume"]
         self.stateSchema.actions.$actionOrder.update(
             columns: [
                 .integer(label: "timeslot", validation: .required().between(min: 0, max: 255)),
