@@ -310,6 +310,34 @@ final class VHDLVariablesGroupTests: XCTestCase {
         }
     }
 
+    /// Test that renaming an external variables updates the states and the schema.
+    func testTriggersUpdateExternalVariablesInStates() {
+        guard let trigger = variables?.allTriggers else {
+            XCTFail("Failed to retrieve trigger in group.")
+            return
+        }
+        machine.attributes[0].attributes["external_signals"]?.tableValue[0][2] = .line("new_name")
+        let path = AnyPath(
+            Path(MetaMachine.self)
+                .attributes[0]
+                .attributes["external_signals"]
+                .wrappedValue
+                .tableValue[0][2]
+                .lineValue
+        )
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let newExternals: Set<String> = ["new_name", "y"]
+        XCTAssertEqual(
+            schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
+        )
+        machine.states.forEach {
+            XCTAssertEqual(
+                newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
+            )
+        }
+    }
+
     /// Test that the validator rules throw errors for an invalid name.
     func testClockNameValidatorRules() throws {
         try [

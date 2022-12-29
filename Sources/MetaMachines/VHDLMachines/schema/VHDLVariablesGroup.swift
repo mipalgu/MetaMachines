@@ -198,6 +198,45 @@ struct VHDLVariablesGroup: GroupProtocol {
     )
     var machineSignals
 
+    // @TriggerBuilder<MetaMachine>
+    // private var renameExternalVariable: AnyTrigger<MetaMachine> {
+    //     AnyTrigger(
+    //         Attributes.ForEach(CollectionSearchPath(
+    //             collectionPath: path.attributes["external_signals"].wrappedValue.tableValue,
+    //             elementPath: Path([LineAttribute].self)[2].lineValue
+    //         )) { externalNamePath in
+    //             Attributes.WhenChanged(externalNamePath).custom { machine in
+    //                 guard
+    //                     let externals = machine.attributes[0].attributes["external_signals"],
+    //                     var schema = machine.vhdlSchema
+    //                 else {
+    //                     return .failure(AttributeError(
+    //                         message: "Cannot find external variables", path: AnyPath(externalNamePath)
+    //                     ))
+    //                 }
+    //                 let externalNames = Set(externals.tableValue.map { $0[2].lineValue })
+    //                 schema.stateSchema.variables.$externals = EnumerableCollectionProperty(
+    //                     label: "externals",
+    //                     validValues: externalNames
+    //                 ) {
+    //                     $0.unique()
+    //                 }
+    //                 machine.vhdlSchema = schema
+    //                 machine.states.indices.forEach { index in
+    //                     let existingExternals = machine.states[index].attributes[0]
+    //                         .attributes["externals"]?.enumerableCollectionValue ?? []
+    //                     machine.states[index].attributes[0].attributes["externals"] = .enumerableCollection
+    //                     (
+    //                         existingExternals.filter { externalNames.contains($0) },
+    //                         validValues: externalNames
+    //                     )
+    //                 }
+    //                 return .success(true)
+    //             }
+    //         }
+    //     )
+    // }
+
     /// Triggers that update the states external variables when a new one is added to the machine.
     @TriggerBuilder<MetaMachine>
     private var newExternalVariable: AnyTrigger<MetaMachine> {
