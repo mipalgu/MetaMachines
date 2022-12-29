@@ -279,6 +279,37 @@ final class VHDLVariablesGroupTests: XCTestCase {
         }
     }
 
+    /// Test that removing an external variables updates the states and the schema.
+    func testTriggersRemoveExternalVariablesFromStates() {
+        guard
+            let trigger = variables?.allTriggers,
+            let externals = machine.attributes[0].attributes["external_signals"]?.tableValue
+        else {
+            XCTFail("Failed to retrieve trigger in group.")
+            return
+        }
+        let removedExternals = Array(externals.dropFirst())
+        machine.attributes[0].attributes["external_signals"]?.tableValue.remove(at: 0)
+        let path = AnyPath(
+            Path(MetaMachine.self)
+                .attributes[0]
+                .attributes["external_signals"]
+                .wrappedValue
+                .tableValue[0]
+        )
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let newExternals = Set(removedExternals.map { $0[2].lineValue })
+        XCTAssertEqual(
+            schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
+        )
+        machine.states.forEach {
+            XCTAssertEqual(
+                newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
+            )
+        }
+    }
+
     /// Test that the validator rules throw errors for an invalid name.
     func testClockNameValidatorRules() throws {
         try [
