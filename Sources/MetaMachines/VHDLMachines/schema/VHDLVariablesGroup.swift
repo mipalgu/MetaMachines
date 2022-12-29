@@ -25,7 +25,6 @@ struct VHDLVariablesGroup: GroupProtocol {
         renameClocks
         newClocks
         newExternalVariable
-        // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
     /// All of the clocks available to this machine.
