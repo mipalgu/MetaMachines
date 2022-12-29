@@ -201,25 +201,65 @@ struct VHDLVariablesGroup: GroupProtocol {
     /// include the new clock in its valid values.
     @TriggerBuilder<MetaMachine>
     private var newClocks: AnyTrigger<MetaMachine> {
+        Attributes.ForEach(
+            CollectionSearchPath(
+                collectionPath: path.attributes["clocks"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[0].lineValue
+            )
+        ) { clockNamePath in
+            Attributes.WhenChanged(clockNamePath).custom { machine in
+                guard
+                    !clockNamePath.isNil(machine),
+                    let clockAttribute = machine.attributes[0].attributes["clocks"],
+                    let drivingClock = machine.attributes[0].attributes["driving_clock"],
+                    var schema = machine.vhdlSchema
+                else {
+                    return .failure(
+                        AttributeError(message: "Cannot find clocks", path: AnyPath(clockNamePath))
+                    )
+                }
+                let validValues = Set(clockAttribute.tableValue.map { clockLine in
+                    clockLine[0].lineValue
+                })
+                let enumeratedOldValue = drivingClock.enumeratedValue
+                print(enumeratedOldValue)
+                let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
+                    machine[keyPath: clockNamePath.keyPath]
+                machine.attributes[0].attributes["driving_clock"] = Attribute.enumerated(
+                    selected, validValues: validValues
+                )
+                schema.variables.$drivingClock = syncSchema(clockAttribute: clockAttribute)
+                machine.vhdlSchema = schema
+                return .success(true)
+            }
+        }
         WhenChanged(clocks).sync(
             target: path.attributes["driving_clock"].wrappedValue
         ) { clocksAttribute, oldValue in
-            let validValues = Set(clocksAttribute.tableValue.map { clockLine in
-                clockLine[0].lineValue
-            })
-            let enumeratedOldValue = oldValue.enumeratedValue
-            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
-                validValues.min() ?? ""
-            return Attribute.enumerated(selected, validValues: validValues)
+            syncAttributes(clocksAttribute: clocksAttribute, oldValue: oldValue)
         }
         WhenChanged(clocks).sync(
             target: MetaMachine.path.vhdlSchema.wrappedValue.variables.$drivingClock
         ) { clockAttribute, _ in
-            let validValues = Set(clockAttribute.tableValue.map { clockLine in
-                clockLine[0].lineValue
-            })
-            return EnumeratedProperty(label: "driving_clock", validValues: validValues) { $0.notEmpty() }
+            syncSchema(clockAttribute: clockAttribute)
         }
+    }
+
+    private func syncAttributes(clocksAttribute: Attribute, oldValue: Attribute) -> Attribute {
+        let validValues = Set(clocksAttribute.tableValue.map { clockLine in
+            clockLine[0].lineValue
+        })
+        let enumeratedOldValue = oldValue.enumeratedValue
+        let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
+            validValues.min() ?? ""
+        return Attribute.enumerated(selected, validValues: validValues)
+    }
+
+    private func syncSchema(clockAttribute: Attribute) -> EnumeratedProperty {
+        let validValues = Set(clockAttribute.tableValue.map { clockLine in
+            clockLine[0].lineValue
+        })
+        return EnumeratedProperty(label: "driving_clock", validValues: validValues) { $0.notEmpty() }
     }
 
 }
