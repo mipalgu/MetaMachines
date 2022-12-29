@@ -52,7 +52,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .integer(
                 label: "frequency",
-                validation: .required().between(min: 0, max: 999)
+                validation: .required().between(min: 1, max: 999)
             ),
             .enumerated(
                 label: "unit",
@@ -116,12 +116,12 @@ struct VHDLVariablesGroup: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greyList(VHDLReservedWords.variableTypes)
+                    .whitelist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
-            .line(label: "lower_range", validation: .optional().numeric().minLength(1).maxLength(255)),
-            .line(label: "upper_range", validation: .optional().numeric().minLength(1).maxLength(255)),
+            .line(label: "lower_range", validation: .optional().numeric().maxLength(255)),
+            .line(label: "upper_range", validation: .optional().numeric().maxLength(255)),
             .line(
                 label: "name",
                 validation:
@@ -146,12 +146,12 @@ struct VHDLVariablesGroup: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greyList(VHDLReservedWords.variableTypes)
+                    .whitelist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
-            .line(label: "lower_range", validation: .optional().numeric().minLength(1).maxLength(255)),
-            .line(label: "upper_range", validation: .optional().numeric().minLength(1).maxLength(255)),
+            .line(label: "lower_range", validation: .optional().numeric().maxLength(255)),
+            .line(label: "upper_range", validation: .optional().numeric().maxLength(255)),
             .line(
                 label: "name",
                 validation:

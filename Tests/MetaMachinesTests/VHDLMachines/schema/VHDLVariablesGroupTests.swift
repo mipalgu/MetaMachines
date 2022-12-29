@@ -73,10 +73,16 @@ final class VHDLVariablesGroupTests: XCTestCase {
         (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema
     }
 
+    /// Allowed external variable modes.
+    let modes: Set<String> = ["in", "out", "inout", "buffer"]
+
     /// The schema group under test.
     var variables: VHDLVariablesGroup? {
         schema?.variables
     }
+
+    /// Allowed clock frequencies.
+    let frequencies: Set<String> = ["Hz", "kHz", "MHz", "GHz", "THz"]
 
     /// Initialise the test data.
     override func setUp() {
@@ -95,11 +101,11 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(variables?.clocks.type, .table( columns: [
             ("name", .line),
             ("frequency", .integer),
-            ("unit", .enumerated(validValues: ["Hz", "kHz", "MHz", "GHz", "THz"]))
+            ("unit", .enumerated(validValues: frequencies))
         ]))
         XCTAssertEqual(variables?.externalVariables.label, "external_signals")
         XCTAssertEqual(variables?.externalVariables.type, .table(columns: [
-            ("mode", .enumerated(validValues: ["in", "out", "inout", "buffer"])),
+            ("mode", .enumerated(validValues: modes)),
             ("type", .expression(language: .vhdl)),
             ("name", .line),
             ("value", .expression(language: .vhdl)),
@@ -133,6 +139,132 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(variables?.drivingClock.label, "driving_clock")
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: ["clk", "clk1"]))
         XCTAssertEqual(variables?.properties.count, 6)
+    }
+
+    /// Test that the validator rules throw errors for an invalid name.
+    func testClockNameValidatorRules() throws {
+        try [
+            clockTable(name: "a%^&"),
+            clockTable(name: "std_logic"),
+            clockTable(name: "integer"),
+            clockTable(name: "abs"),
+            clockTable(name: "")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables?.clocks.validate.performValidation($0))
+        }
+        try [
+            clockTable(name: "x"),
+            clockTable(name: "y"),
+            clockTable(name: "x_1"),
+            clockTable(name: "_x"),
+            clockTable(name: "abs3"),
+            clockTable(name: "clk"),
+            clockTable(name: "clk1"),
+            clockTable(name: "clk_1"),
+            clockTable(name: "clk_2"),
+            clockTable(name: "clk50")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables?.clocks.validate.performValidation($0))
+        }
+    }
+
+    /// Test that the validator rules throw errors for an invalid frequency.
+    func testClockFrequencyValidatorRules() throws {
+        try [
+            clockTable(frequency: -1),
+            clockTable(frequency: 0),
+            clockTable(frequency: 1000),
+            clockTable(frequency: -1000)
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables?.clocks.validate.performValidation($0))
+        }
+        try [
+            clockTable(frequency: 1),
+            clockTable(frequency: 500),
+            clockTable(frequency: 999)
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables?.clocks.validate.performValidation($0))
+        }
+    }
+
+    /// Test that the validator rules throw errors for an invalid unit.
+    func testClockUnitValidatorRules() throws {
+        try [
+            clockTable(unit: "KHz"),
+            clockTable(unit: "Mhz"),
+            clockTable(unit: "ghz"),
+            clockTable(unit: "integer"),
+            clockTable(unit: "std_logic"),
+            clockTable(unit: "freq"),
+            clockTable(unit: "other")
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables?.clocks.validate.performValidation($0))
+        }
+        try [
+            clockTable(unit: "Hz"),
+            clockTable(unit: "kHz"),
+            clockTable(unit: "MHz"),
+            clockTable(unit: "GHz"),
+            clockTable(unit: "THz")
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables?.clocks.validate.performValidation($0))
+        }
+    }
+
+    /// Test validate throws error when clocks table is empty.
+    func testClocksThrowsErrorWhenEmpty() throws {
+        let attribute = Attribute.table([], columns: [
+            ("name", .line),
+            ("frequency", .integer),
+            ("unit", .enumerated(validValues: frequencies))
+        ])
+        XCTAssertThrowsError(try variables?.clocks.validate.performValidation(attribute))
+    }
+
+    /// Test that driving clock validators enforce valid values.
+    func testDrivingClockValidationRules() throws {
+        try [
+            Attribute.enumerated("", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("a", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("b", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("clk2", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("Clk1", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("Clk2", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("clk_1", validValues: ["clk", "clk1"])
+        ]
+        .forEach {
+            XCTAssertThrowsError(try variables?.drivingClock.validate.performValidation($0))
+        }
+        try [
+            Attribute.enumerated("clk", validValues: ["clk", "clk1"]),
+            Attribute.enumerated("clk1", validValues: ["clk", "clk1"])
+        ]
+        .forEach {
+            XCTAssertNoThrow(try variables?.drivingClock.validate.performValidation($0))
+        }
+    }
+
+    /// Create a table for a clock.
+    private func clockTable(name: String = "clk", frequency: Int = 50, unit: String = "MHz") -> Attribute {
+        let row: [LineAttribute] = [
+            .line(name),
+            .integer(frequency),
+            .enumerated(unit, validValues: frequencies)
+        ]
+        return .table(
+            [row],
+            columns: [
+                ("name", .line),
+                ("frequency", .integer),
+                ("unit", .enumerated(validValues: frequencies))
+            ]
+        )
     }
 
 }
