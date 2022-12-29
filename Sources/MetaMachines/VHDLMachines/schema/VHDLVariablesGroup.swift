@@ -24,6 +24,7 @@ struct VHDLVariablesGroup: GroupProtocol {
     var triggers: AnyTrigger<Root> {
         renameClocks
         newClocks
+        renameExternalVariable
         newExternalVariable
     }
 
@@ -197,44 +198,49 @@ struct VHDLVariablesGroup: GroupProtocol {
     )
     var machineSignals
 
-    // @TriggerBuilder<MetaMachine>
-    // private var renameExternalVariable: AnyTrigger<MetaMachine> {
-    //     AnyTrigger(
-    //         Attributes.ForEach(CollectionSearchPath(
-    //             collectionPath: path.attributes["external_signals"].wrappedValue.tableValue,
-    //             elementPath: Path([LineAttribute].self)[2].lineValue
-    //         )) { externalNamePath in
-    //             Attributes.WhenChanged(externalNamePath).custom { machine in
-    //                 guard
-    //                     let externals = machine.attributes[0].attributes["external_signals"],
-    //                     var schema = machine.vhdlSchema
-    //                 else {
-    //                     return .failure(AttributeError(
-    //                         message: "Cannot find external variables", path: AnyPath(externalNamePath)
-    //                     ))
-    //                 }
-    //                 let externalNames = Set(externals.tableValue.map { $0[2].lineValue })
-    //                 schema.stateSchema.variables.$externals = EnumerableCollectionProperty(
-    //                     label: "externals",
-    //                     validValues: externalNames
-    //                 ) {
-    //                     $0.unique()
-    //                 }
-    //                 machine.vhdlSchema = schema
-    //                 machine.states.indices.forEach { index in
-    //                     let existingExternals = machine.states[index].attributes[0]
-    //                         .attributes["externals"]?.enumerableCollectionValue ?? []
-    //                     machine.states[index].attributes[0].attributes["externals"] = .enumerableCollection
-    //                     (
-    //                         existingExternals.filter { externalNames.contains($0) },
-    //                         validValues: externalNames
-    //                     )
-    //                 }
-    //                 return .success(true)
-    //             }
-    //         }
-    //     )
-    // }
+    /// A trigger that updates a machines states when an external variable is renamed.
+    @TriggerBuilder<MetaMachine>
+    private var renameExternalVariable: AnyTrigger<MetaMachine> {
+        // swiftlint:disable closure_body_length
+        AnyTrigger(
+            Attributes.ForEach(CollectionSearchPath(
+                collectionPath: path.attributes["external_signals"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[2].lineValue
+            )) { externalNamePath in
+                Attributes.WhenChanged(externalNamePath).custom { machine in
+                    guard
+                        !machine.attributes.isEmpty,
+                        let externals = machine.attributes[0].attributes["external_signals"],
+                        var schema = machine.vhdlSchema
+                    else {
+                        return .failure(AttributeError(
+                            message: "Cannot find external variables", path: AnyPath(externalNamePath)
+                        ))
+                    }
+                    let externalNames = Set(externals.tableValue.compactMap {
+                        $0.count >= 3 ? $0[2].lineValue : nil
+                    })
+                    schema.stateSchema.variables.$externals = EnumerableCollectionProperty(
+                        label: "externals",
+                        validValues: externalNames
+                    ) {
+                        $0.unique()
+                    }
+                    machine.vhdlSchema = schema
+                    machine.states.indices.forEach { index in
+                        let existingExternals = machine.states[index].attributes[0].attributes["externals"]?
+                            .enumerableCollectionValue ?? []
+                        machine.states[index].attributes[0].attributes["externals"] = .enumerableCollection(
+                            existingExternals.filter { externalNames.contains($0) },
+                            validValues: externalNames
+                        )
+                    }
+                    return .success(true)
+                }
+            }
+        )
+        // swiftlint:enable closure_body_length
+    }
 
     /// Triggers that update the states external variables when a new one is added to the machine.
     @TriggerBuilder<MetaMachine>

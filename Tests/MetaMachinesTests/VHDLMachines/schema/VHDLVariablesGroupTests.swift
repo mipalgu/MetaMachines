@@ -316,7 +316,7 @@ final class VHDLVariablesGroupTests: XCTestCase {
             XCTFail("Failed to retrieve trigger in group.")
             return
         }
-        machine.attributes[0].attributes["external_signals"]?.tableValue[0][2] = .line("new_name")
+        machine.attributes[0].attributes["external_signals"]?.tableValue[0][2] = .line("znew_name")
         let path = AnyPath(
             Path(MetaMachine.self)
                 .attributes[0]
@@ -327,7 +327,7 @@ final class VHDLVariablesGroupTests: XCTestCase {
         )
         XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
-        let newExternals: Set<String> = ["new_name", "y"]
+        let newExternals: Set<String> = ["znew_name", "y"]
         XCTAssertEqual(
             schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
         )
