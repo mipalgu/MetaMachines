@@ -141,6 +141,35 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertEqual(variables?.properties.count, 6)
     }
 
+    func testNewClockTriggerUpdatesDrivingClock() {
+        guard let trigger = variables?.allTriggers else {
+            XCTFail("Failed to get triggers.")
+            return
+        }
+        guard let existingClocks = machine.attributes[0].attributes["clocks"]?.tableValue else {
+            XCTFail("Failed to get clocks.")
+            return
+        }
+        let newClock = [
+            LineAttribute.line("clk2"),
+            LineAttribute.integer(1),
+            LineAttribute.enumerated("MHz", validValues: frequencies)
+        ]
+        let newClocks = Attribute.table(existingClocks + [newClock], columns: [
+            ("name", .line),
+            ("frequency", .integer),
+            ("unit", .enumerated(validValues: frequencies))
+        ])
+        machine.attributes[0].attributes["clocks"] = newClocks
+        let path = AnyPath(Path(MetaMachine.self).attributes[0].attributes["clocks"].wrappedValue.tableValue)
+        XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
+        XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
+        let validValues: Set<String> = ["clk", "clk1", "clk2"]
+        XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
+        XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "clk")
+        XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
+    }
+
     /// Test that the validator rules throw errors for an invalid name.
     func testClockNameValidatorRules() throws {
         try [

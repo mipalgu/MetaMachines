@@ -112,7 +112,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         return MetaMachine.Semantics.allCases.filter { $0 != .other }
     }
     
-    public private(set) var mutator: Mutator
+    public fileprivate(set) var mutator: Mutator
     
     public private(set) var errorBag: ErrorBag<MetaMachine> = ErrorBag()
     
@@ -776,4 +776,20 @@ extension MetaMachine: Codable {
         try container.encode(self.metaData, forKey: .metaData)
     }
     
+}
+
+extension MetaMachine {
+
+    var vhdlSchema: VHDLSchema? {
+        get {
+            (self.mutator as? SchemaMutator<VHDLSchema>)?.schema
+        }
+        set {
+            guard let newValue = newValue else {
+                return
+            }
+            self.mutator = SchemaMutator(schema: newValue)
+        }
+    }
+
 }

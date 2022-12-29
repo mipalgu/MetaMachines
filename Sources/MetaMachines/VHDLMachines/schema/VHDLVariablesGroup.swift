@@ -27,23 +27,6 @@ struct VHDLVariablesGroup: GroupProtocol {
         // Need to add trigger for CUD operations on external variables -> Affects state external vars
     }
 
-    /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
-    /// include the new clock in its valid values.
-    @TriggerBuilder<MetaMachine>
-    private var newClock: AnyTrigger<MetaMachine> {
-        AnyTrigger(WhenChanged(clocks).sync(
-            target: path.attributes["driving_clock"].wrappedValue
-        ) { clocksAttribute, oldValue in
-            let validValues = Set(clocksAttribute.tableValue.map { clockLine in
-                clockLine[0].lineValue
-            })
-            let enumeratedOldValue = oldValue.enumeratedValue
-            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
-                validValues.first ?? ""
-            return Attribute.enumerated(selected, validValues: validValues)
-        })
-    }
-
     /// All of the clocks available to this machine.
     @TableProperty(
         label: "clocks",
@@ -213,5 +196,30 @@ struct VHDLVariablesGroup: GroupProtocol {
         ]
     )
     var machineSignals
+
+    /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
+    /// include the new clock in its valid values.
+    @TriggerBuilder<MetaMachine>
+    private var newClock: AnyTrigger<MetaMachine> {
+        WhenChanged(clocks).sync(
+            target: path.attributes["driving_clock"].wrappedValue
+        ) { clocksAttribute, oldValue in
+            let validValues = Set(clocksAttribute.tableValue.map { clockLine in
+                clockLine[0].lineValue
+            })
+            let enumeratedOldValue = oldValue.enumeratedValue
+            let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
+                validValues.first ?? ""
+            return Attribute.enumerated(selected, validValues: validValues)
+        }
+        WhenChanged(clocks).sync(
+            target: MetaMachine.path.vhdlSchema.wrappedValue.variables.$drivingClock
+        ) { clockAttribute, _ in
+            let validValues = Set(clockAttribute.tableValue.map { clockLine in
+                clockLine[0].lineValue
+            })
+            return EnumeratedProperty(label: "driving_clock", validValues: validValues) { $0.notEmpty() }
+        }
+    }
 
 }
