@@ -114,6 +114,10 @@ final class VHDLSettingsTests: XCTestCase {
 
     /// Test the validation passes for correct machine.
     func testValidationPasses() throws {
+        guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
         XCTAssertNoThrow(try settings.propertiesValidator.performValidation(expected))
     }
 

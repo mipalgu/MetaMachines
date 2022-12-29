@@ -170,10 +170,33 @@ final class VHDLStateVariablesTests: XCTestCase {
         XCTAssertNoThrow(try variables.propertiesValidator.performValidation(expected))
     }
 
+    /// Test valid data passes validation when combined with group and root validator.
+    func testSchemaValidatorPassesForValidData() {
+        guard
+            let val = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.makeValidator(root: machine)
+        else {
+            XCTFail("Could not get variables from machine.")
+            return
+        }
+        XCTAssertNoThrow(try val.performValidation(machine))
+    }
+
+    /// Test that the validator rules allow VHDL signal types.
+    func testSignalValidatorPassesForValidType() {
+        let data = signalTable(type: "std_logic")
+        XCTAssertNoThrow(try variables.stateSignals.validate.performValidation(data))
+    }
+
     /// Test that the validator rules throw errors for an invalid type.
     func testSignalValidatorFailsForInvalidType() {
         let data = signalTable(type: "abcd")
-        XCTAssertThrowsError(try signalValidator.performValidation(data))
+        XCTAssertThrowsError(try variables.stateSignals.validate.performValidation(data))
+    }
+
+    /// Test that the validator rules throw errors for an invalid name.
+    func testSignalValidatorFailsForInvalidName() {
+        let data = signalTable(name: "a%^&")
+        XCTAssertThrowsError(try variables.stateSignals.validate.performValidation(data))
     }
 
     /// Create a table for a state signal.
