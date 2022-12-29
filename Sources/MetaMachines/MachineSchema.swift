@@ -30,6 +30,11 @@ public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Roo
 }
 
 public extension MachineSchema {
+
+    // /// The trigger is all the group triggers by default.
+    // var trigger: AnyTrigger<Root> {
+    //     AnyTrigger(groups.map(\.allTriggers) + [stateSchema.trigger, transitionSchema.trigger])
+    // }
     
     mutating func didCreateDependency(machine: inout MetaMachine, dependency: MachineDependency, index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         return .success(false)
