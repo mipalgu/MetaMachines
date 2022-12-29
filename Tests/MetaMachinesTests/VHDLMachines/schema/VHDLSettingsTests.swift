@@ -133,6 +133,19 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertThrowsError(try settings.propertiesValidator.performValidation(expected))
     }
 
+    /// Test trigger only fires for correct paths.
+    func testTriggerPaths() {
+        guard
+            let trigger = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings.allTriggers
+        else {
+            XCTFail("Could not get settings from machine.")
+            return
+        }
+        let path = Path(MetaMachine.self)
+        XCTAssertFalse(trigger.isTriggerForPath(AnyPath(path), in: machine))
+        XCTAssertTrue(trigger.isTriggerForPath(AnyPath(path.states), in: machine))
+    }
+
     /// Test that the initial and suspended state settings are updated when a new state is added.
     func testValidValuesAreUpdatedOnNewState() throws {
         let actions = machine.states[0].actions
