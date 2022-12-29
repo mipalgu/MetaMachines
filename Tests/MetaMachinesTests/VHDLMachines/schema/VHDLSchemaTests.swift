@@ -205,4 +205,12 @@ final class VHDLSchemaTests: XCTestCase {
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
+    /// Make sure initial machine passes validation.
+    func testInitialMachinePassesValidation() {
+        let machine = MetaMachine.initialMachine(forSemantics: .vhdl)
+        let validator = schema?.makeValidator(root: machine)
+        XCTAssertNotNil(validator)
+        XCTAssertNoThrow(try validator?.performValidation(machine))
+    }
+
 }
