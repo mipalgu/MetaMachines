@@ -102,8 +102,17 @@ final class MetaMachineVHDLTests: XCTestCase {
     }
 
     /// Test the `newTransition` creates the new transition correctly.
-    func testNewTransition() {
-        
+    func testNewTransition() throws {
+        XCTAssertFalse(
+            try machine.newTransition(source: "Initial", target: "Suspended", condition: "true").get()
+        )
+        let newTransition = machine.states[0].transitions.last
+        let expected = MetaMachines.Transition(
+            condition: "true", target: "Suspended", attributes: [], metaData: []
+        )
+        XCTAssertEqual(newTransition, expected)
+        XCTAssertEqual(machine.states.filter { !$0.transitions.isEmpty }.count, 1)
+        XCTAssertEqual(machine.states[0].transitions.count, 2)
     }
 
 }
