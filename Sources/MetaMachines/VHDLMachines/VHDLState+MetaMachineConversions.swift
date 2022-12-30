@@ -108,6 +108,97 @@ extension VHDLMachines.State {
         )
     }
 
+    // swiftlint:disable function_body_length
+
+    /// Create the default for a new state.
+    /// - Parameter machine: The machine to create the new state in.
+    /// - Returns: The attributes for the new state.
+    static func defaultAttributes(in machine: MetaMachine) -> [AttributeGroup] {
+        let schema = machine.vhdlSchema
+        let validValues = schema?.stateSchema.variables.externalValidValues ?? []
+        let variables = AttributeGroup(
+            name: "variables",
+            fields: [
+                Field(name: "externals", type: .enumerableCollection(
+                        validValues: validValues
+                )),
+                Field(name: "state_signals", type: .table(columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ])),
+                Field(name: "state_variables", type: .table(columns: [
+                    ("type", .expression(language: .vhdl)),
+                    ("lower_range", .line),
+                    ("upper_range", .line),
+                    ("name", .line),
+                    ("value", .expression(language: .vhdl)),
+                    ("comment", .line)
+                ]))
+            ],
+            attributes: [
+                "externals": .enumerableCollection([], validValues: validValues),
+                "state_signals": .table(
+                    [],
+                    columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]
+                ),
+                "state_variables": .table(
+                    [],
+                    columns: [
+                        ("type", .expression(language: .vhdl)),
+                        ("lower_range", .line),
+                        ("upper_range", .line),
+                        ("name", .line),
+                        ("value", .expression(language: .vhdl)),
+                        ("comment", .line)
+                    ]
+                )
+            ],
+            metaData: [:]
+        )
+        let actions: Set<String> = ["OnEntry", "OnExit", "Internal", "OnSuspend", "OnResume"]
+        let actionsGroup = AttributeGroup(
+            name: "actions",
+            fields: [
+                Field(name: "action_names", type: .table(columns: [
+                    ("name", .line)
+                ])),
+                Field(name: "action_order", type: .table(columns: [
+                    ("timeslot", .integer),
+                    ("action", .enumerated(validValues: actions))
+                ]))
+            ],
+            attributes: [
+                "action_names": .table(actions.sorted().map { [LineAttribute.line($0)] }, columns: [
+                    ("name", .line)
+                ]),
+                "action_order": .table(
+                    [
+                        [.integer(0), .enumerated("OnResume", validValues: actions)],
+                        [.integer(0), .enumerated("OnSuspend", validValues: actions)],
+                        [.integer(1), .enumerated("OnEntry", validValues: actions)],
+                        [.integer(2), .enumerated("OnExit", validValues: actions)],
+                        [.integer(2), .enumerated("Internal", validValues: actions)]
+                    ],
+                    columns: [
+                        ("timeslot", .integer),
+                        ("action", .enumerated(validValues: actions))
+                    ]
+                )
+            ],
+            metaData: [:]
+        )
+        return [variables, actionsGroup]
+    }
+
+    // swiftlint:enable function_body_length
+
     /// The attributes of this state. These attributes can be used to specify additional properties for a
     /// state in a ``MetaMachine``.
     /// - Parameter machine: The machine this state belongs too.
