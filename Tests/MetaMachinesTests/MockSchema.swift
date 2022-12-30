@@ -62,7 +62,7 @@ import MetaMachines
 // swiftlint:disable file_length
 
 /// A mock schema.
-final class MockSchema: MachineSchema {
+final class MockSchema: MachineSchema, Equatable {
 
     /// The StateSchema is empty.
     typealias StateSchema = EmptySchema
@@ -395,6 +395,21 @@ final class MockSchema: MachineSchema {
         metaData: [AttributeGroup]
     ) {
         fatalError("Not supported")
+    }
+
+    /// Equatable conformance.
+    static func == (lhs: MockSchema, rhs: MockSchema) -> Bool {
+        let isSame = lhs.dependencyLayout == rhs.dependencyLayout &&
+            lhs.functionsCalled == rhs.functionsCalled && lhs.mockTrigger === rhs.mockTrigger &&
+            lhs.validator === rhs.validator
+        switch (lhs.returnType, rhs.returnType) {
+        case (.success(let lhs), .success(let rhs)):
+            return lhs == rhs && isSame
+        case (.failure(let lhs), .failure(let rhs)):
+            return lhs.message == rhs.message && lhs.path == rhs.path && isSame
+        default:
+            return false
+        }
     }
 
     /// The `didCreateDependency` function.

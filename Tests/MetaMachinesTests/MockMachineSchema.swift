@@ -59,7 +59,7 @@ import AttributesTestUtils
 @testable import MetaMachines
 
 /// A Mock ``MachineSchema``.
-struct MockMachineSchema: MachineSchema {
+struct MockMachineSchema: MachineSchema, Equatable {
 
     /// The StateSchema is a `MockSchema`.
     typealias StateSchema = MockSchema
@@ -97,6 +97,12 @@ struct MockMachineSchema: MachineSchema {
         self.stateSchema = stateSchema
         self.transitionSchema = transitionSchema
         self.group = group
+    }
+
+    /// Equality conformance.
+    static func == (lhs: MockMachineSchema, rhs: MockMachineSchema) -> Bool {
+        lhs.dependencyLayout == rhs.dependencyLayout && lhs.stateSchema == rhs.stateSchema &&
+            lhs.transitionSchema == rhs.transitionSchema && lhs.group == rhs.group
     }
 
 }

@@ -58,9 +58,14 @@ import Attributes
 import MetaMachines
 
 /// An empty schema.
-final class EmptySchema: SchemaProtocol {
+final class EmptySchema: SchemaProtocol, Equatable {
 
     /// The root is a meta machine.
     typealias Root = MetaMachine
+
+    /// Equality operator is always true.
+    static func == (lhs: EmptySchema, rhs: EmptySchema) -> Bool {
+        true
+    }
 
 }

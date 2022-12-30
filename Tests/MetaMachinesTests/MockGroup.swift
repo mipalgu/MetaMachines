@@ -59,7 +59,7 @@ import AttributesTestUtils
 import MetaMachines
 
 /// A mock `Group`.
-struct MockGroup: GroupProtocol {
+struct MockGroup: GroupProtocol, Equatable {
 
     /// The root is a ``MetaMachine``.
     typealias Root = MetaMachine
@@ -82,6 +82,12 @@ struct MockGroup: GroupProtocol {
     /// The mock validator.
     var propertiesValidator: AnyValidator<AttributeGroup> {
         AnyValidator(mockValidator)
+    }
+
+    /// Equality conformance.
+    static func == (lhs: MockGroup, rhs: MockGroup) -> Bool {
+        lhs.mockTrigger === rhs.mockTrigger && lhs.mockValidator === rhs.mockValidator &&
+            lhs.path == rhs.path
     }
 
 }
