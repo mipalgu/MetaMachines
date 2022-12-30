@@ -287,4 +287,37 @@ final class MetaMachineTests: XCTestCase {
         XCTAssertEqual(decodedMachine, machine)
     }
 
+    /// Test that the newState function creates the state correctly.
+    func testNewState() throws {
+        let url = URL(fileURLWithPath: "Machine.machine", isDirectory: true)
+        var machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
+        XCTAssertTrue(try machine.newState().get())
+        XCTAssertEqual(machine.states.count, 3)
+        let actions = [
+            "OnEntry": "",
+            "OnExit": "",
+            "Internal": "",
+            "OnSuspend": "",
+            "OnResume": ""
+        ]
+        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+        var vhdlMachine = VHDLMachines.Machine(machine: machine)
+        let expectedVHDLState = VHDLMachines.State(
+            name: "State0",
+            actions: actions,
+            actionOrder: actionOrder,
+            signals: [],
+            variables: [],
+            externalVariables: []
+        )
+        vhdlMachine.states.append(expectedVHDLState)
+        let expectedState = MetaMachines.State(vhdl: expectedVHDLState, in: vhdlMachine)
+        let lastState = machine.states.last
+        XCTAssertEqual(lastState?.name, expectedState.name)
+        XCTAssertEqual(lastState?.actions, expectedState.actions)
+        XCTAssertEqual(lastState?.attributes, expectedState.attributes)
+        XCTAssertEqual(lastState?.metaData, expectedState.metaData)
+        XCTAssertEqual(lastState?.transitions, expectedState.transitions)
+    }
+
 }
