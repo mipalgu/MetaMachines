@@ -46,7 +46,7 @@ public protocol MachineSchema: SchemaProtocol, MachineMutatorResponder where Roo
 /// Default implementations.
 public extension MachineSchema {
 
-    /// The trigger is all the group triggers by default.
+    /// The triggers in the state schema, transition schema, and all groups.
     var trigger: AnyTrigger<Root> {
         AnyTrigger(groups.map(\.allTriggers) + [stateSchema.trigger, transitionSchema.trigger])
     }
