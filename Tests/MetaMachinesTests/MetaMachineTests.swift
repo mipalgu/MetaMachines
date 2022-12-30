@@ -312,12 +312,25 @@ final class MetaMachineTests: XCTestCase {
         )
         vhdlMachine.states.append(expectedVHDLState)
         let expectedState = MetaMachines.State(vhdl: expectedVHDLState, in: vhdlMachine)
-        let lastState = machine.states.last
-        XCTAssertEqual(lastState?.name, expectedState.name)
-        XCTAssertEqual(lastState?.actions, expectedState.actions)
-        XCTAssertEqual(lastState?.attributes, expectedState.attributes)
-        XCTAssertEqual(lastState?.metaData, expectedState.metaData)
-        XCTAssertEqual(lastState?.transitions, expectedState.transitions)
+        guard let lastState = machine.states.last else {
+            XCTFail("Failed to get last state.")
+            return
+        }
+        XCTAssertEqual(lastState.name, expectedState.name)
+        XCTAssertEqual(lastState.actions, expectedState.actions)
+        XCTAssertEqual(lastState.metaData, expectedState.metaData)
+        XCTAssertEqual(lastState.transitions, expectedState.transitions)
+        XCTAssertEqual(lastState.attributes.count, expectedState.attributes.count)
+        zip(lastState.attributes, expectedState.attributes).forEach {
+            XCTAssertEqual($0.name, $1.name)
+            XCTAssertEqual($0.fields.count, $1.fields.count)
+            zip($0.fields, $1.fields).forEach { lhs, rhs in
+                XCTAssertEqual(lhs.name, rhs.name)
+                XCTAssertEqual(lhs.type, rhs.type)
+            }
+            XCTAssertEqual($0.metaData, $1.metaData)
+            XCTAssertEqual($0.attributes, $1.attributes)
+        }
     }
 
 }
