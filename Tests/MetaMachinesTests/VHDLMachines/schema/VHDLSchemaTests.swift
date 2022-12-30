@@ -143,6 +143,7 @@ final class VHDLSchemaTests: XCTestCase {
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
         XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(machine.states.last?.attributes, VHDLMachines.State.defaultAttributes(in: machine))
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
