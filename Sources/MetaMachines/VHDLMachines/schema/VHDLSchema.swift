@@ -7,6 +7,7 @@
 
 import Attributes
 import Foundation
+import VHDLMachines
 
 /// The schema for VHDL machines.
 struct VHDLSchema: MachineSchema {
@@ -131,7 +132,12 @@ struct VHDLSchema: MachineSchema {
     func didCreateNewState(
         machine: inout MetaMachine, state: State, index: Int
     ) -> Result<Bool, AttributeError<MetaMachine>> {
-        statesTrigger(machine: &machine)
+        let path = AnyPath(Path(MetaMachine.self).states[index])
+        guard !path.isNil(machine) else {
+            return .failure(AttributeError(message: "State does not exist!", path: path))
+        }
+        machine.states[index].attributes = VHDLMachines.State.defaultAttributes(in: machine)
+        return statesTrigger(machine: &machine)
     }
 
     /// Initiate some triggers in response to the mutation of a states name.

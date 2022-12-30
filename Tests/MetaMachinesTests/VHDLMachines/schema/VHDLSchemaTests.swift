@@ -128,7 +128,7 @@ final class VHDLSchemaTests: XCTestCase {
         )
         machine.states.append(newState)
         XCTAssertTrue(
-            try schema?.didCreateNewState(machine: &machine, state: newState, index: 3).get() ?? false
+            try schema?.didCreateNewState(machine: &machine, state: newState, index: 2).get() ?? false
         )
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
