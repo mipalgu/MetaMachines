@@ -81,22 +81,37 @@ import IO
 ///
 /// - SeeAlso: `SwiftMachinesConvertible`.
 public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, DependenciesContainer {
-    
+
+    /// The mutators type.
     public typealias Mutator = MachineMutatorResponder & MachineAttributesMutator & MachineModifier
-    
+
+    /// The semantics available to the meta machine.
     public enum Semantics: String, Hashable, Codable, CaseIterable, Comparable {
+
+        /// Miscellanious semantics.
         case other
+
+        /// The swiftfsm semantics used for swift machines.
         case swiftfsm
+
+        /// The clfsm semantics used for C++ machines.
         case clfsm
+
+        /// The vhdl semantics used for HDL machines in FPGAs.
         case vhdl
+
+        /// The ucfsm semantics used for C machines on bare-metal implementations.
         case ucfsm
+
+        /// The spartanfsm semantics used for VHDL machines based on the clfsm machine format.
         case spartanfsm
 
+        /// Compare two semantics. This places the semantics in alphabetical order.
         public static func < (lhs: MetaMachine.Semantics, rhs: MetaMachine.Semantics) -> Bool {
             lhs.rawValue < rhs.rawValue
         }
     }
-    
+
     /// The semantics that are fully supported by this module.
     ///
     /// This means that it is possible to create a machine using the
@@ -109,26 +124,35 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     ///
     /// This array generally contains all semantics except for the `other` case.
     public static var supportedSemantics: [MetaMachine.Semantics] {
-        return MetaMachine.Semantics.allCases.filter { $0 != .other }
+        MetaMachine.Semantics.allCases.filter { $0 != .other }
     }
-    
+
+    /// Fetches a keypath like structure for use when modifying and validating
+    /// properties of machines.
+    public static var path: Path<MetaMachine, MetaMachine> {
+        Path(Self.self)
+    }
+
+    /// The underlying mutator that handles operations on the machine.
     public fileprivate(set) var mutator: Mutator
-    
+
+    /// The collection of errors within the machine.
     public private(set) var errorBag: ErrorBag<MetaMachine> = ErrorBag()
-    
-    public private(set) var id: UUID = UUID()
-    
+
+    /// The ID of the machine.
+    public private(set) var id = UUID()
+
     /// The underlying semantics which this meta machine follows.
     public var semantics: Semantics
-    
+
     /// The name of the machine.
     public var name: String
-    
+
     /// The name of the initial state.
     ///
     /// The name should represent the name of a state within the `states` array.
     public var initialState: StateName
-    
+
     /// The accepting states of the machine.
     ///
     /// An accepting state is a state without any transitions.
@@ -136,35 +160,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// - Complexity: O(n * m) where n is the length of the `states` array and
     /// m is the length of the `transitions` array.
     public var acceptingStates: [State] {
-        return self.states.filter { $0.transitions.isEmpty }
+        self.states.filter { $0.transitions.isEmpty }
     }
-    
+
     /// All states within the machine.
     public var states: [State]
-    
+
     /// All machines that this machine depends on
     public var dependencies: [MachineDependency]
-    
-    public var dependencyAttributeType: AttributeType {
-        return .complex(layout: [
-            "name": .line,
-            "filePath": .line,
-            "attributes": .complex(layout: mutator.dependencyLayout)
-        ])
-    }
-    
-    public var dependencyAttributes: [Attribute] {
-        get {
-            self.dependencies.map(\.complexAttribute)
-        } set {
-            self.dependencies = zip(self.dependencies, newValue).map {
-                var dep = $0
-                dep.complexAttribute = $1
-                return dep
-            }
-        }
-    }
-    
+
     /// A list of attributes specifying additional fields that can change.
     ///
     /// The attribute list usually details extra fields necessary for additional
@@ -175,7 +179,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// feature set. The features which are not common between schedulers
     /// should be facilitated through this attributes field.
     public var attributes: [AttributeGroup]
-    
+
     /// A list of attributes specifying additional fields that do not change.
     ///
     /// This metaData property is similar to the `attributes` property, however;
@@ -188,19 +192,35 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// - Attention: If you were to make a GUI using the meta model machines,
     /// then you should simply keep these values the same between modifications.
     public var metaData: [AttributeGroup]
-    
+
     /// Fetches a keypath like structure for use when modifying and validating
     /// properties of machines.
     public var path: Path<MetaMachine, MetaMachine> {
-        return Path(Self.self)
+        Path(Self.self)
     }
-    
-    /// Fetches a keypath like structure for use when modifying and validating
-    /// properties of machines.
-    public static var path: Path<MetaMachine, MetaMachine> {
-        return Path(Self.self)
+
+    /// An attribute type representing the dependency layout.
+    public var dependencyAttributeType: AttributeType {
+        .complex(layout: [
+            "name": .line,
+            "filePath": .line,
+            "attributes": .complex(layout: mutator.dependencyLayout)
+        ])
     }
-    
+
+    /// An array of attributes representing each dependency.
+    public var dependencyAttributes: [Attribute] {
+        get {
+            self.dependencies.map(\.complexAttribute)
+        } set {
+            self.dependencies = zip(self.dependencies, newValue).map {
+                var dep = $0
+                dep.complexAttribute = $1
+                return dep
+            }
+        }
+    }
+
     /// Create a new `Machine`.
     ///
     /// Creates a new meta machine model.
@@ -269,7 +289,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
     /// Create a new `Machine`.
     ///
     /// Creates a new meta machine model.
@@ -308,14 +328,17 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
     /// Setup an initial machine for a specific semantics.
     ///
     /// - Parameter semantics: The semantics which the machine should follow.
     ///
     /// - Warning: The value of `semantics` should exist in the
     /// `supportedSemantics` array.
-    public static func initialMachine(forSemantics semantics: MetaMachine.Semantics, filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)) -> MetaMachine {
+    public static func initialMachine(
+        forSemantics semantics: MetaMachine.Semantics,
+        filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)
+    ) -> MetaMachine {
         switch semantics {
         case .clfsm:
             return CLFSMConverter().initialCLFSMMachine(filePath: filePath)
@@ -673,31 +696,38 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
 }
 
 extension MetaMachine {
-    
+
     public init(filePath: URL) throws {
         let parser = MachineParser()
         guard let machine = parser.parseMachine(atURL: filePath) else {
-            throw ConversionError(message: parser.lastError ?? "Unable to load machine at path \(filePath.path)", path: MetaMachine.path)
+            throw ConversionError(
+                message: parser.lastError ?? "Unable to load machine at path \(filePath.path)",
+                path: MetaMachine.path
+            )
         }
         self = machine
     }
-    
+
     public init(from wrapper: FileWrapper) throws {
         let parser = MachineParser()
         guard let machine = parser.parseMachine(fromWrapper: wrapper) else {
-            throw ConversionError(message: parser.lastError ?? "Unable to load machine", path: MetaMachine.path)
+            throw ConversionError(
+                message: parser.lastError ?? "Unable to load machine", path: MetaMachine.path
+            )
         }
         self = machine
     }
-    
+
     public func fileWrapper() throws -> FileWrapper {
         let generator = MachineGenerator()
         guard let fileWrapper = generator.generate(self) else {
-            throw ConversionError(message: generator.lastError ?? "Unable to create machine", path: MetaMachine.path)
+            throw ConversionError(
+                message: generator.lastError ?? "Unable to create machine", path: MetaMachine.path
+            )
         }
         return fileWrapper
     }
-    
+
     public func save() throws {
         try self.validate()
         let generator = MachineGenerator()
@@ -709,20 +739,20 @@ extension MetaMachine {
 }
 
 extension MetaMachine: Equatable {
-    
+
     public static func == (lhs: MetaMachine, rhs: MetaMachine) -> Bool {
-        return lhs.semantics == rhs.semantics
+        lhs.semantics == rhs.semantics
             && lhs.name == rhs.name
             && lhs.initialState == rhs.initialState
             && lhs.states == rhs.states
             && lhs.attributes == rhs.attributes
             && lhs.metaData == rhs.metaData
     }
-    
+
 }
 
 extension MetaMachine: Hashable {
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.semantics)
         hasher.combine(self.name)
@@ -731,13 +761,13 @@ extension MetaMachine: Hashable {
         hasher.combine(self.attributes)
         hasher.combine(self.metaData)
     }
-    
+
 }
 
 extension MetaMachine: Codable {
-    
+
     public enum CodingKeys: CodingKey {
-        
+
         case semantics
         case name
         case initialState
@@ -745,9 +775,9 @@ extension MetaMachine: Codable {
         case transitions
         case attributes
         case metaData
-        
+
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let semantics = try container.decode(Semantics.self, forKey: .semantics)
@@ -765,7 +795,7 @@ extension MetaMachine: Codable {
             metaData: metaData
         )
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.semantics, forKey: .semantics)
@@ -775,7 +805,7 @@ extension MetaMachine: Codable {
         try container.encode(self.attributes, forKey: .attributes)
         try container.encode(self.metaData, forKey: .metaData)
     }
-    
+
 }
 
 extension MetaMachine {
