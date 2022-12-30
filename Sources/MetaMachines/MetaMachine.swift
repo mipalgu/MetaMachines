@@ -393,19 +393,31 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Add a new empty state to the machine.
+    /// - Returns: A `Result` containing a `Bool` indicating whether other data was mutated during this
+    /// operation.
     public mutating func newState() -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             let newName = machine.generateNewStateName()
             let newInitialMachine = MetaMachine.initialMachine(forSemantics: machine.semantics)
             guard let firstState = newInitialMachine.states.first else {
                 fatalError("Cannot create new state from blueprint")
             }
-            let appendingState = State(name: newName, actions: firstState.actions, transitions: [], attributes: firstState.attributes, metaData: firstState.metaData)
+            let appendingState = State(
+                name: newName,
+                actions: firstState.actions,
+                transitions: [],
+                attributes: firstState.attributes,
+                metaData: firstState.metaData
+            )
             machine.states.append(appendingState)
-            guard let newState = machine.states.last, let index = machine.states.lastIndex(of: newState) else {
-                return .failure(AttributeError(message: "Failed to find added state", path: MetaMachine.path.states))
+            guard
+                let newState = machine.states.last, let index = machine.states.lastIndex(of: newState)
+            else {
+                return .failure(
+                    AttributeError(message: "Failed to find added state", path: MetaMachine.path.states)
+                )
             }
             var mutator = machine.mutator
             let result = mutator.didCreateNewState(machine: &machine, state: newState, index: index)
@@ -413,7 +425,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Add a new empty transition to the machine.
     public mutating func newTransition(source: StateName, target: StateName, condition: Expression? = nil) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in
