@@ -19,6 +19,17 @@ struct VHDLStateVariables: GroupProtocol {
         collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0]
     )
 
+    /// Helper property for getting external variables.
+    var externalValidValues: Set<String>? {
+        guard
+            case AttributeType.block(let attributes) = self.externals.type,
+            case BlockAttributeType.enumerableCollection(let values) = attributes
+        else {
+            return nil
+        }
+        return values
+    }
+
     /// The external variables used in this states execution.
     @EnumerableCollectionProperty(label: "externals", validValues: [], validation: { $0.unique() })
     var externals

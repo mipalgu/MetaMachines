@@ -331,4 +331,13 @@ final class VHDLStateVariablesTests: XCTestCase {
         )
     }
 
+    /// Test externalValidValues property.
+    func testExternalValidValues() {
+        guard let schema = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema else {
+            XCTFail("Could not get schema")
+            return
+        }
+        XCTAssertEqual(schema.stateSchema.variables.externalValidValues, ["x", "y"])
+    }
+
 }
