@@ -427,13 +427,21 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     }
 
     /// Add a new empty transition to the machine.
-    public mutating func newTransition(source: StateName, target: StateName, condition: Expression? = nil) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+    public mutating func newTransition(
+        source: StateName, target: StateName, condition: Expression? = nil
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        // swiftlint:disable:next closure_body_length
+        perform { machine in
             guard
                 let index = machine.states.indices.first(where: { machine.states[$0].name == source }),
-                nil != machine.states.first(where: { $0.name == target })
+                machine.states.contains(where: { $0.name == target })
             else {
-                return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: MetaMachine.path))
+                return .failure(
+                    ValidationError(
+                        message: "You must attach a transition to a source and target state",
+                        path: MetaMachine.path
+                    )
+                )
             }
             let transition = Transition(condition: condition, target: target)
             machine.states[index].transitions.append(transition)
@@ -442,15 +450,22 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                     $0 == transition
                 })
             else {
-                return .failure(AttributeError(message: "Failed to find added transition", path: MetaMachine.path.states[index].transitions))
+                return .failure(
+                    AttributeError(
+                        message: "Failed to find added transition",
+                        path: MetaMachine.path.states[index].transitions
+                    )
+                )
             }
             var mutator = machine.mutator
-            let result = mutator.didCreateNewTransition(machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex)
+            let result = mutator.didCreateNewTransition(
+                machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Delete a specific item in a table attribute.
     public mutating func deleteItem<Path: PathProtocol, T>(table attribute: Path, atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
         return perform { machine in
