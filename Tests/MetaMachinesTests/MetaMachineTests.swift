@@ -312,11 +312,7 @@ final class MetaMachineTests: XCTestCase {
         )
         vhdlMachine.states.append(expectedVHDLState)
         let expectedState = MetaMachines.State(vhdl: expectedVHDLState, in: vhdlMachine)
-        guard let lastState = machine.states.last else {
-            XCTFail("Failed to get last state.")
-            return
-        }
-        XCTAssertEqual(lastState, expectedState)
+        XCTAssertEqual(machine.states.last, expectedState)
     }
 
 }
