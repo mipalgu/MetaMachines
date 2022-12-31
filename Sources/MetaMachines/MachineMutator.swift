@@ -59,6 +59,7 @@
 import Attributes
 import Foundation
 
+/// A protocol for defining types that can mutate a ``MetaMachine``.
 public protocol MachineMutator: DependencyLayoutContainer {
     
     func addItem<Path, T>(_ item: T, to attribute: Path, machine: inout MetaMachine) -> Result<Bool, AttributeError<Path.Root>> where Path : PathProtocol, Path.Root == MetaMachine, Path.Value == [T]

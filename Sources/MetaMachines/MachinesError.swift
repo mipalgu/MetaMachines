@@ -58,12 +58,19 @@
 
 import Attributes
 
+/// A ``MachinesError`` is an ``AttributeError`` with a root that is a ``MetaMachine``.
 public typealias MachinesError = AttributeError<MetaMachine>
 
+/// Add common errors.
 extension AttributeError where Root == MetaMachine {
-    
-    public static func unsupportedSemantics(_ semantics: MetaMachine.Semantics) -> AttributeError<MetaMachine> {
-        return AttributeError(message: "Unsupported semantics \(semantics)", path: MetaMachine.path.semantics)
+
+    /// The unsupported semantics error.
+    /// - Parameter semantics: The semantics that is unsupported.
+    /// - Returns: An error that indicates that the semantics are unsupported.
+    public static func unsupportedSemantics(
+        _ semantics: MetaMachine.Semantics
+    ) -> AttributeError<MetaMachine> {
+        AttributeError(message: "Unsupported semantics \(semantics)", path: MetaMachine.path.semantics)
     }
-    
+
 }
