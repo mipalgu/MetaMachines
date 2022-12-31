@@ -74,9 +74,12 @@ final class MetaMachineMutationTests: XCTestCase {
 
     /// The machine under test.
     lazy var machine = MetaMachine(
+        semantics: .other,
         mutator: SchemaMutator(schema: schema),
         name: "machine",
         initialState: "Initial",
+        states: [State(name: "Initial", actions: [], transitions: [])],
+        dependencies: [],
         attributes: [],
         metaData: []
     )
@@ -87,11 +90,44 @@ final class MetaMachineMutationTests: XCTestCase {
         self.validator = NullValidator()
         self.schema = MockSchema(dependencyLayout: [], trigger: trigger, validator: validator)
         self.machine = MetaMachine(
+            semantics: .other,
             mutator: SchemaMutator(schema: schema),
             name: "machine",
             initialState: "Initial",
+            states: [State(name: "Initial", actions: [], transitions: [])],
+            dependencies: [],
             attributes: [],
             metaData: []
+        )
+    }
+
+    // func testNewStateCallsSchema() throws {
+    //     XCTAssertFalse(try machine.newState().get())
+    //     XCTAssertEqual(schema.didCreateNewStateTimesCalled, 1)
+    //     let newState = State(name: "State0", actions: [], transitions: [], attributes: [], metaData: [])
+    //     XCTAssertEqual(
+    //         schema.didCreateNewStateCalls.first,
+    //         .didCreateNewState(machine: machine, state: newState, index: 1)
+    //     )
+    // }
+
+    /// Test that the schema is delegated to correctly when a new transition is created.
+    func testNewTransitionCallsSchema() throws {
+        XCTAssertFalse(
+            try machine.newTransition(source: "Initial", target: "Initial", condition: "true").get()
+        )
+        let newTransition = Transition(condition: "true", target: "Initial", attributes: [], metaData: [])
+        XCTAssertEqual(machine.states.first?.transitions, [newTransition])
+        XCTAssertEqual(machine.states.count, 1)
+        XCTAssertEqual(
+            schema.functionsCalled,
+            [
+                .didCreateNewTransition(
+                    machine: machine, transition: newTransition, stateIndex: 0, transitionIndex: 0
+                ),
+                .update(metaMachine: machine),
+                .makeValidator(root: machine)
+            ]
         )
     }
 
