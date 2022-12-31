@@ -278,6 +278,34 @@ final class MetaMachineVHDLTests: XCTestCase {
         }
     }
 
+    /// Test moveItems works correctly.
+    func testMoveItems() throws {
+        let path = Path(MetaMachine.self).attributes[0].attributes["external_signals"].wrappedValue.tableValue
+        guard
+            let firstSignal = machine.attributes[0].attributes["external_signals"]?.tableValue[0],
+            let secondSignal = machine.attributes[0].attributes["external_signals"]?.tableValue[1]
+        else {
+            XCTFail("Failed to get signals.")
+            return
+        }
+        XCTAssertTrue(try machine.moveItems(table: path, from: IndexSet(0...0), to: 2).get())
+        let externals: Set<String> = ["x", "y"]
+        XCTAssertEqual(
+            machine.vhdlSchema?.stateSchema.variables.externals.type,
+            .enumerableCollection(validValues: externals)
+        )
+        machine.states.forEach {
+            let field = $0.attributes[0].fields.first { $0.name == "externals" }
+            XCTAssertEqual(field?.type, .enumerableCollection(validValues: externals))
+            XCTAssertEqual(
+                externals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
+            )
+        }
+        XCTAssertEqual(
+            machine.attributes[0].attributes["external_signals"]?.tableValue, [secondSignal, firstSignal]
+        )
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)

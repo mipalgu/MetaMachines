@@ -375,13 +375,23 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
-    public mutating func moveItems<Path: PathProtocol, T>(table attribute: Path, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T]  {
-        return perform { machine in
+    /// Move items within a table to a new location.
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to move.
+    ///   - source: The indices of the elements to move.
+    ///   - destination: The destination index of the elements.
+    /// - Returns: A `Result` indicating whether the items were moved successfully.
+    public mutating func moveItems<Path: PathProtocol, T>(
+        table attribute: Path, from source: IndexSet, to destination: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
             let indices = Array(source)
             let items = indices.map { machine[keyPath: attribute.keyPath][$0] }
             machine[keyPath: attribute.path].move(fromOffsets: source, toOffset: destination)
             var mutator = machine.mutator
-            let result = mutator.didMoveItems(attribute: attribute, machine: &machine, from: source, to: destination, items: items)
+            let result = mutator.didMoveItems(
+                attribute: attribute, machine: &machine, from: source, to: destination, items: items
+            )
             machine.mutator = mutator
             return result
         }
