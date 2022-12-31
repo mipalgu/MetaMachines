@@ -68,6 +68,18 @@ final class MetaMachineVHDLTests: XCTestCase {
     /// A meta machine under test.
     lazy var machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
 
+    /// The default actions in a state.
+    let actions = [
+        "OnEntry": "",
+        "OnExit": "",
+        "Internal": "",
+        "OnSuspend": "",
+        "OnResume": ""
+    ]
+
+    /// The default action order in a state.
+    let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
+
     /// Initialise the test data.
     override func setUp() {
         self.machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
@@ -79,26 +91,7 @@ final class MetaMachineVHDLTests: XCTestCase {
         var machine = MetaMachine(vhdl: VHDLMachines.Machine.testMachine(path: url))
         XCTAssertTrue(try machine.newState().get())
         XCTAssertEqual(machine.states.count, 3)
-        let actions = [
-            "OnEntry": "",
-            "OnExit": "",
-            "Internal": "",
-            "OnSuspend": "",
-            "OnResume": ""
-        ]
-        let actionOrder = [["OnResume", "OnSuspend"], ["OnEntry"], ["OnExit", "Internal"]]
-        var vhdlMachine = VHDLMachines.Machine(machine: machine)
-        let expectedVHDLState = VHDLMachines.State(
-            name: "State0",
-            actions: actions,
-            actionOrder: actionOrder,
-            signals: [],
-            variables: [],
-            externalVariables: []
-        )
-        vhdlMachine.states.append(expectedVHDLState)
-        let expectedState = MetaMachines.State(vhdl: expectedVHDLState, in: vhdlMachine)
-        XCTAssertEqual(machine.states.last, expectedState)
+        XCTAssertEqual(machine.states.last, newState())
     }
 
     /// Test the `newTransition` creates the new transition correctly.
@@ -121,6 +114,45 @@ final class MetaMachineVHDLTests: XCTestCase {
         let newDependency = MachineDependency(relativePath: "../NewMachine.machine")
         XCTAssertFalse(try machine.newDependency(newDependency).get())
         XCTAssertEqual(machine.dependencies, oldDependencies + [newDependency])
+    }
+
+    /// Test deletes state works correctly.
+    func testDeleteStates() throws {
+        var initialState = machine.states[0]
+        initialState.transitions = []
+        let indices = IndexSet(1...2)
+        XCTAssertTrue(try machine.newState().get())
+        XCTAssertTrue(try machine.delete(states: indices).get())
+        XCTAssertEqual(machine.states.count, 1)
+        XCTAssertEqual(machine.states, [initialState])
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.initialState.type, .line(.enumerated(validValues: ["Initial"]))
+        )
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.suspendedState.type, .line(.enumerated(validValues: ["Initial", ""]))
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["initial_state"],
+            .enumerated("Initial", validValues: ["Initial"])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["suspended_state"], .enumerated("", validValues: ["Initial", ""])
+        )
+    }
+
+    /// Create a new state.
+    private func newState(name: String = "State0") -> MetaMachines.State {
+        var vhdlMachine = VHDLMachines.Machine(machine: machine)
+        let expectedVHDLState = VHDLMachines.State(
+            name: name,
+            actions: actions,
+            actionOrder: actionOrder,
+            signals: [],
+            variables: [],
+            externalVariables: []
+        )
+        vhdlMachine.states.append(expectedVHDLState)
+        return MetaMachines.State(vhdl: expectedVHDLState, in: vhdlMachine)
     }
 
 }

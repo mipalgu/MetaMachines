@@ -78,7 +78,10 @@ final class MetaMachineMutationTests: XCTestCase {
         mutator: SchemaMutator(schema: schema),
         name: "machine",
         initialState: "Initial",
-        states: [State(name: "Initial", actions: [], transitions: [])],
+        states: [
+            State(name: "Initial", actions: [], transitions: []),
+            State(name: "Suspended", actions: [], transitions: [])
+        ],
         dependencies: [],
         attributes: [],
         metaData: []
@@ -94,7 +97,10 @@ final class MetaMachineMutationTests: XCTestCase {
             mutator: SchemaMutator(schema: schema),
             name: "machine",
             initialState: "Initial",
-            states: [State(name: "Initial", actions: [], transitions: [])],
+            states: [
+                State(name: "Initial", actions: [], transitions: []),
+                State(name: "Suspended", actions: [], transitions: [])
+            ],
             dependencies: [],
             attributes: [],
             metaData: []
@@ -118,7 +124,7 @@ final class MetaMachineMutationTests: XCTestCase {
         )
         let newTransition = Transition(condition: "true", target: "Initial", attributes: [], metaData: [])
         XCTAssertEqual(machine.states.first?.transitions, [newTransition])
-        XCTAssertEqual(machine.states.count, 1)
+        XCTAssertEqual(machine.states.count, 2)
         XCTAssertEqual(
             schema.functionsCalled,
             [
@@ -142,6 +148,20 @@ final class MetaMachineMutationTests: XCTestCase {
             self.functionsCalled(prefixed: [
                 .didCreateDependency(machine: machine, dependency: newDependency, index: 0)
             ])
+        )
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
+    /// Test delete(states:) calls schema correctly.
+    func testDeleteStates() throws {
+        let indices = IndexSet(1...1)
+        let initial = machine.states[0]
+        let state = machine.states[1]
+        XCTAssertFalse(try machine.delete(states: indices).get())
+        XCTAssertEqual(machine.states, [initial])
+        XCTAssertEqual(
+            schema.functionsCalled,
+            self.functionsCalled(prefixed: [.didDeleteStates(machine: machine, state: [state], at: indices)])
         )
         XCTAssertEqual(validator.parameters, [machine])
     }

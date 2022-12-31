@@ -519,22 +519,30 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Delete a set of states and transitions.
+    /// - Parameter states: The states to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func delete(states: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             if
-                let initialIndex = machine.states.enumerated().first(where: { $0.1.name == machine.initialState })?.0,
-                states.contains(initialIndex)
-            {
-                return .failure(ValidationError(message: "You cannot delete the initial state", path: MetaMachine.path.states[initialIndex]))
+                let initialIndex = machine.states.enumerated().first(
+                    where: { $0.1.name == machine.initialState }
+                )?.0,
+                states.contains(initialIndex) {
+                return .failure(ValidationError(
+                    message: "You cannot delete the initial state",
+                    path: MetaMachine.path.states[initialIndex]
+                ))
             }
-            let deletedStatesArray = machine.states.enumerated().filter { states.contains($0.0)  }.map(\.element)
+            let deletedStatesArray = machine.states.enumerated().filter { states.contains($0.0) }.map(
+                \.element
+            )
             let deletedStates = Set(deletedStatesArray.map(\.name))
             machine.states = machine.states.enumerated().filter { !states.contains($0.0) }.map(\.element)
             machine.states = machine.states.map {
                 var state = $0
-                state.transitions.removeAll(where: { deletedStates.contains($0.target) })
+                state.transitions.removeAll { deletedStates.contains($0.target) }
                 return state
             }
             var mutator = machine.mutator
@@ -543,7 +551,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     public mutating func delete(transitions: IndexSet, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in
             guard let stateIndex = machine.states.firstIndex(where: { $0.name == sourceState }) else {
