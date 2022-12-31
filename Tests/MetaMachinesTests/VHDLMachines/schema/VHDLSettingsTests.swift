@@ -168,17 +168,18 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        let suspendedValidValues: Set<String> = ["Initial", "Suspended", "State0", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Initial")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedValidValues))
     }
 
     /// Test that the initial and suspended state settings are updated when a state is deleted.
@@ -195,17 +196,18 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Suspended"]
+        let suspendedValidValues: Set<String> = ["Suspended", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Suspended")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedValidValues))
     }
 
     /// Test that the initial and suspended state settings are updated when a state is renamed.
@@ -222,17 +224,18 @@ final class VHDLSettingsTests: XCTestCase {
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["zState0", "Suspended"]
+        let suspendedValidValues: Set<String> = ["zState0", "Suspended", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "zState0")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = (machine.mutator as? SchemaMutator<VHDLSchema>)?.schema.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedValidValues))
     }
 
 }

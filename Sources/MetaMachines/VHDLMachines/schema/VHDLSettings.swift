@@ -41,7 +41,9 @@ struct VHDLSettings: GroupProtocol {
             collectionPath: Path(MetaMachine.self).states, elementPath: Path(State.self).name
         )) { namePath in
             Attributes.WhenChanged(namePath).custom { machine in
-                let stateNames = Set(machine.states.map(\.name))
+                let stateNamesArray = machine.states.map(\.name)
+                let stateNames = Set(stateNamesArray)
+                let suspendedNames = Set(stateNamesArray + [""])
                 guard
                     !namePath.isNil(machine),
                     machine.attributes.count >= 4,
@@ -58,9 +60,9 @@ struct VHDLSettings: GroupProtocol {
                     newInitial, validValues: stateNames
                 )
                 let oldSuspended = suspendedState.enumeratedValue
-                let newSuspended = stateNames.contains(oldSuspended) ? oldSuspended : newName
+                let newSuspended = suspendedNames.contains(oldSuspended) ? oldSuspended : newName
                 machine.attributes[3].attributes["suspended_state"] = .enumerated(
-                    newSuspended, validValues: stateNames
+                    newSuspended, validValues: suspendedNames
                 )
                 schema.settings.$initialState = EnumeratedProperty(
                     label: "initial_state",
@@ -70,7 +72,7 @@ struct VHDLSettings: GroupProtocol {
                 }
                 schema.settings.$suspendedState = EnumeratedProperty(
                     label: "suspended_state",
-                    validValues: stateNames
+                    validValues: suspendedNames
                 )
                 machine.vhdlSchema = schema
                 return .success(true)
@@ -95,14 +97,14 @@ struct VHDLSettings: GroupProtocol {
             target: self.path(for: suspendedState)
         ) { states, oldValue in
             let oldName = oldValue.enumeratedValue
-            let newValidValues = Set(states.map(\.name))
+            let newValidValues = Set(states.map(\.name) + [""])
             let newName = newValidValues.contains(oldName) ? oldName : ""
             return Attribute.enumerated(newName, validValues: newValidValues)
         }
         Attributes.WhenChanged(Path(MetaMachine.self).states).sync(
             target: Path(MetaMachine.self).vhdlSchema.wrappedValue.settings.$suspendedState
         ) { states, _ in
-            let newValidValues = Set(states.map(\.name))
+            let newValidValues = Set(states.map(\.name) + [""])
             return EnumeratedProperty(label: "suspended_state", validValues: newValidValues)
         }
     }

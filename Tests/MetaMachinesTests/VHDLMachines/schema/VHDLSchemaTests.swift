@@ -103,17 +103,18 @@ final class VHDLSchemaTests: XCTestCase {
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        let suspendedValidValues: Set<String> = ["Initial", "Suspended", "State0", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Initial")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = schema?.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedValidValues))
     }
 
     /// Test that settings triggers are available using delegates.
@@ -132,17 +133,18 @@ final class VHDLSchemaTests: XCTestCase {
         )
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Initial", "Suspended", "State0"]
+        let suspendedValidValues: Set<String> = ["Initial", "Suspended", "State0", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Initial")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = self.schema?.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedValidValues))
         XCTAssertEqual(machine.states.last?.attributes, VHDLMachines.State.defaultAttributes(in: machine))
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
@@ -155,17 +157,18 @@ final class VHDLSchemaTests: XCTestCase {
         )
         let initialState = machine.attributes[3].attributes["initial_state"]
         let newValidValues: Set<String> = ["Suspended"]
+        let suspendedNewValidValues: Set<String> = ["Suspended", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Suspended")
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
-        XCTAssertEqual(suspendedState?.enumeratedValidValues, newValidValues)
+        XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedNewValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
         guard let settings = self.schema?.settings else {
             XCTFail("Could not get settings from machine.")
             return
         }
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: newValidValues))
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedNewValidValues))
         try schema?.makeValidator(root: machine).performValidation(machine)
     }
 
