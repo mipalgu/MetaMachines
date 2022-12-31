@@ -354,10 +354,19 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             fatalError("You cannot create an initial machine for an unknown semantics")
         }
     }
-    
+
     /// Add a new item to a table attribute.
-    public mutating func addItem<Path: PathProtocol, T>(_ item: T, to attribute: Path) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
+    /// - Parameters:
+    ///  - item: The item to add to the table.
+    ///  - attribute: The path to the attribute to add the item to.
+    /// - Returns: A `Result` indicating whether the item was added successfully.
+    public mutating func addItem<Path: PathProtocol, T>(
+        _ item: T, to attribute: Path
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
+            guard !attribute.isNil(machine) else {
+                return .failure(AttributeError(message: "Collection does not exist.", path: attribute))
+            }
             machine[keyPath: attribute.path].append(item)
             var mutator = machine.mutator
             let result = mutator.didAddItem(item, to: attribute, machine: &machine)
@@ -365,7 +374,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     public mutating func moveItems<Path: PathProtocol, T>(table attribute: Path, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T]  {
         return perform { machine in
             let indices = Array(source)

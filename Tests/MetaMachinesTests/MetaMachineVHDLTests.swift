@@ -253,6 +253,31 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertNoThrow(try machine.validate())
     }
 
+    /// Test addItem works correctly.
+    func testAddItem() throws {
+        let newItem: [LineAttribute] = [
+            .enumerated("in", validValues: ["in", "out", "inout", "buffer"]),
+            .expression("std_logic", language: .vhdl),
+            .line("z"),
+            .expression("'1'", language: .vhdl),
+            .line("Signal z.")
+        ]
+        let path = Path(MetaMachine.self).attributes[0].attributes["external_signals"].wrappedValue.tableValue
+        XCTAssertTrue(try machine.addItem(newItem, to: path).get())
+        let newExternals: Set<String> = ["x", "y", "z"]
+        XCTAssertEqual(
+            machine.vhdlSchema?.stateSchema.variables.externals.type,
+            .enumerableCollection(validValues: newExternals)
+        )
+        machine.states.forEach {
+            let field = $0.attributes[0].fields.first { $0.name == "externals" }
+            XCTAssertEqual(field?.type, .enumerableCollection(validValues: newExternals))
+            XCTAssertEqual(
+                newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
+            )
+        }
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)
