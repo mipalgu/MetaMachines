@@ -377,15 +377,25 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
-    public mutating func newDependency(_ dependency: MachineDependency) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+
+    /// Create a new dependency for this machine.
+    /// - Parameter dependency: The dependency to add to this machine.
+    /// - Returns: Whether the dependency was successfully added.
+    public mutating func newDependency(
+        _ dependency: MachineDependency
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
             if machine.dependencies.contains(where: { $0.name == dependency.name }) {
-                return .failure(AttributeError<MetaMachine>(message: "The dependency '\(dependency.name)' already exists.", path: machine.path.dependencies[machine.dependencies.count]))
+                return .failure(AttributeError<MetaMachine>(
+                    message: "The dependency '\(dependency.name)' already exists.",
+                    path: machine.path.dependencies[machine.dependencies.count]
+                ))
             }
             machine.dependencies.append(dependency)
             guard let index = machine.dependencies.firstIndex(where: { $0 == dependency }) else {
-                return .failure(AttributeError(message: "Failed to find added dependency", path: MetaMachine.path.dependencies))
+                return .failure(AttributeError(
+                    message: "Failed to find added dependency", path: MetaMachine.path.dependencies
+                ))
             }
             var mutator = machine.mutator
             let result = mutator.didCreateDependency(machine: &machine, dependency: dependency, index: index)

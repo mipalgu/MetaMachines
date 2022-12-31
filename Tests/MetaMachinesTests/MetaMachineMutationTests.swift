@@ -129,6 +129,26 @@ final class MetaMachineMutationTests: XCTestCase {
                 .makeValidator(root: machine)
             ]
         )
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
+    /// Test new dependency calls schema properly.
+    func testNewDependency() throws {
+        let newDependency = MachineDependency(relativePath: "../NewMachine.machine")
+        XCTAssertFalse(try machine.newDependency(newDependency).get())
+        XCTAssertEqual(machine.dependencies, [newDependency])
+        XCTAssertEqual(
+            schema.functionsCalled,
+            self.functionsCalled(prefixed: [
+                .didCreateDependency(machine: machine, dependency: newDependency, index: 0)
+            ])
+        )
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
+    /// Prefix the functions called to update and validate.
+    private func functionsCalled(prefixed: [MockSchema.FunctionsCalled]) -> [MockSchema.FunctionsCalled] {
+        prefixed + [.update(metaMachine: machine), .makeValidator(root: machine)]
     }
 
 }

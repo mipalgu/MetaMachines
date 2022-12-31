@@ -115,4 +115,12 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(machine.states[0].transitions.count, 2)
     }
 
+    /// Test new dependency is added.
+    func testNewDependency() throws {
+        let oldDependencies = machine.dependencies
+        let newDependency = MachineDependency(relativePath: "../NewMachine.machine")
+        XCTAssertFalse(try machine.newDependency(newDependency).get())
+        XCTAssertEqual(machine.dependencies, oldDependencies + [newDependency])
+    }
+
 }
