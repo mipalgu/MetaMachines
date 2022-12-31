@@ -248,6 +248,11 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertTrue(machine.states[0].transitions.isEmpty)
     }
 
+    /// Test validation passes.
+    func testValidate() throws {
+        XCTAssertNoThrow(try machine.validate())
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)

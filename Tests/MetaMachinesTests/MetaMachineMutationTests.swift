@@ -254,6 +254,13 @@ final class MetaMachineMutationTests: XCTestCase {
         XCTAssertEqual(validator.parameters, [machine])
     }
 
+    /// Test validate function calls schema correctly.
+    func testValidate() throws {
+        XCTAssertNoThrow(try machine.validate())
+        XCTAssertEqual(schema.functionsCalled, [.makeValidator(root: machine)])
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
     /// Prefix the functions called to update and validate.
     private func functionsCalled(prefixed: [MockSchema.FunctionsCalled]) -> [MockSchema.FunctionsCalled] {
         prefixed + [.update(metaMachine: machine), .makeValidator(root: machine)]

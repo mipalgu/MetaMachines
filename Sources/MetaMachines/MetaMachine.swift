@@ -732,14 +732,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Are there any errors with the machine?
     public func validate() throws {
         try nonMutatingPerform { machine in
             try machine.mutator.validate(machine: machine)
         }
     }
-                      
+
     private func generateNewStateName() -> String {
         let stateNames = Set(states.map(\.name))
         var newName = "State"
