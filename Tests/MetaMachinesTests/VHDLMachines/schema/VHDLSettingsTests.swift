@@ -172,6 +172,11 @@ final class VHDLSettingsTests: XCTestCase {
         let suspendedValidValues: Set<String> = ["Initial", "Suspended", "State0", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Initial")
+        let fields = machine.attributes[3].fields
+        let initialField = fields.first { $0.name == "initial_state" }
+        let suspendedField = fields.first { $0.name == "suspended_state" }
+        XCTAssertEqual(initialField?.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(suspendedField?.type, .enumerated(validValues: suspendedValidValues))
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
         XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
@@ -200,6 +205,11 @@ final class VHDLSettingsTests: XCTestCase {
         let suspendedValidValues: Set<String> = ["Suspended", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "Suspended")
+        let fields = machine.attributes[3].fields
+        let initialField = fields.first { $0.name == "initial_state" }
+        let suspendedField = fields.first { $0.name == "suspended_state" }
+        XCTAssertEqual(initialField?.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(suspendedField?.type, .enumerated(validValues: suspendedValidValues))
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
         XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
@@ -228,6 +238,11 @@ final class VHDLSettingsTests: XCTestCase {
         let suspendedValidValues: Set<String> = ["zState0", "Suspended", ""]
         XCTAssertEqual(initialState?.enumeratedValidValues, newValidValues)
         XCTAssertEqual(initialState?.enumeratedValue, "zState0")
+        let fields = machine.attributes[3].fields
+        let initialField = fields.first { $0.name == "initial_state" }
+        let suspendedField = fields.first { $0.name == "suspended_state" }
+        XCTAssertEqual(initialField?.type, .enumerated(validValues: newValidValues))
+        XCTAssertEqual(suspendedField?.type, .enumerated(validValues: suspendedValidValues))
         let suspendedState = machine.attributes[3].attributes["suspended_state"]
         XCTAssertEqual(suspendedState?.enumeratedValidValues, suspendedValidValues)
         XCTAssertEqual(suspendedState?.enumeratedValue, "Suspended")
