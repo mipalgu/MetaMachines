@@ -526,8 +526,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
-    public mutating func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
+    /// Delete multiple items from a table attribute.
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to delete.
+    ///   - items: The indices of the items to delete.
+    /// - Returns: A `Result` indicating whether the items were deleted successfully.
+    public mutating func deleteItems<Path: PathProtocol, T>(
+        table attribute: Path, items: IndexSet
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
             if machine[keyPath: attribute.path].count <= items.max() ?? -1 || (items.min() ?? -1) < 0 {
                 return .failure(ValidationError(message: "Invalid indexes '\(items)'", path: attribute))
             }
@@ -538,7 +545,9 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                 machine[keyPath: attribute.path].remove(at: $0)
             }
             var mutator = machine.mutator
-            let result = mutator.didDeleteItems(table: attribute, indices: items, machine: &machine, items: itemObjs)
+            let result = mutator.didDeleteItems(
+                table: attribute, indices: items, machine: &machine, items: itemObjs
+            )
             machine.mutator = mutator
             return result
         }

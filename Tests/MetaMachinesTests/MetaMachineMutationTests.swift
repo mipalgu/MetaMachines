@@ -313,6 +313,24 @@ final class MetaMachineMutationTests: XCTestCase {
         XCTAssertEqual(trigger.rootsPassed, [machine])
     }
 
+    /// Test deleteItems calls schema correctly.
+    func testDeleteItems() throws {
+        let t0 = Transition(condition: "true", target: "Initial", attributes: [], metaData: [])
+        let t1 = Transition(condition: "false", target: "Initial", attributes: [], metaData: [])
+        let path = Path(MetaMachine.self).states[0].transitions
+        machine.states[0].transitions = [t0, t1]
+        XCTAssertFalse(try machine.deleteItems(table: path, items: IndexSet(0...1)).get())
+        XCTAssertEqual(machine.states.first?.transitions, [])
+        XCTAssertEqual(machine.states.count, 2)
+        XCTAssertEqual(
+            schema.functionsCalled,
+            self.functionsCalled(prefixed: [.trigger])
+        )
+        XCTAssertEqual(validator.parameters, [machine])
+        XCTAssertEqual(trigger.pathsPassed, [AnyPath(path)])
+        XCTAssertEqual(trigger.rootsPassed, [machine])
+    }
+
     /// Prefix the functions called to update and validate.
     private func functionsCalled(prefixed: [MockSchema.FunctionsCalled]) -> [MockSchema.FunctionsCalled] {
         prefixed + [.update(metaMachine: machine), .makeValidator(root: machine)]
