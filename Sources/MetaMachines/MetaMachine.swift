@@ -508,13 +508,24 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
+    /// Delete multiple dependencies from this machine.
+    /// - Parameter dependencies: The indices of the dependencies to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func delete(dependencies: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            let deletedDependencies = machine.dependencies.enumerated().filter { dependencies.contains($0.0) }.map(\.element)
-            machine.dependencies = machine.dependencies.enumerated().filter { !dependencies.contains($0.0) }.map(\.element)
+        perform { machine in
+            let deletedDependencies = machine.dependencies
+                .enumerated()
+                .filter { dependencies.contains($0.0) }
+                .map(\.element)
+            machine.dependencies = machine.dependencies
+                .enumerated()
+                .filter { !dependencies.contains($0.0) }
+                .map(\.element)
             var mutator = machine.mutator
-            let result = mutator.didDeleteDependencies(machine: &machine, dependency: deletedDependencies, at: dependencies)
+            let result = mutator.didDeleteDependencies(
+                machine: &machine, dependency: deletedDependencies, at: dependencies
+            )
             machine.mutator = mutator
             return result
         }

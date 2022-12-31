@@ -232,6 +232,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(machine.dependencies, newDependencies)
     }
 
+    /// Test delete depeendencies work correctly.
+    func testDeleteDependencies() throws {
+        let dependencies = machine.dependencies
+        XCTAssertFalse(try machine.delete(dependencies: IndexSet(0...0)).get())
+        let newDependencies = Array(dependencies.dropFirst())
+        XCTAssertEqual(machine.dependencies, newDependencies)
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)
