@@ -63,9 +63,9 @@ struct VHDLSchema: MachineSchema {
         metaData: [AttributeGroup]
     ) {
         self.init()
-        let stateNames = Set(states.map(\.name))
-        self.settings.$initialState.update(validValues: stateNames) { $0.notEmpty() }
-        self.settings.$suspendedState.update(validValues: stateNames)
+        let stateNames = states.map(\.name)
+        self.settings.$initialState.update(validValues: Set(stateNames)) { $0.notEmpty() }
+        self.settings.$suspendedState.update(validValues: Set(stateNames + [""]))
         let externals: [String]
         let clocks: [String]
         if attributes.isEmpty {

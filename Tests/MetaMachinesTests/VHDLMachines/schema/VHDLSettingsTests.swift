@@ -101,8 +101,9 @@ final class VHDLSettingsTests: XCTestCase {
             return
         }
         let states: Set<String> = ["Initial", "Suspended"]
+        let suspendedStates: Set<String> = ["Initial", "Suspended", ""]
         XCTAssertEqual(settings.suspendedState.label, "suspended_state")
-        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: states))
+        XCTAssertEqual(settings.suspendedState.type, .enumerated(validValues: suspendedStates))
         XCTAssertEqual(settings.initialState.label, "initial_state")
         XCTAssertEqual(settings.initialState.type, .enumerated(validValues: states))
     }
