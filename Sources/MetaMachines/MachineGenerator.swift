@@ -56,28 +56,37 @@
  *
  */
 
-import Foundation
-import SwiftMachines
 import CXXBase
-import VHDLMachines
+import Foundation
 #if os(Linux)
 import IO
 #endif
+import SwiftMachines
+import VHDLMachines
 
+/// A class that generates file wrappers for a ``MetaMachine``.
 public final class MachineGenerator {
-    
+
+    /// The errors during the generation.
     public fileprivate(set) var errors: [String] = []
-    
+
+    /// A swift generator for swift machines.
     fileprivate let swiftGenerator: SwiftMachines.MachineGenerator
-    
+
+    /// The last error that occurred.
     public var lastError: String? {
-        return self.errors.last
+        self.errors.last
     }
-    
+
+    /// Initialise the generator with a swift generator.
+    /// - Parameter swiftGenerator: The swift generator.
     public init(swiftGenerator: SwiftMachines.MachineGenerator = SwiftMachines.MachineGenerator()) {
         self.swiftGenerator = swiftGenerator
     }
-    
+
+    /// Generate a file wrapper for a ``MetaMachine``.
+    /// - Parameter machine: The machine to generate a file wrapper for.
+    /// - Returns: The file wrapper for the machine or nil if an error occurred.
     public func generate(_ machine: MetaMachine) -> FileWrapper? {
         self.errors = []
         switch machine.semantics {
@@ -112,29 +121,19 @@ public final class MachineGenerator {
                 self.errors = []
                 return nil
             }
-            //return (cxxMachine.path, [])
+            // return (cxxMachine.path, [])
             return wrapper
         case .vhdl:
-            let vhdlMachine: VHDLMachines.Machine
-            do {
-                vhdlMachine = try VHDLMachines.Machine(machine: machine)
-            } catch let e as ConversionError<MetaMachine> {
-                self.errors.append(e.message)
-                return nil
-            } catch let e {
-                self.errors.append("\(e)")
-                return nil
-            }
+            let vhdlMachine = VHDLMachines.Machine(machine: machine)
             guard let wrapper = VHDLGenerator().generate(machine: vhdlMachine) else {
                 self.errors = []
                 return nil
             }
-            //return (vhdlMachine.path, [])
             return wrapper
         default:
             self.errors.append("\(machine.semantics) Machines are currently not supported")
             return nil
         }
     }
-    
+
 }
