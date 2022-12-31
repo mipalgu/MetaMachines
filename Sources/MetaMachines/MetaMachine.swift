@@ -518,12 +518,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             let item = machine[keyPath: attribute.keyPath][index]
             machine[keyPath: attribute.path].remove(at: index)
             var mutator = machine.mutator
-            let result = mutator.didDeleteItem(attribute: attribute, atIndex: index, machine: &machine, item: item)
+            let result = mutator.didDeleteItem(
+                attribute: attribute, atIndex: index, machine: &machine, item: item
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     public mutating func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
         return perform { machine in
             if machine[keyPath: attribute.path].count <= items.max() ?? -1 || (items.min() ?? -1) < 0 {
