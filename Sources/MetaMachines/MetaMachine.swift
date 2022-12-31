@@ -579,22 +579,28 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Delete a state at a specific index.
+    /// - Parameter index: The index of the state to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func deleteState(atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            if index >= machine.states.count  {
-                return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: MetaMachine.path.states))
+        perform { machine in
+            if index >= machine.states.count {
+                return .failure(ValidationError(
+                    message: "Can't delete state that doesn't exist", path: MetaMachine.path.states
+                ))
             }
             let name = machine.states[index].name
             if name == machine.initialState {
-                return .failure(ValidationError(message: "Can't delete the initial state", path: MetaMachine.path.states[index]))
+                return .failure(ValidationError(
+                    message: "Can't delete the initial state", path: MetaMachine.path.states[index]
+                ))
             }
             let state = machine.states[index]
             machine.states.remove(at: index)
             machine.states = machine.states.map {
                 var state = $0
-                state.transitions.removeAll(where: { $0.target == name })
+                state.transitions.removeAll { $0.target == name }
                 return state
             }
             var mutator = machine.mutator
@@ -603,7 +609,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Delete a transition at a specific index.
     public mutating func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in

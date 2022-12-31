@@ -166,6 +166,20 @@ final class MetaMachineMutationTests: XCTestCase {
         XCTAssertEqual(validator.parameters, [machine])
     }
 
+    /// Test deleteState calls schema correctly.
+    func testDeleteState() throws {
+        let index = 1
+        let initial = machine.states[0]
+        let state = machine.states[1]
+        XCTAssertFalse(try machine.deleteState(atIndex: index).get())
+        XCTAssertEqual(machine.states, [initial])
+        XCTAssertEqual(
+            schema.functionsCalled,
+            self.functionsCalled(prefixed: [.didDeleteState(machine: machine, state: state, at: index)])
+        )
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
     /// Prefix the functions called to update and validate.
     private func functionsCalled(prefixed: [MockSchema.FunctionsCalled]) -> [MockSchema.FunctionsCalled] {
         prefixed + [.update(metaMachine: machine), .makeValidator(root: machine)]

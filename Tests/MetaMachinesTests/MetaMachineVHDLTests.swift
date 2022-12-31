@@ -140,6 +140,34 @@ final class MetaMachineVHDLTests: XCTestCase {
         )
     }
 
+    /// Test deletes state works correctly.
+    func testDeleteState() throws {
+        var initialState = machine.states[0]
+        initialState.transitions = []
+        let newState = newState()
+        let index = 1
+        XCTAssertTrue(try machine.newState().get())
+        XCTAssertTrue(try machine.deleteState(atIndex: index).get())
+        XCTAssertEqual(machine.states.count, 2)
+        XCTAssertEqual(machine.states, [initialState, newState])
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.initialState.type,
+            .line(.enumerated(validValues: ["Initial", "State0"]))
+        )
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.suspendedState.type,
+            .line(.enumerated(validValues: ["Initial", "State0", ""]))
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["initial_state"],
+            .enumerated("Initial", validValues: ["Initial", "State0"])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["suspended_state"],
+            .enumerated("", validValues: ["Initial", "State0", ""])
+        )
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)
