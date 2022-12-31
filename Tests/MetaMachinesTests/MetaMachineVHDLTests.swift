@@ -137,6 +137,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(
             machine.attributes[3].attributes["suspended_state"], .enumerated("", validValues: ["Initial", ""])
         )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "initial_state" }?.type,
+            .enumerated(validValues: ["Initial"])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "suspended_state" }?.type,
+            .enumerated(validValues: ["Initial", ""])
+        )
     }
 
     /// Test deletes state works correctly.
@@ -163,6 +171,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(
             machine.attributes[3].attributes["suspended_state"],
             .enumerated("", validValues: ["Initial", "State0", ""])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "initial_state" }?.type,
+            .enumerated(validValues: ["Initial", "State0"])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "suspended_state" }?.type,
+            .enumerated(validValues: ["Initial", "State0", ""])
         )
     }
 
@@ -197,6 +213,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(
             machine.attributes[3].attributes["suspended_state"],
             .enumerated(state2.name, validValues: [newName, state2.name, ""])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "initial_state" }?.type,
+            .enumerated(validValues: [newName, state2.name])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].fields.first { $0.name == "suspended_state" }?.type,
+            .enumerated(validValues: [newName, state2.name, ""])
         )
     }
 
