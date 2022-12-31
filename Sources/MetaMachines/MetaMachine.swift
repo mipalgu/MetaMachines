@@ -761,8 +761,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     }
 
     /// Modify a specific attributes value.
-    public mutating func modify<Path: PathProtocol>(attribute: Path, value: Path.Value) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
-        return perform { machine in
+    /// - Parameters:
+    ///   - attribute: The attribute to modify.
+    ///   - value: The new value.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func modify<Path: PathProtocol>(
+        attribute: Path, value: Path.Value
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
+        perform { machine in
             if let value = value as? String, let stateIndex = machine.states.indices.first(where: {
                 (MetaMachine.path.states[$0].name).path == attribute.path
             }) {
@@ -771,7 +777,9 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             let oldValue = machine[keyPath: attribute.keyPath]
             machine[keyPath: attribute.path] = value
             var mutator = machine.mutator
-            let result = mutator.didModify(attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine)
+            let result = mutator.didModify(
+                attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine
+            )
             machine.mutator = mutator
             return result
         }
