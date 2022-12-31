@@ -386,6 +386,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
         perform { machine in
             let indices = Array(source)
+            guard let maxIndex = indices.max() else {
+                return .success(false)
+            }
+            guard !attribute[maxIndex].isNil(machine) else {
+                return .failure(
+                    AttributeError(message: "Element does not exist.", path: attribute[maxIndex])
+                )
+            }
             let items = indices.map { machine[keyPath: attribute.keyPath][$0] }
             machine[keyPath: attribute.path].move(fromOffsets: source, toOffset: destination)
             var mutator = machine.mutator
@@ -496,9 +504,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     }
 
     /// Delete a specific item in a table attribute.
-    public mutating func deleteItem<Path: PathProtocol, T>(table attribute: Path, atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
-            if machine[keyPath: attribute.path].count <= index || index < 0 {
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to delete.
+    ///   - index: The index of the item to delete.
+    /// - Returns: A `Result` indicating whether the item was deleted successfully.
+    public mutating func deleteItem<Path: PathProtocol, T>(
+        table attribute: Path, atIndex index: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
+            if attribute.isNil(machine), machine[keyPath: attribute.path].count <= index || index < 0 {
                 return .failure(ValidationError(message: "Invalid index '\(index)'", path: attribute))
             }
             let item = machine[keyPath: attribute.keyPath][index]
@@ -638,7 +652,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// - Returns: A result indicating whether the operation was successful.
     public mutating func deleteState(atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
         perform { machine in
-            if index >= machine.states.count {
+            if index >= machine.states.count || index < 0 {
                 return .failure(ValidationError(
                     message: "Can't delete state that doesn't exist", path: MetaMachine.path.states
                 ))
@@ -680,7 +694,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                     path: MetaMachine.path.states
                 ))
             }
-            guard machine.states[stateIndex].transitions.count >= index else {
+            guard machine.states[stateIndex].transitions.count >= index, index >= 0 else {
                 return .failure(ValidationError(
                     message: "Cannot delete transition that does not exist",
                     path: MetaMachine.path.states[stateIndex].transitions
@@ -706,7 +720,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         atIndex index: Int, to newName: String
     ) -> Result<Bool, AttributeError<MetaMachine>> {
         perform { machine in
-            guard machine.states.count > index else {
+            guard machine.states.count > index, index >= 0 else {
                 return .failure(AttributeError(
                     message: "Invalid index \(index) for changing a state name.",
                     path: MetaMachine.path.states[index]
