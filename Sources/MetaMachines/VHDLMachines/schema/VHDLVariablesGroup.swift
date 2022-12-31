@@ -263,6 +263,8 @@ struct VHDLVariablesGroup: GroupProtocol {
         }
     }
 
+    // swiftlint:disable closure_body_length
+
     /// The trigger that causes the driving clock valid values to update when a clock is renamed.
     @TriggerBuilder<MetaMachine>
     private var renameClocks: AnyTrigger<MetaMachine> {
@@ -286,6 +288,13 @@ struct VHDLVariablesGroup: GroupProtocol {
                 let validValues = Set(clockAttribute.tableValue.map { clockLine in
                     clockLine[0].lineValue
                 })
+                if let drivingClockIndex = machine.attributes[0].fields.firstIndex(
+                    where: { $0.name == "driving_clock" }
+                ) {
+                    machine.attributes[0].fields[drivingClockIndex].type = .enumerated(
+                        validValues: validValues
+                    )
+                }
                 let enumeratedOldValue = drivingClock.enumeratedValue
                 let selected = validValues.contains(enumeratedOldValue) ? enumeratedOldValue :
                     machine[keyPath: clockNamePath.keyPath]
@@ -298,6 +307,8 @@ struct VHDLVariablesGroup: GroupProtocol {
             }
         })
     }
+
+    // swiftlint:enable closure_body_length
 
     /// The trigger used when a new clock is created. This trigger will update the driving clock attribute to
     /// include the new clock in its valid values.
@@ -312,6 +323,16 @@ struct VHDLVariablesGroup: GroupProtocol {
             target: MetaMachine.path.vhdlSchema.wrappedValue.variables.$drivingClock
         ) { clockAttribute, _ in
             syncSchema(clockAttribute: clockAttribute)
+        }
+        WhenChanged(clocks).sync(target: self.path.fields) { newClocks, oldFields in
+            guard let drivingClockIndex = oldFields.firstIndex(where: { $0.name == "driving_clock" }) else {
+                return oldFields
+            }
+            let validValues = Set(newClocks.tableValue.map { $0[0].lineValue })
+            var newFields = oldFields
+            let oldValue = newFields.remove(at: drivingClockIndex)
+            newFields.append(Field(name: oldValue.name, type: .enumerated(validValues: validValues)))
+            return newFields.sorted { $0.name < $1.name }
         }
     }
 

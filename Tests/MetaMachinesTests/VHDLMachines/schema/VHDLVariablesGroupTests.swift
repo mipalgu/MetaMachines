@@ -59,6 +59,9 @@ import Attributes
 import VHDLMachines
 import XCTest
 
+// swiftlint:disable file_length
+// swiftlint:disable type_body_length
+
 /// Tests for the ``VHDLVariablesGroup`` struct.
 final class VHDLVariablesGroupTests: XCTestCase {
 
@@ -188,6 +191,9 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let validValues: Set<String> = ["clk", "clk1", "clk2"]
+        let fields = machine.attributes[0].fields
+        let clockField = fields.first { $0.name == "driving_clock" }
+        XCTAssertEqual(clockField?.type, .enumerated(validValues: validValues))
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "clk")
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
@@ -213,6 +219,9 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let validValues: Set<String> = ["clk1"]
+        let fields = machine.attributes[0].fields
+        let clockField = fields.first { $0.name == "driving_clock" }
+        XCTAssertEqual(clockField?.type, .enumerated(validValues: validValues))
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "clk1")
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
@@ -238,6 +247,9 @@ final class VHDLVariablesGroupTests: XCTestCase {
         XCTAssertTrue(trigger.isTriggerForPath(path, in: machine))
         XCTAssertTrue(try trigger.performTrigger(&machine, for: path).get())
         let validValues: Set<String> = ["new_clock", "clk1"]
+        let fields = machine.attributes[0].fields
+        let clockField = fields.first { $0.name == "driving_clock" }
+        XCTAssertEqual(clockField?.type, .enumerated(validValues: validValues))
         XCTAssertEqual(variables?.drivingClock.type, .enumerated(validValues: validValues))
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValue, "new_clock")
         XCTAssertEqual(machine.attributes[0].attributes["driving_clock"]?.enumeratedValidValues, validValues)
@@ -487,3 +499,6 @@ final class VHDLVariablesGroupTests: XCTestCase {
     }
 
 }
+
+// swiftlint:enable type_body_length
+// swiftlint:enable file_length
