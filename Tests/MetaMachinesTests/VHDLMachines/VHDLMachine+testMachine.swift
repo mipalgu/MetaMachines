@@ -335,14 +335,14 @@ extension Machine {
                 name: "settings",
                 fields: [
                     Field(
-                        name: "initial_state", type: .enumerated(validValues: ["Initial", "Suspended", ""])
+                        name: "initial_state", type: .enumerated(validValues: ["Initial", "Suspended"])
                     ),
                     Field(
                         name: "suspended_state", type: .enumerated(validValues: ["Initial", "Suspended", ""])
                     )
                 ],
                 attributes: [
-                    "initial_state": .enumerated("Initial", validValues: ["Initial", "Suspended", ""]),
+                    "initial_state": .enumerated("Initial", validValues: ["Initial", "Suspended"]),
                     "suspended_state": .enumerated("Suspended", validValues: ["Initial", "Suspended", ""])
                 ],
                 metaData: [:]

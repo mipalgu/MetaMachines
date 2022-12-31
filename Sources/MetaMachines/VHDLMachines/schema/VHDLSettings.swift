@@ -64,6 +64,20 @@ struct VHDLSettings: GroupProtocol {
                 machine.attributes[3].attributes["suspended_state"] = .enumerated(
                     newSuspended, validValues: suspendedNames
                 )
+                if let initialFieldIndex = machine.attributes[3].fields.firstIndex(
+                    where: { $0.name == "initial_state" }
+                ) {
+                    machine.attributes[3].fields[initialFieldIndex] = Field(
+                        name: "initial_state", type: .enumerated(validValues: stateNames)
+                    )
+                }
+                if let suspendedFieldIndex = machine.attributes[3].fields.firstIndex(
+                    where: { $0.name == "suspended_state" }
+                ) {
+                    machine.attributes[3].fields[suspendedFieldIndex] = Field(
+                        name: "suspended_state", type: .enumerated(validValues: suspendedNames)
+                    )
+                }
                 schema.settings.$initialState = EnumeratedProperty(
                     label: "initial_state",
                     validValues: stateNames
@@ -86,6 +100,30 @@ struct VHDLSettings: GroupProtocol {
             let newValidValues = Set(states.map(\.name))
             let newName = newValidValues.contains(oldName) ? oldName : newValidValues.min() ?? ""
             return Attribute.enumerated(newName, validValues: newValidValues)
+        }
+        Attributes.WhenChanged(Path(MetaMachine.self).states).sync(
+            target: self.path.fields
+        ) { states, oldFields in
+            guard let initialField = (oldFields.first { $0.name == "initial_state" }) else {
+                return oldFields
+            }
+            let newValidValues = Set(states.map(\.name))
+            let newFields = oldFields.drop { $0 == initialField }
+            return newFields + [
+                Field(name: initialField.name, type: .enumerated(validValues: newValidValues))
+            ].sorted { $0.name < $1.name }
+        }
+        Attributes.WhenChanged(Path(MetaMachine.self).states).sync(
+            target: self.path.fields
+        ) { states, oldFields in
+            guard let suspendedField = (oldFields.first { $0.name == "suspended_state" }) else {
+                return oldFields
+            }
+            let newValidValues = Set(states.map(\.name) + [""])
+            let newFields = oldFields.drop { $0 == suspendedField }
+            return newFields + [
+                Field(name: suspendedField.name, type: .enumerated(validValues: newValidValues))
+            ].sorted { $0.name < $1.name }
         }
         Attributes.WhenChanged(Path(MetaMachine.self).states).sync(
             target: Path(MetaMachine.self).vhdlSchema.wrappedValue.settings.$initialState

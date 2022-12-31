@@ -230,7 +230,7 @@ extension VHDLMachines.Machine {
             name: "settings",
             fields: [
                 Field(
-                    name: "initial_state", type: .enumerated(validValues: Set([""] + self.states.map(\.name)))
+                    name: "initial_state", type: .enumerated(validValues: Set(self.states.map(\.name)))
                 ),
                 Field(
                     name: "suspended_state",
@@ -239,7 +239,7 @@ extension VHDLMachines.Machine {
             ],
             attributes: [
                 "initial_state": .enumerated(
-                    self.states[self.initialState].name, validValues: Set(self.states.map(\.name) + [""])
+                    self.states[self.initialState].name, validValues: Set(self.states.map(\.name))
                 ),
                 "suspended_state": .enumerated(
                     self.suspendedState.map { self.states[$0].name } ?? "",
