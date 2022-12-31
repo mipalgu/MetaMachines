@@ -565,11 +565,17 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
+    /// Delete a dependency from this machine.
+    /// - Parameter index: The index of the dependency to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func deleteDependency(atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             if index < 0 || index >= machine.dependencies.count {
-                return .failure(AttributeError<MetaMachine>(message: "Invalid index \(index) for deleting a dependency.", path: machine.path.dependencies))
+                return .failure(AttributeError<MetaMachine>(
+                    message: "Invalid index \(index) for deleting a dependency.",
+                    path: machine.path.dependencies
+                ))
             }
             let dependency = machine.dependencies[index]
             machine.dependencies.remove(at: index)
