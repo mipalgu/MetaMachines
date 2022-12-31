@@ -56,11 +56,14 @@
  *
  */
 
-import Foundation
 import Attributes
+import Foundation
 #if os(Linux)
 import IO
 #endif
+
+// swiftlint:disable file_length
+// swiftlint:disable type_body_length
 
 /// A general meta model machine.
 ///
@@ -824,6 +827,9 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
+    /// Perform a function that mutates this machine.
+    /// - Parameter f: The function to perform.
+    /// - Throws: The errors thrown by `f`.
     private mutating func perform(_ f: (inout MetaMachine) throws -> Void) throws {
         let backup = self
         do {
@@ -943,8 +949,10 @@ extension MetaMachine {
 
 }
 
+/// Equatable conformance.
 extension MetaMachine: Equatable {
 
+    /// Check if two machines are equal.
     public static func == (lhs: MetaMachine, rhs: MetaMachine) -> Bool {
         lhs.semantics == rhs.semantics
             && lhs.name == rhs.name
@@ -956,8 +964,10 @@ extension MetaMachine: Equatable {
 
 }
 
+/// Hashable conformance.
 extension MetaMachine: Hashable {
 
+    /// Hash function.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.semantics)
         hasher.combine(self.name)
@@ -969,20 +979,36 @@ extension MetaMachine: Hashable {
 
 }
 
+/// Codable conformance.
 extension MetaMachine: Codable {
 
+    /// The coding keys for the Keyed container.
     public enum CodingKeys: CodingKey {
 
+        /// The semantics.
         case semantics
+
+        /// The name.
         case name
+
+        /// The initial state.
         case initialState
+
+        /// The states.
         case states
+
+        /// The transitions.
         case transitions
+
+        /// The attributes.
         case attributes
+
+        /// The meta data.
         case metaData
 
     }
 
+    /// Decoder init.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let semantics = try container.decode(Semantics.self, forKey: .semantics)
@@ -1001,6 +1027,7 @@ extension MetaMachine: Codable {
         )
     }
 
+    /// Encoder function.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.semantics, forKey: .semantics)
@@ -1013,8 +1040,10 @@ extension MetaMachine: Codable {
 
 }
 
+/// Add helper for getting the VHDL schema.
 extension MetaMachine {
 
+    /// Access the underlying schema as a ``VHDLSchema``.
     var vhdlSchema: VHDLSchema? {
         get {
             (self.mutator as? SchemaMutator<VHDLSchema>)?.schema
@@ -1028,3 +1057,6 @@ extension MetaMachine {
     }
 
 }
+
+// swiftlint:enable type_body_length
+// swiftlint:enable file_length
