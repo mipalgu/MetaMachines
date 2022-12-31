@@ -180,6 +180,21 @@ final class MetaMachineMutationTests: XCTestCase {
         XCTAssertEqual(validator.parameters, [machine])
     }
 
+    /// Test deleteTransition calls schema correctly.
+    func testDeleteTransition() throws {
+        let index = 0
+        let transition = Transition(target: "Initial")
+        machine.states[0].transitions = [transition]
+        XCTAssertFalse(try machine.deleteTransition(atIndex: index, attachedTo: "Initial").get())
+        XCTAssertTrue(self.machine.states[0].transitions.isEmpty)
+        XCTAssertEqual(schema.functionsCalled, self.functionsCalled(
+            prefixed: [
+                .didDeleteTransition(machine: machine, transition: transition, stateIndex: 0, at: index)
+            ]
+        ))
+        XCTAssertEqual(validator.parameters, [machine])
+    }
+
     /// Prefix the functions called to update and validate.
     private func functionsCalled(prefixed: [MockSchema.FunctionsCalled]) -> [MockSchema.FunctionsCalled] {
         prefixed + [.update(metaMachine: machine), .makeValidator(root: machine)]

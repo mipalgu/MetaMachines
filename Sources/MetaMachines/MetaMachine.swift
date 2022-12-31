@@ -611,23 +611,39 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     }
 
     /// Delete a transition at a specific index.
-    public mutating func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            guard let stateIndex = machine.states.indices.first(where: { machine.states[$0].name == sourceState }) else {
-                return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: MetaMachine.path.states))
+    /// - Parameters:
+    ///  - index: The index of the transition to delete.
+    ///  - sourceState: The name of the state the transition is attached to.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func deleteTransition(
+        atIndex index: Int, attachedTo sourceState: StateName
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
+            guard let stateIndex = machine.states.indices.first(
+                where: { machine.states[$0].name == sourceState }
+            ) else {
+                return .failure(ValidationError(
+                    message: "Cannot delete a transition attached to a state that does not exist",
+                    path: MetaMachine.path.states
+                ))
             }
             guard machine.states[stateIndex].transitions.count >= index else {
-                return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: MetaMachine.path.states[stateIndex].transitions))
+                return .failure(ValidationError(
+                    message: "Cannot delete transition that does not exist",
+                    path: MetaMachine.path.states[stateIndex].transitions
+                ))
             }
             let transition = machine.states[stateIndex].transitions[index]
             machine.states[stateIndex].transitions.remove(at: index)
             var mutator = machine.mutator
-            let result = mutator.didDeleteTransition(machine: &machine, transition: transition, stateIndex: stateIndex, at: index)
+            let result = mutator.didDeleteTransition(
+                machine: &machine, transition: transition, stateIndex: stateIndex, at: index
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
         return perform { machine in
             let oldName = machine.states[index].name

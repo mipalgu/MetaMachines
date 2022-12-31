@@ -168,6 +168,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         )
     }
 
+    /// Test deleteTransition deletes correct transition.
+    func testDeleteTransition() throws {
+        var states = machine.states
+        states[0].transitions = []
+        XCTAssertFalse(try machine.deleteTransition(atIndex: 0, attachedTo: "Initial").get())
+        XCTAssertEqual(machine.states, states)
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)
