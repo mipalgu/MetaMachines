@@ -464,6 +464,11 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     }
 
     /// Add a new empty transition to the machine.
+    /// - Parameters:
+    ///   - source: The source states name.
+    ///   - target: The target states name.
+    ///   - condition: The condition for the transition.
+    /// - Returns: A `Result` indicating whether the transition was added successfully.
     public mutating func newTransition(
         source: StateName, target: StateName, condition: Expression? = nil
     ) -> Result<Bool, AttributeError<MetaMachine>> {
