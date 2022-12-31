@@ -740,6 +740,8 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
+    /// Generate a new state name for the machine.
+    /// - Returns: A new state name.
     private func generateNewStateName() -> String {
         let stateNames = Set(states.map(\.name))
         var newName = "State"
@@ -750,7 +752,10 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         } while (stateNames.contains(newName))
         return newName
     }
-    
+
+    /// Perform a pure function that acts on this machine.
+    /// - Parameter f: The function to perform.
+    /// - Throws: ``AttributeError`` and any error thrown by `f`.
     private func nonMutatingPerform(_ f: (MetaMachine) throws -> Void) throws {
         do {
             try f(self)
@@ -761,7 +766,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             throw e
         }
     }
-    
+
     private mutating func perform(_ f: (inout MetaMachine) throws -> Void) throws {
         let backup = self
         do {
@@ -779,12 +784,23 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             throw e
         }
     }
-    
-    private func nonMutatingPerform(_ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
-        return f(self)
+
+    /// Performs a pure function the machine.
+    /// - Parameter f: The function to perform on the machine.
+    /// - Returns: The result of the function `f`.
+    private func nonMutatingPerform(
+        _ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        f(self)
     }
-    
-    private mutating func perform(_ f: (inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
+
+    /// Calls a function and then tries to validate the machine. If the validation fails, then the changes
+    /// performed by the function are reverted.
+    /// - Parameter f: The function to perform on the machine.
+    /// - Returns: A result indicating whether the operation was successful.
+    private mutating func perform(
+        _ f: (inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
         let backup = self
         let result = f(&self)
         switch result {
@@ -810,11 +826,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
 }
 
+/// IO methods.
 extension MetaMachine {
 
+    /// Initialise the machine located at a filePath on the system.
+    /// - Parameter filePath: The path of the file.
+    /// - Throws: ``ConversionError``.
     public init(filePath: URL) throws {
         let parser = MachineParser()
         guard let machine = parser.parseMachine(atURL: filePath) else {
@@ -826,6 +846,9 @@ extension MetaMachine {
         self = machine
     }
 
+    /// Initialise the machine from a file wrapper.
+    /// - Parameter wrapper: The file wrapper.
+    /// - Throws: ``ConversionError``.
     public init(from wrapper: FileWrapper) throws {
         let parser = MachineParser()
         guard let machine = parser.parseMachine(fromWrapper: wrapper) else {
@@ -836,6 +859,9 @@ extension MetaMachine {
         self = machine
     }
 
+    /// Generate a file wrapper for this machine.
+    /// - Returns: The file wrapper.
+    /// - Throws: ``ConversionError``.
     public func fileWrapper() throws -> FileWrapper {
         let generator = MachineGenerator()
         guard let fileWrapper = generator.generate(self) else {
@@ -846,14 +872,18 @@ extension MetaMachine {
         return fileWrapper
     }
 
+    /// Save the machine to a file.
+    /// - Throws: ``ConversionError``.
     public func save() throws {
         try self.validate()
         let generator = MachineGenerator()
-        guard nil != generator.generate(self) else {
-            throw ConversionError(message: generator.lastError ?? "Unable to save machine", path: MetaMachine.path)
+        guard generator.generate(self) != nil else {
+            throw ConversionError(
+                message: generator.lastError ?? "Unable to save machine", path: MetaMachine.path
+            )
         }
     }
-    
+
 }
 
 extension MetaMachine: Equatable {
