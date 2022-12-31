@@ -59,14 +59,23 @@
 import Attributes
 import Foundation
 
+/// A protocol for defining types that can convert between concrete machines and meta machines.
 protocol Converter {
-    
+
+    /// The type of the concrete machine.
     associatedtype ConcreteMachine
-    
+
+    /// Create an meta machine representation of the initial machine.
     var initialMachine: MetaMachine { get }
-    
+
+    /// Create a meta machine representation of the concrete machine.
+    /// - Parameter of: The concrete machine to create a meta machine representation of.
+    /// - Returns: The meta machine representation of the concrete machine.
     func metaMachine(of: ConcreteMachine) -> MetaMachine
-    
+
+    /// Create a concrete machine representation of the meta machine.
+    /// - Parameter _: The meta machine to create a concrete machine representation of.
+    /// - Returns: The concrete machine representation of the meta machine.
     func convert(_: MetaMachine) throws -> ConcreteMachine
-    
+
 }

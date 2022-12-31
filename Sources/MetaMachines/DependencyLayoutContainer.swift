@@ -58,8 +58,10 @@
 
 import Attributes
 
+/// A protocol for defining types that have a dependency layout.
 public protocol DependencyLayoutContainer {
-    
+
+    /// The layout of the dependencies.
     var dependencyLayout: [Field] { get }
-    
+
 }
