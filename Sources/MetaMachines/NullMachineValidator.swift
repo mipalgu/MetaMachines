@@ -56,8 +56,11 @@
  *
  */
 
+/// A ``MachineValidator`` that always passes.
 struct NullMachineValidator: MachineValidator {
-    
+
+    /// Validate the machine.
+    /// - Parameter _: The machine to validate.
     func validate(machine _: MetaMachine) throws {}
-    
+
 }
