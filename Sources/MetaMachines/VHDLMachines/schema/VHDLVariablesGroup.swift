@@ -228,6 +228,12 @@ struct VHDLVariablesGroup: GroupProtocol {
                     }
                     machine.vhdlSchema = schema
                     machine.states.indices.forEach { index in
+                        if let fieldIndex = machine.states[index].attributes[0].fields.firstIndex(
+                            where: { $0.name == "externals" }
+                        ) {
+                            machine.states[index].attributes[0].fields[fieldIndex].type =
+                                .enumerableCollection(validValues: externalNames)
+                        }
                         let existingExternals = machine.states[index].attributes[0].attributes["externals"]?
                             .enumerableCollectionValue ?? []
                         machine.states[index].attributes[0].attributes["externals"] = .enumerableCollection(
@@ -260,6 +266,21 @@ struct VHDLVariablesGroup: GroupProtocol {
             let newExternals = Set(externalsNow.tableValue.map { $0[2].lineValue })
             let newValues = oldStateExternals.enumerableCollectionValue.filter { newExternals.contains($0) }
             return Attribute.enumerableCollection(newValues, validValues: newExternals)
+        }
+        WhenChanged(externalVariables).sync(target: CollectionSearchPath(
+            collectionPath: Path(MetaMachine.self).states,
+            elementPath: Path(State.self).attributes[0].fields
+        )) { externalsNow, oldFields in
+            guard let fieldIndex = (oldFields.firstIndex { $0.name == "externals" }) else {
+                return oldFields
+            }
+            let newExternals = Set(externalsNow.tableValue.map { $0[2].lineValue })
+            var newFields = oldFields
+            let oldValue = newFields.remove(at: fieldIndex)
+            newFields.append(
+                Field(name: oldValue.name, type: .enumerableCollection(validValues: newExternals))
+            )
+            return newFields.sorted { $0.name < $1.name }
         }
     }
 

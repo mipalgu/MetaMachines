@@ -307,6 +307,8 @@ final class VHDLVariablesGroupTests: XCTestCase {
             schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
         )
         machine.states.forEach {
+            let field = $0.attributes[0].fields.first { $0.name == "externals" }
+            XCTAssertEqual(field?.type, .enumerableCollection(validValues: newExternals))
             XCTAssertEqual(
                 newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
             )
@@ -338,6 +340,8 @@ final class VHDLVariablesGroupTests: XCTestCase {
             schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
         )
         machine.states.forEach {
+            let field = $0.attributes[0].fields.first { $0.name == "externals" }
+            XCTAssertEqual(field?.type, .enumerableCollection(validValues: newExternals))
             XCTAssertEqual(
                 newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
             )
@@ -366,6 +370,8 @@ final class VHDLVariablesGroupTests: XCTestCase {
             schema?.stateSchema.variables.externals.type, .enumerableCollection(validValues: newExternals)
         )
         machine.states.forEach {
+            let field = $0.attributes[0].fields.first { $0.name == "externals" }
+            XCTAssertEqual(field?.type, .enumerableCollection(validValues: newExternals))
             XCTAssertEqual(
                 newExternals, $0.attributes[0].attributes["externals"]?.enumerableCollectionValidValues
             )
