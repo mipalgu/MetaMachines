@@ -563,15 +563,32 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
-    public mutating func delete(transitions: IndexSet, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+    /// Delete several transitions belonging to a specific state.
+    /// - Parameters:
+    ///   - transitions: The indices of the transitions to delete.
+    ///   - sourceState: The state these transitions are attached to.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func delete(
+        transitions: IndexSet, attachedTo sourceState: StateName
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
             guard let stateIndex = machine.states.firstIndex(where: { $0.name == sourceState }) else {
-                return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states))
+                return .failure(ValidationError(
+                    message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states
+                ))
             }
-            let deletedTransitions = machine.states[stateIndex].transitions.enumerated().filter { transitions.contains($0.0) }.map { $1 }
-            machine.states[stateIndex].transitions = machine.states[stateIndex].transitions.enumerated().filter { !transitions.contains($0.0) }.map { $1 }
+            let deletedTransitions = machine.states[stateIndex].transitions
+                .enumerated()
+                .filter { transitions.contains($0.0) }
+                .map { $1 }
+            machine.states[stateIndex].transitions = machine.states[stateIndex].transitions
+                .enumerated()
+                .filter { !transitions.contains($0.0) }
+                .map { $1 }
             var mutator = machine.mutator
-            let result = mutator.didDeleteTransitions(machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions)
+            let result = mutator.didDeleteTransitions(
+                machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions
+            )
             machine.mutator = mutator
             return result
         }

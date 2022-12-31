@@ -240,6 +240,14 @@ final class MetaMachineVHDLTests: XCTestCase {
         XCTAssertEqual(machine.dependencies, newDependencies)
     }
 
+    /// Test transitions are deleted correctly.
+    func testDeleteTransitions() throws {
+        let newTransition = MetaMachines.Transition(target: "Suspended")
+        machine.states[0].transitions += [newTransition]
+        XCTAssertFalse(try machine.delete(transitions: IndexSet(0...1), attachedTo: "Initial").get())
+        XCTAssertTrue(machine.states[0].transitions.isEmpty)
+    }
+
     /// Create a new state.
     private func newState(name: String = "State0") -> MetaMachines.State {
         var vhdlMachine = VHDLMachines.Machine(machine: machine)
