@@ -123,7 +123,6 @@ final class MetaMachineVHDLTests: XCTestCase {
         let indices = IndexSet(1...2)
         XCTAssertTrue(try machine.newState().get())
         XCTAssertTrue(try machine.delete(states: indices).get())
-        XCTAssertEqual(machine.states.count, 1)
         XCTAssertEqual(machine.states, [initialState])
         XCTAssertEqual(
             machine.vhdlSchema?.settings.initialState.type, .line(.enumerated(validValues: ["Initial"]))
@@ -148,7 +147,6 @@ final class MetaMachineVHDLTests: XCTestCase {
         let index = 1
         XCTAssertTrue(try machine.newState().get())
         XCTAssertTrue(try machine.deleteState(atIndex: index).get())
-        XCTAssertEqual(machine.states.count, 2)
         XCTAssertEqual(machine.states, [initialState, newState])
         XCTAssertEqual(
             machine.vhdlSchema?.settings.initialState.type,
@@ -174,6 +172,32 @@ final class MetaMachineVHDLTests: XCTestCase {
         states[0].transitions = []
         XCTAssertFalse(try machine.deleteTransition(atIndex: 0, attachedTo: "Initial").get())
         XCTAssertEqual(machine.states, states)
+    }
+
+    /// Test changeStateName updates attributes correctly.
+    func testChangeStateName() throws {
+        var initialState = machine.states[0]
+        let newName = "NewInitial"
+        initialState.name = newName
+        let state2 = machine.states[1]
+        XCTAssertTrue(try machine.changeStateName(atIndex: 0, to: newName).get())
+        XCTAssertEqual(machine.states, [initialState, state2])
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.initialState.type,
+            .line(.enumerated(validValues: [newName, state2.name]))
+        )
+        XCTAssertEqual(
+            machine.vhdlSchema?.settings.suspendedState.type,
+            .line(.enumerated(validValues: [newName, state2.name, ""]))
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["initial_state"],
+            .enumerated(newName, validValues: [newName, state2.name])
+        )
+        XCTAssertEqual(
+            machine.attributes[3].attributes["suspended_state"],
+            .enumerated(state2.name, validValues: [newName, state2.name, ""])
+        )
     }
 
     /// Create a new state.

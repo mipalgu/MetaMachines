@@ -644,14 +644,29 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         }
     }
 
-    public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+    /// Change a states name to a new name.
+    /// - Parameters:
+    ///   - index: The index of the state to rename.
+    ///   - newName: The new name.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func changeStateName(
+        atIndex index: Int, to newName: String
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
+            guard machine.states.count > index else {
+                return .failure(AttributeError(
+                    message: "Invalid index \(index) for changing a state name.",
+                    path: MetaMachine.path.states[index]
+                ))
+            }
             let oldName = machine.states[index].name
             if oldName == newName {
                 return .success(false)
             }
-            if (Set(machine.states.map(\.name)).contains(newName)) {
-                return .failure(AttributeError(message: "Name must be unique.", path: MetaMachine.path.states[index].name))
+            if Set(machine.states.map(\.name)).contains(newName) {
+                return .failure(AttributeError(
+                    message: "Name must be unique.", path: MetaMachine.path.states[index].name
+                ))
             }
             if machine.initialState == oldName {
                 machine.initialState = newName
@@ -659,12 +674,14 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             machine.states[index].name = newName
             let state = machine.states[index]
             var mutator = machine.mutator
-            let result = mutator.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+            let result = mutator.didChangeStatesName(
+                machine: &machine, state: state, index: index, oldName: oldName
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Modify a specific attributes value.
     public mutating func modify<Path: PathProtocol>(attribute: Path, value: Path.Value) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
         return perform { machine in
