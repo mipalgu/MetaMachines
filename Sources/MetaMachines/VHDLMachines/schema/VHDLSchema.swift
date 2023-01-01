@@ -38,6 +38,47 @@ struct VHDLSchema: MachineSchema {
     @Group
     var settings: VHDLSettings
 
+    /// The paths to the machine variable names.
+    private var namePaths: [CollectionSearchPath<MetaMachine, [[LineAttribute]], LineAttribute>] {
+        [
+            CollectionSearchPath(
+                collectionPath: variables.path.attributes["clocks"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[0]
+            ),
+            CollectionSearchPath(
+                collectionPath: variables.path.attributes["external_signals"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[2]
+            ),
+            CollectionSearchPath(
+                collectionPath: variables.path.attributes["generics"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[3]
+            ),
+            CollectionSearchPath(
+                collectionPath: variables.path.attributes["machine_variables"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[3]
+            ),
+            CollectionSearchPath(
+                collectionPath: variables.path.attributes["machine_signals"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[1]
+            ),
+            CollectionSearchPath(
+                collectionPath: parameters.path.attributes["parameter_signals"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[1]
+            ),
+            CollectionSearchPath(
+                collectionPath: parameters.path.attributes["returnable_signals"].wrappedValue.tableValue,
+                elementPath: Path([LineAttribute].self)[1]
+            )
+        ]
+    }
+
+    /// A validator that ensures all variables names are unique.
+    private var uniqueValidator: AnyValidator<MetaMachine> {
+        AnyValidator<MetaMachine> { machine in
+            try self.names(in: machine)
+        }
+    }
+
     /// Create a new `VHDLSchema`.
     /// - Parameters:
     ///   - name: The name of the machine.
@@ -181,10 +222,54 @@ struct VHDLSchema: MachineSchema {
         statesTrigger(machine: &machine)
     }
 
+    /// Make the validator for the meta machine.
+    /// - Parameter root: The meta machine to validate.
+    /// - Returns: The validator that validates the meta machine.
+    func makeValidator(root: MetaMachine) -> AnyValidator<MetaMachine> {
+        let groups: [AnyGroup<Root>] = self.groups
+        return AnyValidator([
+            AnyValidator(groups.enumerated().map { groupIndex, group in
+                let path: ReadOnlyPath<Root, AttributeGroup> = Root.path.attributes[groupIndex]
+                let propertiesValidator = AnyValidator<MetaMachine> {
+                    try chainValidator(in: $0, path: path, validator: group.propertiesValidator)
+                }
+                let groupValidator = AnyValidator<MetaMachine> {
+                    try chainValidator(in: $0, path: path, validator: group.groupValidation)
+                }
+                let rootValidator = group.rootValidation
+                return AnyValidator([AnyValidator([propertiesValidator, groupValidator]), rootValidator])
+            }),
+            AnyValidator(self.uniqueValidator)
+        ])
+    }
+
     /// Update the schema with the changes in the meta machine.
     /// - Parameter metaMachine: The meta machine containing the changes.
     mutating func update(from metaMachine: MetaMachine) {
         self = metaMachine.vhdlSchema.wrappedValue
+    }
+
+    /// Create a validator that is similar to a `ChainValidator` from `Attributes`.
+    /// - Parameters:
+    ///   - root: The machine to validate.
+    ///   - path: The path of the group to validate.
+    ///   - validator: The validator that works on that group.
+    /// - Throws: A `ValidationError`.
+    private func chainValidator(
+        in root: MetaMachine,
+        path: ReadOnlyPath<VHDLSchema.Root, AttributeGroup>,
+        validator: AnyValidator<AttributeGroup>
+    ) throws {
+        guard !path.isNil(root) else {
+            throw ValidationError(message: "Path is nil!", path: path)
+        }
+        let machineGroup = root[keyPath: path.keyPath]
+        do {
+            try validator.performValidation(machineGroup)
+        } catch let e as AttributeError<AttributeGroup> {
+            // swiftlint:disable:next force_unwrapping
+            throw ValidationError(message: e.message, path: AnyPath(path).appending(e.path)!)
+        }
     }
 
     /// Initiates a trigger when the states array in the machine is modified.
@@ -196,6 +281,50 @@ struct VHDLSchema: MachineSchema {
             return .success(false)
         }
         return self.trigger.performTrigger(&machine, for: path)
+    }
+
+    /// Verify that all variables names within a meta machine are unique.
+    /// - Parameter root: The meta machine containing the variables.
+    /// - Throws: ``ValidationError``.
+    private func names(in root: MetaMachine) throws {
+        let paths = namePaths + stateNamePaths(in: root)
+        try paths.forEach {
+            var names: Set<LineAttribute> = []
+            try $0.paths(in: root).forEach {
+                let name = root[keyPath: $0.keyPath]
+                if names.contains(name) {
+                    throw ValidationError(message: "All variable names must be unique", path: $0)
+                }
+                names.insert(name)
+            }
+        }
+    }
+
+    /// Get the paths for the names of the variables and actions within a state.
+    /// - Parameter root: The object containing the variables of interest.
+    /// - Returns: The paths.
+    private func stateNamePaths(
+        in root: MetaMachine
+    ) -> [CollectionSearchPath<MetaMachine, [[LineAttribute]], LineAttribute>] {
+        stateSchema.variables.path.paths(in: root).flatMap { variablePath in
+            [
+                CollectionSearchPath(
+                    collectionPath: variablePath.attributes["state_signals"].wrappedValue.tableValue,
+                    elementPath: Path([LineAttribute].self)[1]
+                ),
+                CollectionSearchPath(
+                    collectionPath: variablePath.attributes["state_variables"].wrappedValue.tableValue,
+                    elementPath: Path([LineAttribute].self)[3]
+                )
+            ]
+        } + stateSchema.actions.path.paths(in: root).flatMap { actionPath in
+            [
+                CollectionSearchPath(
+                    collectionPath: actionPath.attributes["action_names"].wrappedValue.tableValue,
+                    elementPath: Path([LineAttribute].self)[0]
+                )
+            ]
+        }
     }
 
 }
