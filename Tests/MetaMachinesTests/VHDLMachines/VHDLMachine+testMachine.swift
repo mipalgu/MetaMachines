@@ -77,6 +77,7 @@ extension Machine {
                             ]
                         )
                     ),
+                    Field(name: "driving_clock", type: .enumerated(validValues: ["clk", "clk1"])),
                     Field(
                         name: "external_signals",
                         type: .table(
@@ -125,8 +126,7 @@ extension Machine {
                                 ("comment", .line)
                             ]
                         )
-                    ),
-                    Field(name: "driving_clock", type: .enumerated(validValues: ["clk", "clk1"]))
+                    )
                 ],
                 attributes: [
                     "clocks": .table(
@@ -320,9 +320,9 @@ extension Machine {
             AttributeGroup(
                 name: "includes",
                 fields: [
-                    Field(name: "includes", type: .code(language: .vhdl)),
+                    Field(name: "architecture_body", type: .code(language: .vhdl)),
                     Field(name: "architecture_head", type: .code(language: .vhdl)),
-                    Field(name: "architecture_body", type: .code(language: .vhdl))
+                    Field(name: "includes", type: .code(language: .vhdl))
                 ],
                 attributes: [
                     "includes": .code("library IEEE;\nuse IEEE.std_logic_1164.All;", language: .vhdl),

@@ -75,6 +75,7 @@ extension VHDLMachines.Machine {
                     )
                 )
             ])),
+            Field(name: "driving_clock", type: .enumerated(validValues: Set(self.clocks.map { $0.name }))),
             Field(name: "external_signals", type: .table(columns: [
                 ("mode", .enumerated(validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }))),
                 ("type", .expression(language: .vhdl)),
@@ -103,8 +104,7 @@ extension VHDLMachines.Machine {
                 ("name", .line),
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)
-            ])),
-            Field(name: "driving_clock", type: .enumerated(validValues: Set(self.clocks.map { $0.name })))
+            ]))
         ]
         let variableAttributes: [String: Attribute] = [
             "clocks": .table(
@@ -214,9 +214,9 @@ extension VHDLMachines.Machine {
         let includes = AttributeGroup(
             name: "includes",
             fields: [
-                Field(name: "includes", type: .code(language: .vhdl)),
+                Field(name: "architecture_body", type: .code(language: .vhdl)),
                 Field(name: "architecture_head", type: .code(language: .vhdl)),
-                Field(name: "architecture_body", type: .code(language: .vhdl))
+                Field(name: "includes", type: .code(language: .vhdl))
             ],
             attributes: [
                 "includes": .code(self.includes.joined(separator: "\n"), language: .vhdl),
