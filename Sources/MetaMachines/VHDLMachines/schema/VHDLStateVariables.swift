@@ -57,8 +57,8 @@ struct VHDLStateVariables: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
@@ -95,8 +95,8 @@ struct VHDLStateVariables: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { $0.unique { $0.map { $0[3] } }.maxLength(128) }
     )

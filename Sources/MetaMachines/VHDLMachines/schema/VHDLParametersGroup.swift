@@ -40,8 +40,8 @@ struct VHDLParametersGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
@@ -59,6 +59,7 @@ struct VHDLParametersGroup: GroupProtocol {
                     .greyList(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
+                    .maxLength(64)
             ),
             .line(
                 label: "name",
@@ -70,7 +71,7 @@ struct VHDLParametersGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .line(label: "comment")
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )

@@ -30,7 +30,7 @@ struct VHDLStateActions: GroupProtocol {
                     .alphaunderscore()
                     .alphaunderscorefirst()
                     .minLength(1)
-                    .maxLength(255)
+                    .maxLength(32)
                     .blacklist(VHDLReservedWords.allReservedWords)
             )
         ],

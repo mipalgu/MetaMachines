@@ -98,8 +98,8 @@ struct VHDLVariablesGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { table in
             table.unique { $0.map { $0[2] } }.maxLength(128)
@@ -133,8 +133,8 @@ struct VHDLVariablesGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { table in
             table.unique { $0.map { $0[3] } }.maxLength(128)
@@ -169,8 +169,8 @@ struct VHDLVariablesGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { table in
             table.unique { $0.map { $0[3] } }.maxLength(128)
@@ -201,8 +201,8 @@ struct VHDLVariablesGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
         ],
         validation: { table in
             table.unique { $0.map { $0[1] } }.maxLength(128)
