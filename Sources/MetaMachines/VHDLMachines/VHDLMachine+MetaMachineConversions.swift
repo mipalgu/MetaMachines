@@ -172,22 +172,22 @@ extension VHDLMachines.Machine {
             metaData: [:]
         )
         attributes.append(variables)
+        let parameterVariables = !self.isParameterised ? [] : [
+            Field(name: "parameter_signals", type: .table(columns: [
+                ("type", .expression(language: .vhdl)),
+                ("name", .line),
+                ("value", .expression(language: .vhdl)),
+                ("comment", .line)
+            ])),
+            Field(name: "returnable_signals", type: .table(columns: [
+                ("type", .expression(language: .vhdl)),
+                ("name", .line),
+                ("comment", .line)
+            ]))
+        ]
         let parameters = AttributeGroup(
             name: "parameters",
-            fields: [
-                Field(name: "is_parameterised", type: .bool),
-                Field(name: "parameter_signals", type: .table(columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("name", .line),
-                    ("value", .expression(language: .vhdl)),
-                    ("comment", .line)
-                ])),
-                Field(name: "returnable_signals", type: .table(columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("name", .line),
-                    ("comment", .line)
-                ]))
-            ],
+            fields: [Field(name: "is_parameterised", type: .bool)] + parameterVariables,
             attributes: [
                 "is_parameterised": .bool(self.isParameterised),
                 "parameter_signals": .table(
