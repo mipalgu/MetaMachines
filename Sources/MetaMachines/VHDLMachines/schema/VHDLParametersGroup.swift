@@ -17,10 +17,6 @@ struct VHDLParametersGroup: GroupProtocol {
     /// The path to the group this schema corresponds too.
     let path = MetaMachine.path.attributes[1]
 
-    /// Whether the machine is parameterised.
-    @BoolProperty(label: "is_parameterised")
-    var isParameterised
-
     /// The input signals to the parameterised machine.
     @TableProperty(
         label: "parameter_signals",
@@ -46,7 +42,8 @@ struct VHDLParametersGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ]
+        ],
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var parameters
 
@@ -74,9 +71,14 @@ struct VHDLParametersGroup: GroupProtocol {
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
             .line(label: "comment")
-        ]
+        ],
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var returns
+
+    /// Whether the machine is parameterised.
+    @BoolProperty(label: "is_parameterised")
+    var isParameterised
 
     /// The triggers that make the signals available/unavailable when the machine is parameterised.
     @TriggerBuilder<MetaMachine>

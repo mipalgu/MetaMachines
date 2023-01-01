@@ -55,7 +55,7 @@ struct VHDLVariablesGroup: GroupProtocol {
             )
         ],
         validation: { table in
-            table.notEmpty()
+            table.notEmpty().unique { $0.map { $0[0] } }.maxLength(128)
         }
     )
     var clocks
@@ -100,7 +100,10 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ]
+        ],
+        validation: { table in
+            table.unique { $0.map { $0[2] } }.maxLength(128)
+        }
     )
     var externalVariables
 
@@ -132,7 +135,10 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ]
+        ],
+        validation: { table in
+            table.unique { $0.map { $0[3] } }.maxLength(128)
+        }
     )
     var generics
 
@@ -165,7 +171,10 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ]
+        ],
+        validation: { table in
+            table.unique { $0.map { $0[3] } }.maxLength(128)
+        }
     )
     var machineVariables
 
@@ -194,7 +203,10 @@ struct VHDLVariablesGroup: GroupProtocol {
             ),
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
-        ]
+        ],
+        validation: { table in
+            table.unique { $0.map { $0[1] } }.maxLength(128)
+        }
     )
     var machineSignals
 

@@ -60,7 +60,7 @@ struct VHDLStateVariables: GroupProtocol {
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ],
-        validation: { $0.unique { $0.map { $0[1] } } }
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var stateSignals
 
@@ -98,7 +98,7 @@ struct VHDLStateVariables: GroupProtocol {
             .expression(label: "value", language: .vhdl),
             .line(label: "comment")
         ],
-        validation: { $0.unique { $0.map { $0[3] } } }
+        validation: { $0.unique { $0.map { $0[3] } }.maxLength(128) }
     )
     var stateVariables
 

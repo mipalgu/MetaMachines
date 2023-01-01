@@ -33,7 +33,8 @@ struct VHDLStateActions: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             )
-        ]
+        ],
+        validation: { $0.unique().maxLength(128) }
     )
     var actionNames
 
@@ -45,7 +46,7 @@ struct VHDLStateActions: GroupProtocol {
             .enumerated(label: "action", validValues: [], validation: .required())
         ],
         validation: { table in
-            table.notEmpty()
+            table.notEmpty().maxLength(128)
         }
     )
     var actionOrder

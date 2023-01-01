@@ -18,16 +18,16 @@ struct VHDLIncludes: GroupProtocol {
     /// This group is located at index 2 in the attributes array of the meta machine.
     let path = MetaMachine.path.attributes[2]
 
-    /// The includes of this machine.
-    @CodeProperty(label: "includes", language: .vhdl)
-    var includes
+    /// The custom architecture body code of this machine.
+    @CodeProperty(label: "architecture_body", language: .vhdl, validation: { $0.maxLength(1024) })
+    var architectureBody
 
     /// The custom architecture head code of this machine.
-    @CodeProperty(label: "architecture_head", language: .vhdl)
+    @CodeProperty(label: "architecture_head", language: .vhdl, validation: { $0.maxLength(1024) })
     var architectureHead
 
-    /// The custom architecture body code of this machine.
-    @CodeProperty(label: "architecture_body", language: .vhdl)
-    var architectureBody
+    /// The includes of this machine.
+    @CodeProperty(label: "includes", language: .vhdl, validation: { $0.maxLength(1024) })
+    var includes
 
 }

@@ -91,7 +91,7 @@ struct VHDLSchema: MachineSchema {
                 .enumerated(label: "action", validValues: Set(stateActions), validation: .required())
             ]
         ) { table in
-            table.notEmpty()
+            table.notEmpty().maxLength(128)
         }
     }
 
