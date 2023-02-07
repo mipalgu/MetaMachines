@@ -1,4 +1,4 @@
-name: Ubuntu 20.04 Swift CI
+name: Ubuntu 20.04 Swift Debug CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  exec-ci:
+  exec-ci-debug:
     runs-on: ubuntu-20.04
 
     steps:
