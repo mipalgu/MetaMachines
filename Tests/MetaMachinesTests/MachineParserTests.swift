@@ -54,6 +54,7 @@
 // Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
+import Attributes
 import IO
 @testable import MetaMachines
 import SwiftMachines
@@ -150,7 +151,56 @@ final class MachineParserTests: XCTestCase {
             parser.parseMachine(atURL: url1),
             parser.parseMachine(atPath: url2.path)
         ]
-        XCTAssertEqual(result, [machine, machine1, machine2], "Failed for semantics \(semantics)")
+        let expected = [machine, machine1, machine2]
+        XCTAssertEqual(result.count, expected.count)
+        zip(result, expected).forEach { isSame(machine: $0, other: $1) }
+    }
+
+    /// Verify that 2 Meta Machines are the same.
+    private func isSame(machine: MetaMachine?, other machine2: MetaMachine) {
+        guard let machine else {
+            XCTFail("Failed to parse machine.")
+            return
+        }
+        XCTAssertEqual(machine.semantics, machine2.semantics)
+        XCTAssertEqual(machine.name, machine2.name)
+        XCTAssertEqual(machine.initialState, machine2.initialState)
+        isSame(attributes: machine.attributes, attributes2: machine2.attributes)
+    }
+
+    /// Verify that 2 arrays of attribute groups are the same.
+    private func isSame(attributes: [AttributeGroup], attributes2: [AttributeGroup]) {
+        XCTAssertEqual(attributes.count, attributes2.count)
+        zip(attributes, attributes2).forEach {
+            XCTAssertEqual($0.name, $1.name)
+            isSame(fields: $0.fields, fields2: $1.fields)
+            isSame(attributes: $0.attributes, attributes2: $1.attributes)
+            isSame(attributes: $0.metaData, attributes2: $1.metaData)
+        }
+    }
+
+    /// Verify that 2 arrays of fields are the same.
+    private func isSame(fields: [Field], fields2: [Field]) {
+        XCTAssertEqual(fields.count, fields2.count)
+        zip(fields, fields2).forEach {
+            XCTAssertEqual($0.name, $1.name)
+            XCTAssertEqual($0.type, $1.type)
+        }
+    }
+
+    /// Verify that 2 dictionaries of attributes are the same.
+    private func isSame(attributes: [Label: Attribute], attributes2: [Label: Attribute]) {
+        let keys = attributes.keys.sorted()
+        let keys2 = attributes2.keys.sorted()
+        XCTAssertEqual(keys.count, keys2.count)
+        zip(keys, keys2).forEach {
+            XCTAssertEqual($0, $1)
+            guard let val = attributes[$0], let val2 = attributes2[$1] else {
+                XCTFail("Failed to get attribute.")
+                return
+            }
+            XCTAssertEqual(val, val2)
+        }
     }
 
 }
