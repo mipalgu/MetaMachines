@@ -33,11 +33,5 @@ jobs:
       - name: Debug Build
         run: swift build -c debug
 
-      - name: Release build
-        run: swift build -c release
-
       - name: Debug Test
         run: swift test
-
-      - name: Release Test
-        run: swift test -c release

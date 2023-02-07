@@ -35,14 +35,8 @@ jobs:
       - name: Debug Build
         run: swift build -c debug
 
-      - name: Release build
-        run: swift build -c release
-
       - name: Debug Test
         run: swift test --enable-code-coverage
-
-      - name: Release Test
-        run: swift test -c release
 
       - name: Coverage Report
         uses: mattpolzin/swift-codecov-action@0.7.3
