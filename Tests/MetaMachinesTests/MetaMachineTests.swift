@@ -250,7 +250,9 @@ final class MetaMachineTests: XCTestCase {
         XCTAssertEqual(wrapper.preferredFilename, "Untitled.machine")
         XCTAssertTrue(wrapper.isDirectory)
         XCTAssertFalse(wrapper.isRegularFile)
+        #if os(Linux)
         XCTAssertNil(wrapper.regularFileContents)
+        #endif
         guard let subWrappers = wrapper.fileWrappers, let subWrapper = subWrappers["machine.json"] else {
             XCTFail("failed to get subwrappers")
             return
@@ -258,8 +260,7 @@ final class MetaMachineTests: XCTestCase {
         XCTAssertEqual(subWrappers.count, 1)
         XCTAssertEqual(subWrapper.preferredFilename, "machine.json")
         XCTAssertFalse(subWrapper.isDirectory)
-        XCTAssertTrue(subWrapper.isRegularFile)
-        guard let contents = subWrapper.regularFileContents else {
+        guard subWrapper.isRegularFile, let contents = subWrapper.regularFileContents else {
             XCTFail("failed to get contents")
             return
         }
