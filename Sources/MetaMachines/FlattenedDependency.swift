@@ -57,12 +57,16 @@
  *
  */
 
+/// A data structure for representing arrangement dependencies.
 public struct FlattenedDependency {
-    
+
+    /// The name of the dependency.
     public var name: String
-    
+
+    /// The meta machine version of the dependency.
     public var machine: MetaMachine
-    
+
+    /// The dependencies of the dependency.
     public var dependencies: [FlattenedDependency]
-    
+
 }

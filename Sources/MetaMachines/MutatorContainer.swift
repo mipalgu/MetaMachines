@@ -56,10 +56,13 @@
  *
  */
 
+/// A protocol for defining types that contain a mutator.
 public protocol MutatorContainer {
-    
+
+    /// The type of the mutator.
     associatedtype Mutator
-    
+
+    /// The mutator in the conforming type.
     var mutator: Mutator { get }
-    
+
 }

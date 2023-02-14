@@ -56,28 +56,49 @@
  *
  */
 
-import Foundation
 import Attributes
+import Foundation
 
+/// A transition represents a logical condition that will cause a machine to change state. For most
+/// implementations, the condition is a boolean expression that is evaluated to determine whether
+/// the transition should fire.
 public struct Transition: Hashable, Codable {
-    
+
+    /// The condition that will cause the transition to fire.
     public var condition: Expression?
-    
+
+    /// The state that the machine will transition to if the condition is true.
     public var target: StateName
-    
+
+    /// The attributes for the transition view.
     public var attributes: [AttributeGroup]
-    
+
+    /// The meta data for the transition view.
     public var metaData: [AttributeGroup]
-    
-    public init(condition: Code? = nil, target: StateName, attributes: [AttributeGroup] = [], metaData: [AttributeGroup] = []) {
+
+    /// Creates a new transition with the given condition, target state, attributes and meta data.
+    /// - Parameters:
+    ///  - condition: The condition that will cause the transition to fire.
+    ///  - target: The state that the machine will transition to if the condition is true.
+    ///  - attributes: The attributes for the transition view.
+    ///  - metaData: The meta data for the transition view.
+    public init(
+        condition: Code? = nil,
+        target: StateName,
+        attributes: [AttributeGroup] = [],
+        metaData: [AttributeGroup] = []
+    ) {
         self.condition = condition
         self.target = target
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
+    /// The target state a machine will transition to when this transition fires.
+    /// - Parameter machine: The machine that this transition belongs to.
+    /// - Returns: The target state of this transition.
     public func targetState(in machine: MetaMachine) -> State {
-        return machine.states.first { $0.name == target }!
+        machine.states.first { $0.name == target }!
     }
-    
+
 }

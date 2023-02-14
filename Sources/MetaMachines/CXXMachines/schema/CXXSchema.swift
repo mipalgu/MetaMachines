@@ -33,6 +33,17 @@ public struct CXXSchema: MachineSchema {
         self.funcRefs = CXXFuncRefs(semantics: cxxSemantics)
         self.includes = CXXIncludes(semantics: cxxSemantics)
     }
+
+    public init(
+        name: String,
+        initialState: StateName,
+        states: [State],
+        dependencies: [MachineDependency],
+        attributes: [AttributeGroup],
+        metaData: [AttributeGroup]
+    ) {
+        fatalError("Not yet supported")
+    }
     
     public mutating func update(from metaMachine: MetaMachine) {
         self.settings.update(from: metaMachine)

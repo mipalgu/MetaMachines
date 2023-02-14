@@ -58,18 +58,73 @@
 
 import Attributes
 
+/// An action is a piece of code that can be executed by a machine when it is in a particular state.
+/// A state may contain many actions with a particular order that they are executed in.
 public struct Action: Hashable, Codable {
-    
+
+    /// The name of the action.
     public var name: String
-    
+
+    /// The code within the action.
     public var implementation: Code
-    
+
+    /// The language that the actions code is written in.
     public var language: Language
-    
+
+    /// Creates a new action with the given name, implementation and language.
+    /// - Parameters:
+    ///   - name: The name of the action.
+    ///   - implementation: The code within the action.
+    ///   - language: The language that the actions code is written in.
     public init(name: String, implementation: Code, language: Language) {
         self.name = name
         self.implementation = implementation
         self.language = language
     }
-    
+
+    /// Creates an onEntry action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onEntry` with the given implementation and language.
+    public static func onEntry(language: Language, code: Code = "") -> Action {
+        Action(name: "onEntry", implementation: code, language: language)
+    }
+
+    /// Creates an onExit action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onExit` with the given implementation and language.
+    public static func onExit(language: Language, code: Code = "") -> Action {
+        Action(name: "onExit", implementation: code, language: language)
+    }
+
+    /// Creates an internal action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `internal` with the given implementation and language.
+    public static func `internal`(language: Language, code: Code = "") -> Action {
+        Action(name: "internal", implementation: code, language: language)
+    }
+
+    /// Creates an onResume action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onResume` with the given implementation and language.
+    public static func onResume(language: Language, code: Code = "") -> Action {
+        Action(name: "onResume", implementation: code, language: language)
+    }
+
+    /// Creates an onSuspend action with the given implementation and language.
+    /// - Parameters:
+    ///   - language: The language that the actions code is written in.
+    ///   - code: The code within the action.
+    /// - Returns: An action called `onSuspend` with the given implementation and language.
+    public static func onSuspend(language: Language, code: Code = "") -> Action {
+        Action(name: "onSuspend", implementation: code, language: language)
+    }
+
 }

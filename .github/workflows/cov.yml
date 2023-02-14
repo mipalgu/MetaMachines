@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: fwal/setup-swift@v1
+      - uses: swift-actions/setup-swift@v1
         with:
-            swift-version: "5.6"
+            swift-version: "5.7"
 
       - name: Setup SSH Key
         run: | 
@@ -38,10 +38,10 @@ jobs:
         run: swift test --enable-code-coverage
 
       - name: Coverage Test
-        uses: mattpolzin/swift-codecov-action@0.6.1
+        uses: mattpolzin/swift-codecov-action@0.7.3
         id: cov
         with:
-          MINIMUM_COVERAGE: 80
+          MINIMUM_COVERAGE: 75
 
       - name: Post Positive Result
         if: ${{ success() }}

@@ -56,11 +56,14 @@
  *
  */
 
-import Foundation
 import Attributes
+import Foundation
 #if os(Linux)
 import IO
 #endif
+
+// swiftlint:disable file_length
+// swiftlint:disable type_body_length
 
 /// A general meta model machine.
 ///
@@ -81,18 +84,37 @@ import IO
 ///
 /// - SeeAlso: `SwiftMachinesConvertible`.
 public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, DependenciesContainer {
-    
+
+    /// The mutators type.
     public typealias Mutator = MachineMutatorResponder & MachineAttributesMutator & MachineModifier
-    
-    public enum Semantics: String, Hashable, Codable, CaseIterable {
+
+    /// The semantics available to the meta machine.
+    public enum Semantics: String, Hashable, Codable, CaseIterable, Comparable {
+
+        /// Miscellanious semantics.
         case other
+
+        /// The swiftfsm semantics used for swift machines.
         case swiftfsm
+
+        /// The clfsm semantics used for C++ machines.
         case clfsm
+
+        /// The vhdl semantics used for HDL machines in FPGAs.
         case vhdl
+
+        /// The ucfsm semantics used for C machines on bare-metal implementations.
         case ucfsm
+
+        /// The spartanfsm semantics used for VHDL machines based on the clfsm machine format.
         case spartanfsm
+
+        /// Compare two semantics. This places the semantics in alphabetical order.
+        public static func < (lhs: MetaMachine.Semantics, rhs: MetaMachine.Semantics) -> Bool {
+            lhs.rawValue < rhs.rawValue
+        }
     }
-    
+
     /// The semantics that are fully supported by this module.
     ///
     /// This means that it is possible to create a machine using the
@@ -105,26 +127,35 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     ///
     /// This array generally contains all semantics except for the `other` case.
     public static var supportedSemantics: [MetaMachine.Semantics] {
-        return MetaMachine.Semantics.allCases.filter { $0 != .other }
+        MetaMachine.Semantics.allCases.filter { $0 != .other }
     }
-    
-    public private(set) var mutator: Mutator
-    
+
+    /// Fetches a keypath like structure for use when modifying and validating
+    /// properties of machines.
+    public static var path: Path<MetaMachine, MetaMachine> {
+        Path(Self.self)
+    }
+
+    /// The underlying mutator that handles operations on the machine.
+    public fileprivate(set) var mutator: Mutator
+
+    /// The collection of errors within the machine.
     public private(set) var errorBag: ErrorBag<MetaMachine> = ErrorBag()
-    
-    public private(set) var id: UUID = UUID()
-    
+
+    /// The ID of the machine.
+    public private(set) var id = UUID()
+
     /// The underlying semantics which this meta machine follows.
     public var semantics: Semantics
-    
+
     /// The name of the machine.
     public var name: String
-    
+
     /// The name of the initial state.
     ///
     /// The name should represent the name of a state within the `states` array.
     public var initialState: StateName
-    
+
     /// The accepting states of the machine.
     ///
     /// An accepting state is a state without any transitions.
@@ -132,35 +163,15 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// - Complexity: O(n * m) where n is the length of the `states` array and
     /// m is the length of the `transitions` array.
     public var acceptingStates: [State] {
-        return self.states.filter { $0.transitions.isEmpty }
+        self.states.filter { $0.transitions.isEmpty }
     }
-    
+
     /// All states within the machine.
     public var states: [State]
-    
+
     /// All machines that this machine depends on
     public var dependencies: [MachineDependency]
-    
-    public var dependencyAttributeType: AttributeType {
-        return .complex(layout: [
-            "name": .line,
-            "filePath": .line,
-            "attributes": .complex(layout: mutator.dependencyLayout)
-        ])
-    }
-    
-    public var dependencyAttributes: [Attribute] {
-        get {
-            self.dependencies.map(\.complexAttribute)
-        } set {
-            self.dependencies = zip(self.dependencies, newValue).map {
-                var dep = $0
-                dep.complexAttribute = $1
-                return dep
-            }
-        }
-    }
-    
+
     /// A list of attributes specifying additional fields that can change.
     ///
     /// The attribute list usually details extra fields necessary for additional
@@ -171,7 +182,7 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// feature set. The features which are not common between schedulers
     /// should be facilitated through this attributes field.
     public var attributes: [AttributeGroup]
-    
+
     /// A list of attributes specifying additional fields that do not change.
     ///
     /// This metaData property is similar to the `attributes` property, however;
@@ -184,19 +195,35 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
     /// - Attention: If you were to make a GUI using the meta model machines,
     /// then you should simply keep these values the same between modifications.
     public var metaData: [AttributeGroup]
-    
+
     /// Fetches a keypath like structure for use when modifying and validating
     /// properties of machines.
     public var path: Path<MetaMachine, MetaMachine> {
-        return Path(Self.self)
+        Path(Self.self)
     }
-    
-    /// Fetches a keypath like structure for use when modifying and validating
-    /// properties of machines.
-    public static var path: Path<MetaMachine, MetaMachine> {
-        return Path(Self.self)
+
+    /// An attribute type representing the dependency layout.
+    public var dependencyAttributeType: AttributeType {
+        .complex(layout: [
+            "name": .line,
+            "filePath": .line,
+            "attributes": .complex(layout: mutator.dependencyLayout)
+        ])
     }
-    
+
+    /// An array of attributes representing each dependency.
+    public var dependencyAttributes: [Attribute] {
+        get {
+            self.dependencies.map(\.complexAttribute)
+        } set {
+            self.dependencies = zip(self.dependencies, newValue).map {
+                var dep = $0
+                dep.complexAttribute = $1
+                return dep
+            }
+        }
+    }
+
     /// Create a new `Machine`.
     ///
     /// Creates a new meta machine model.
@@ -228,9 +255,27 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.name = name
         switch semantics {
         case .vhdl:
-            self.mutator = SchemaMutator(schema: VHDLSchema(dependencyLayout: []))
+            self.mutator = SchemaMutator(
+                schema: VHDLSchema(
+                    name: name,
+                    initialState: initialState,
+                    states: states,
+                    dependencies: dependencies,
+                    attributes: attributes,
+                    metaData: metaData
+                )
+            )
         case .swiftfsm:
-            self.mutator = SchemaMutator(schema: SwiftfsmSchema())
+            self.mutator = SchemaMutator(
+                schema: SwiftfsmSchema(
+                    name: name,
+                    initialState: initialState,
+                    states: states,
+                    dependencies: dependencies,
+                    attributes: attributes,
+                    metaData: metaData
+                )
+            )
         case .ucfsm, .clfsm, .spartanfsm:
             guard let schema = CXXSchema(semantics: semantics) else {
                 fatalError("Tried to create CXXSchema for unsupported semantics")
@@ -238,17 +283,16 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             self.mutator = SchemaMutator(schema: schema)
         case .other:
             fatalError("Use the mutator constructor if you wish to use an undefined semantics")
-//        default:
-//            fatalError("Semantics not supported")
+        // default:
+        //    fatalError("Semantics not supported")
         }
         self.initialState = initialState
         self.states = states
         self.dependencies = dependencies
         self.attributes = attributes
         self.metaData = metaData
-        self.mutator.update(from: self)
     }
-    
+
     /// Create a new `Machine`.
     ///
     /// Creates a new meta machine model.
@@ -287,14 +331,17 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         self.attributes = attributes
         self.metaData = metaData
     }
-    
+
     /// Setup an initial machine for a specific semantics.
     ///
     /// - Parameter semantics: The semantics which the machine should follow.
     ///
     /// - Warning: The value of `semantics` should exist in the
     /// `supportedSemantics` array.
-    public static func initialMachine(forSemantics semantics: MetaMachine.Semantics, filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)) -> MetaMachine {
+    public static func initialMachine(
+        forSemantics semantics: MetaMachine.Semantics,
+        filePath: URL = URL(fileURLWithPath: "/tmp/Untitled.machine", isDirectory: true)
+    ) -> MetaMachine {
         switch semantics {
         case .clfsm:
             return CLFSMConverter().initialCLFSMMachine(filePath: filePath)
@@ -305,15 +352,24 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         case .swiftfsm:
             return SwiftfsmConverter().initialMachine
         case .vhdl:
-            return VHDLMachinesConverter().initialVHDLMachine(filePath: filePath)
+            return self.initialVHDLMachine(filePath: filePath)
         case .other:
             fatalError("You cannot create an initial machine for an unknown semantics")
         }
     }
-    
+
     /// Add a new item to a table attribute.
-    public mutating func addItem<Path: PathProtocol, T>(_ item: T, to attribute: Path) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
+    /// - Parameters:
+    ///  - item: The item to add to the table.
+    ///  - attribute: The path to the attribute to add the item to.
+    /// - Returns: A `Result` indicating whether the item was added successfully.
+    public mutating func addItem<Path: PathProtocol, T>(
+        _ item: T, to attribute: Path
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
+            guard !attribute.isNil(machine) else {
+                return .failure(AttributeError(message: "Collection does not exist.", path: attribute))
+            }
             machine[keyPath: attribute.path].append(item)
             var mutator = machine.mutator
             let result = mutator.didAddItem(item, to: attribute, machine: &machine)
@@ -321,27 +377,55 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
-    public mutating func moveItems<Path: PathProtocol, T>(table attribute: Path, from source: IndexSet, to destination: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T]  {
-        return perform { machine in
+
+    /// Move items within a table to a new location.
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to move.
+    ///   - source: The indices of the elements to move.
+    ///   - destination: The destination index of the elements.
+    /// - Returns: A `Result` indicating whether the items were moved successfully.
+    public mutating func moveItems<Path: PathProtocol, T>(
+        table attribute: Path, from source: IndexSet, to destination: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
             let indices = Array(source)
+            guard let maxIndex = indices.max() else {
+                return .success(false)
+            }
+            guard !attribute[maxIndex].isNil(machine) else {
+                return .failure(
+                    AttributeError(message: "Element does not exist.", path: attribute[maxIndex])
+                )
+            }
             let items = indices.map { machine[keyPath: attribute.keyPath][$0] }
             machine[keyPath: attribute.path].move(fromOffsets: source, toOffset: destination)
             var mutator = machine.mutator
-            let result = mutator.didMoveItems(attribute: attribute, machine: &machine, from: source, to: destination, items: items)
+            let result = mutator.didMoveItems(
+                attribute: attribute, machine: &machine, from: source, to: destination, items: items
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
-    public mutating func newDependency(_ dependency: MachineDependency) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+
+    /// Create a new dependency for this machine.
+    /// - Parameter dependency: The dependency to add to this machine.
+    /// - Returns: Whether the dependency was successfully added.
+    public mutating func newDependency(
+        _ dependency: MachineDependency
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
             if machine.dependencies.contains(where: { $0.name == dependency.name }) {
-                return .failure(AttributeError<MetaMachine>(message: "The dependency '\(dependency.name)' already exists.", path: machine.path.dependencies[machine.dependencies.count]))
+                return .failure(AttributeError<MetaMachine>(
+                    message: "The dependency '\(dependency.name)' already exists.",
+                    path: machine.path.dependencies[machine.dependencies.count]
+                ))
             }
             machine.dependencies.append(dependency)
             guard let index = machine.dependencies.firstIndex(where: { $0 == dependency }) else {
-                return .failure(AttributeError(message: "Failed to find added dependency", path: MetaMachine.path.dependencies))
+                return .failure(AttributeError(
+                    message: "Failed to find added dependency", path: MetaMachine.path.dependencies
+                ))
             }
             var mutator = machine.mutator
             let result = mutator.didCreateDependency(machine: &machine, dependency: dependency, index: index)
@@ -349,19 +433,31 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Add a new empty state to the machine.
+    /// - Returns: A `Result` containing a `Bool` indicating whether other data was mutated during this
+    /// operation.
     public mutating func newState() -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             let newName = machine.generateNewStateName()
             let newInitialMachine = MetaMachine.initialMachine(forSemantics: machine.semantics)
             guard let firstState = newInitialMachine.states.first else {
                 fatalError("Cannot create new state from blueprint")
             }
-            let appendingState = State(name: newName, actions: firstState.actions, transitions: [], attributes: firstState.attributes, metaData: firstState.metaData)
+            let appendingState = State(
+                name: newName,
+                actions: firstState.actions,
+                transitions: [],
+                attributes: firstState.attributes,
+                metaData: firstState.metaData
+            )
             machine.states.append(appendingState)
-            guard let newState = machine.states.last, let index = machine.states.lastIndex(of: newState) else {
-                return .failure(AttributeError(message: "Failed to find added state", path: MetaMachine.path.states))
+            guard
+                let newState = machine.states.last, let index = machine.states.lastIndex(of: newState)
+            else {
+                return .failure(
+                    AttributeError(message: "Failed to find added state", path: MetaMachine.path.states)
+                )
             }
             var mutator = machine.mutator
             let result = mutator.didCreateNewState(machine: &machine, state: newState, index: index)
@@ -369,15 +465,28 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Add a new empty transition to the machine.
-    public mutating func newTransition(source: StateName, target: StateName, condition: Expression? = nil) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+    /// - Parameters:
+    ///   - source: The source states name.
+    ///   - target: The target states name.
+    ///   - condition: The condition for the transition.
+    /// - Returns: A `Result` indicating whether the transition was added successfully.
+    public mutating func newTransition(
+        source: StateName, target: StateName, condition: Expression? = nil
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        // swiftlint:disable:next closure_body_length
+        perform { machine in
             guard
                 let index = machine.states.indices.first(where: { machine.states[$0].name == source }),
-                nil != machine.states.first(where: { $0.name == target })
+                machine.states.contains(where: { $0.name == target })
             else {
-                return .failure(ValidationError(message: "You must attach a transition to a source and target state", path: MetaMachine.path))
+                return .failure(
+                    ValidationError(
+                        message: "You must attach a transition to a source and target state",
+                        path: MetaMachine.path
+                    )
+                )
             }
             let transition = Transition(condition: condition, target: target)
             machine.states[index].transitions.append(transition)
@@ -386,32 +495,54 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                     $0 == transition
                 })
             else {
-                return .failure(AttributeError(message: "Failed to find added transition", path: MetaMachine.path.states[index].transitions))
+                return .failure(
+                    AttributeError(
+                        message: "Failed to find added transition",
+                        path: MetaMachine.path.states[index].transitions
+                    )
+                )
             }
             var mutator = machine.mutator
-            let result = mutator.didCreateNewTransition(machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex)
+            let result = mutator.didCreateNewTransition(
+                machine: &machine, transition: transition, stateIndex: index, transitionIndex: transitionIndex
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Delete a specific item in a table attribute.
-    public mutating func deleteItem<Path: PathProtocol, T>(table attribute: Path, atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
-            if machine[keyPath: attribute.path].count <= index || index < 0 {
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to delete.
+    ///   - index: The index of the item to delete.
+    /// - Returns: A `Result` indicating whether the item was deleted successfully.
+    public mutating func deleteItem<Path: PathProtocol, T>(
+        table attribute: Path, atIndex index: Int
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
+            if attribute.isNil(machine), machine[keyPath: attribute.path].count <= index || index < 0 {
                 return .failure(ValidationError(message: "Invalid index '\(index)'", path: attribute))
             }
             let item = machine[keyPath: attribute.keyPath][index]
             machine[keyPath: attribute.path].remove(at: index)
             var mutator = machine.mutator
-            let result = mutator.didDeleteItem(attribute: attribute, atIndex: index, machine: &machine, item: item)
+            let result = mutator.didDeleteItem(
+                attribute: attribute, atIndex: index, machine: &machine, item: item
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
-    public mutating func deleteItems<Path: PathProtocol, T>(table attribute: Path, items: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
-        return perform { machine in
+
+    /// Delete multiple items from a table attribute.
+    /// - Parameters:
+    ///   - attribute: The path to the table attribute containing the elements to delete.
+    ///   - items: The indices of the items to delete.
+    /// - Returns: A `Result` indicating whether the items were deleted successfully.
+    public mutating func deleteItems<Path: PathProtocol, T>(
+        table attribute: Path, items: IndexSet
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine, Path.Value == [T] {
+        perform { machine in
             if machine[keyPath: attribute.path].count <= items.max() ?? -1 || (items.min() ?? -1) < 0 {
                 return .failure(ValidationError(message: "Invalid indexes '\(items)'", path: attribute))
             }
@@ -422,38 +553,59 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
                 machine[keyPath: attribute.path].remove(at: $0)
             }
             var mutator = machine.mutator
-            let result = mutator.didDeleteItems(table: attribute, indices: items, machine: &machine, items: itemObjs)
+            let result = mutator.didDeleteItems(
+                table: attribute, indices: items, machine: &machine, items: itemObjs
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
+    /// Delete multiple dependencies from this machine.
+    /// - Parameter dependencies: The indices of the dependencies to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func delete(dependencies: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            let deletedDependencies = machine.dependencies.enumerated().filter { dependencies.contains($0.0) }.map(\.element)
-            machine.dependencies = machine.dependencies.enumerated().filter { !dependencies.contains($0.0) }.map(\.element)
+        perform { machine in
+            let deletedDependencies = machine.dependencies
+                .enumerated()
+                .filter { dependencies.contains($0.0) }
+                .map(\.element)
+            machine.dependencies = machine.dependencies
+                .enumerated()
+                .filter { !dependencies.contains($0.0) }
+                .map(\.element)
             var mutator = machine.mutator
-            let result = mutator.didDeleteDependencies(machine: &machine, dependency: deletedDependencies, at: dependencies)
+            let result = mutator.didDeleteDependencies(
+                machine: &machine, dependency: deletedDependencies, at: dependencies
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Delete a set of states and transitions.
+    /// - Parameter states: The states to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func delete(states: IndexSet) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             if
-                let initialIndex = machine.states.enumerated().first(where: { $0.1.name == machine.initialState })?.0,
-                states.contains(initialIndex)
-            {
-                return .failure(ValidationError(message: "You cannot delete the initial state", path: MetaMachine.path.states[initialIndex]))
+                let initialIndex = machine.states.enumerated().first(
+                    where: { $0.1.name == machine.initialState }
+                )?.0,
+                states.contains(initialIndex) {
+                return .failure(ValidationError(
+                    message: "You cannot delete the initial state",
+                    path: MetaMachine.path.states[initialIndex]
+                ))
             }
-            let deletedStatesArray = machine.states.enumerated().filter { states.contains($0.0)  }.map(\.element)
+            let deletedStatesArray = machine.states.enumerated().filter { states.contains($0.0) }.map(
+                \.element
+            )
             let deletedStates = Set(deletedStatesArray.map(\.name))
             machine.states = machine.states.enumerated().filter { !states.contains($0.0) }.map(\.element)
             machine.states = machine.states.map {
                 var state = $0
-                state.transitions.removeAll(where: { deletedStates.contains($0.target) })
+                state.transitions.removeAll { deletedStates.contains($0.target) }
                 return state
             }
             var mutator = machine.mutator
@@ -462,25 +614,48 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
-    public mutating func delete(transitions: IndexSet, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+
+    /// Delete several transitions belonging to a specific state.
+    /// - Parameters:
+    ///   - transitions: The indices of the transitions to delete.
+    ///   - sourceState: The state these transitions are attached to.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func delete(
+        transitions: IndexSet, attachedTo sourceState: StateName
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
             guard let stateIndex = machine.states.firstIndex(where: { $0.name == sourceState }) else {
-                return .failure(ValidationError(message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states))
+                return .failure(ValidationError(
+                    message: "Unable to find state with name \(sourceState)", path: MetaMachine.path.states
+                ))
             }
-            let deletedTransitions = machine.states[stateIndex].transitions.enumerated().filter { transitions.contains($0.0) }.map { $1 }
-            machine.states[stateIndex].transitions = machine.states[stateIndex].transitions.enumerated().filter { !transitions.contains($0.0) }.map { $1 }
+            let deletedTransitions = machine.states[stateIndex].transitions
+                .enumerated()
+                .filter { transitions.contains($0.0) }
+                .map { $1 }
+            machine.states[stateIndex].transitions = machine.states[stateIndex].transitions
+                .enumerated()
+                .filter { !transitions.contains($0.0) }
+                .map { $1 }
             var mutator = machine.mutator
-            let result = mutator.didDeleteTransitions(machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions)
+            let result = mutator.didDeleteTransitions(
+                machine: &machine, transition: deletedTransitions, stateIndex: stateIndex, at: transitions
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
+    /// Delete a dependency from this machine.
+    /// - Parameter index: The index of the dependency to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func deleteDependency(atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+        perform { machine in
             if index < 0 || index >= machine.dependencies.count {
-                return .failure(AttributeError<MetaMachine>(message: "Invalid index \(index) for deleting a dependency.", path: machine.path.dependencies))
+                return .failure(AttributeError<MetaMachine>(
+                    message: "Invalid index \(index) for deleting a dependency.",
+                    path: machine.path.dependencies
+                ))
             }
             let dependency = machine.dependencies[index]
             machine.dependencies.remove(at: index)
@@ -490,22 +665,28 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Delete a state at a specific index.
+    /// - Parameter index: The index of the state to delete.
+    /// - Returns: A result indicating whether the operation was successful.
     public mutating func deleteState(atIndex index: Int) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            if index >= machine.states.count  {
-                return .failure(ValidationError(message: "Can't delete state that doesn't exist", path: MetaMachine.path.states))
+        perform { machine in
+            if index >= machine.states.count || index < 0 {
+                return .failure(ValidationError(
+                    message: "Can't delete state that doesn't exist", path: MetaMachine.path.states
+                ))
             }
             let name = machine.states[index].name
             if name == machine.initialState {
-                return .failure(ValidationError(message: "Can't delete the initial state", path: MetaMachine.path.states[index]))
+                return .failure(ValidationError(
+                    message: "Can't delete the initial state", path: MetaMachine.path.states[index]
+                ))
             }
             let state = machine.states[index]
             machine.states.remove(at: index)
             machine.states = machine.states.map {
                 var state = $0
-                state.transitions.removeAll(where: { $0.target == name })
+                state.transitions.removeAll { $0.target == name }
                 return state
             }
             var mutator = machine.mutator
@@ -514,33 +695,64 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
     /// Delete a transition at a specific index.
-    public mutating func deleteTransition(atIndex index: Int, attachedTo sourceState: StateName) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
-            guard let stateIndex = machine.states.indices.first(where: { machine.states[$0].name == sourceState }) else {
-                return .failure(ValidationError(message: "Cannot delete a transition attached to a state that does not exist", path: MetaMachine.path.states))
+    /// - Parameters:
+    ///  - index: The index of the transition to delete.
+    ///  - sourceState: The name of the state the transition is attached to.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func deleteTransition(
+        atIndex index: Int, attachedTo sourceState: StateName
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
+            guard let stateIndex = machine.states.indices.first(
+                where: { machine.states[$0].name == sourceState }
+            ) else {
+                return .failure(ValidationError(
+                    message: "Cannot delete a transition attached to a state that does not exist",
+                    path: MetaMachine.path.states
+                ))
             }
-            guard machine.states[stateIndex].transitions.count >= index else {
-                return .failure(ValidationError(message: "Cannot delete transition that does not exist", path: MetaMachine.path.states[stateIndex].transitions))
+            guard machine.states[stateIndex].transitions.count >= index, index >= 0 else {
+                return .failure(ValidationError(
+                    message: "Cannot delete transition that does not exist",
+                    path: MetaMachine.path.states[stateIndex].transitions
+                ))
             }
             let transition = machine.states[stateIndex].transitions[index]
             machine.states[stateIndex].transitions.remove(at: index)
             var mutator = machine.mutator
-            let result = mutator.didDeleteTransition(machine: &machine, transition: transition, stateIndex: stateIndex, at: index)
+            let result = mutator.didDeleteTransition(
+                machine: &machine, transition: transition, stateIndex: stateIndex, at: index
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
-    public mutating func changeStateName(atIndex index: Int, to newName: String) -> Result<Bool, AttributeError<MetaMachine>> {
-        return perform { machine in
+
+    /// Change a states name to a new name.
+    /// - Parameters:
+    ///   - index: The index of the state to rename.
+    ///   - newName: The new name.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func changeStateName(
+        atIndex index: Int, to newName: String
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        perform { machine in
+            guard machine.states.count > index, index >= 0 else {
+                return .failure(AttributeError(
+                    message: "Invalid index \(index) for changing a state name.",
+                    path: MetaMachine.path.states[index]
+                ))
+            }
             let oldName = machine.states[index].name
             if oldName == newName {
                 return .success(false)
             }
-            if (Set(machine.states.map(\.name)).contains(newName)) {
-                return .failure(AttributeError(message: "Name must be unique.", path: MetaMachine.path.states[index].name))
+            if Set(machine.states.map(\.name)).contains(newName) {
+                return .failure(AttributeError(
+                    message: "Name must be unique.", path: MetaMachine.path.states[index].name
+                ))
             }
             if machine.initialState == oldName {
                 machine.initialState = newName
@@ -548,15 +760,23 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             machine.states[index].name = newName
             let state = machine.states[index]
             var mutator = machine.mutator
-            let result = mutator.didChangeStatesName(machine: &machine, state: state, index: index, oldName: oldName)
+            let result = mutator.didChangeStatesName(
+                machine: &machine, state: state, index: index, oldName: oldName
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Modify a specific attributes value.
-    public mutating func modify<Path: PathProtocol>(attribute: Path, value: Path.Value) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
-        return perform { machine in
+    /// - Parameters:
+    ///   - attribute: The attribute to modify.
+    ///   - value: The new value.
+    /// - Returns: A result indicating whether the operation was successful.
+    public mutating func modify<Path: PathProtocol>(
+        attribute: Path, value: Path.Value
+    ) -> Result<Bool, AttributeError<MetaMachine>> where Path.Root == MetaMachine {
+        perform { machine in
             if let value = value as? String, let stateIndex = machine.states.indices.first(where: {
                 (MetaMachine.path.states[$0].name).path == attribute.path
             }) {
@@ -565,19 +785,23 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             let oldValue = machine[keyPath: attribute.keyPath]
             machine[keyPath: attribute.path] = value
             var mutator = machine.mutator
-            let result = mutator.didModify(attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine)
+            let result = mutator.didModify(
+                attribute: attribute, oldValue: oldValue, newValue: value, machine: &machine
+            )
             machine.mutator = mutator
             return result
         }
     }
-    
+
     /// Are there any errors with the machine?
     public func validate() throws {
         try nonMutatingPerform { machine in
             try machine.mutator.validate(machine: machine)
         }
     }
-                      
+
+    /// Generate a new state name for the machine.
+    /// - Returns: A new state name.
     private func generateNewStateName() -> String {
         let stateNames = Set(states.map(\.name))
         var newName = "State"
@@ -588,7 +812,10 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
         } while (stateNames.contains(newName))
         return newName
     }
-    
+
+    /// Perform a pure function that acts on this machine.
+    /// - Parameter f: The function to perform.
+    /// - Throws: ``AttributeError`` and any error thrown by `f`.
     private func nonMutatingPerform(_ f: (MetaMachine) throws -> Void) throws {
         do {
             try f(self)
@@ -599,7 +826,10 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             throw e
         }
     }
-    
+
+    /// Perform a function that mutates this machine.
+    /// - Parameter f: The function to perform.
+    /// - Throws: The errors thrown by `f`.
     private mutating func perform(_ f: (inout MetaMachine) throws -> Void) throws {
         let backup = self
         do {
@@ -617,12 +847,23 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             throw e
         }
     }
-    
-    private func nonMutatingPerform(_ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
-        return f(self)
+
+    /// Performs a pure function the machine.
+    /// - Parameter f: The function to perform on the machine.
+    /// - Returns: The result of the function `f`.
+    private func nonMutatingPerform(
+        _ f: (MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
+        f(self)
     }
-    
-    private mutating func perform(_ f: (inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>) -> Result<Bool, AttributeError<MetaMachine>> {
+
+    /// Calls a function and then tries to validate the machine. If the validation fails, then the changes
+    /// performed by the function are reverted.
+    /// - Parameter f: The function to perform on the machine.
+    /// - Returns: A result indicating whether the operation was successful.
+    private mutating func perform(
+        _ f: (inout MetaMachine) -> Result<Bool, AttributeError<MetaMachine>>
+    ) -> Result<Bool, AttributeError<MetaMachine>> {
         let backup = self
         let result = f(&self)
         switch result {
@@ -648,60 +889,85 @@ public struct MetaMachine: PathContainer, Modifiable, MutatorContainer, Dependen
             return result
         }
     }
-    
+
 }
 
+/// IO methods.
 extension MetaMachine {
-    
+
+    /// Initialise the machine located at a filePath on the system.
+    /// - Parameter filePath: The path of the file.
+    /// - Throws: ``ConversionError``.
     public init(filePath: URL) throws {
         let parser = MachineParser()
-        guard let machine = parser.parseMachine(atPath: filePath.path) else {
-            throw ConversionError(message: parser.lastError ?? "Unable to load machine at path \(filePath.path)", path: MetaMachine.path)
+        guard let machine = parser.parseMachine(atURL: filePath) else {
+            throw ConversionError(
+                message: parser.lastError ?? "Unable to load machine at path \(filePath.path)",
+                path: MetaMachine.path
+            )
         }
         self = machine
     }
-    
+
+    /// Initialise the machine from a file wrapper.
+    /// - Parameter wrapper: The file wrapper.
+    /// - Throws: ``ConversionError``.
     public init(from wrapper: FileWrapper) throws {
         let parser = MachineParser()
         guard let machine = parser.parseMachine(fromWrapper: wrapper) else {
-            throw ConversionError(message: parser.lastError ?? "Unable to load machine", path: MetaMachine.path)
+            throw ConversionError(
+                message: parser.lastError ?? "Unable to load machine", path: MetaMachine.path
+            )
         }
         self = machine
     }
-    
+
+    /// Generate a file wrapper for this machine.
+    /// - Returns: The file wrapper.
+    /// - Throws: ``ConversionError``.
     public func fileWrapper() throws -> FileWrapper {
         let generator = MachineGenerator()
         guard let fileWrapper = generator.generate(self) else {
-            throw ConversionError(message: generator.lastError ?? "Unable to create machine", path: MetaMachine.path)
+            throw ConversionError(
+                message: generator.lastError ?? "Unable to create machine", path: MetaMachine.path
+            )
         }
         return fileWrapper
     }
-    
+
+    /// Save the machine to a file.
+    /// - Throws: ``ConversionError``.
     public func save() throws {
         try self.validate()
         let generator = MachineGenerator()
-        guard nil != generator.generate(self) else {
-            throw ConversionError(message: generator.lastError ?? "Unable to save machine", path: MetaMachine.path)
+        guard generator.generate(self) != nil else {
+            throw ConversionError(
+                message: generator.lastError ?? "Unable to save machine", path: MetaMachine.path
+            )
         }
     }
-    
+
 }
 
+/// Equatable conformance.
 extension MetaMachine: Equatable {
-    
+
+    /// Check if two machines are equal.
     public static func == (lhs: MetaMachine, rhs: MetaMachine) -> Bool {
-        return lhs.semantics == rhs.semantics
+        lhs.semantics == rhs.semantics
             && lhs.name == rhs.name
             && lhs.initialState == rhs.initialState
             && lhs.states == rhs.states
             && lhs.attributes == rhs.attributes
             && lhs.metaData == rhs.metaData
     }
-    
+
 }
 
+/// Hashable conformance.
 extension MetaMachine: Hashable {
-    
+
+    /// Hash function.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.semantics)
         hasher.combine(self.name)
@@ -710,23 +976,39 @@ extension MetaMachine: Hashable {
         hasher.combine(self.attributes)
         hasher.combine(self.metaData)
     }
-    
+
 }
 
+/// Codable conformance.
 extension MetaMachine: Codable {
-    
+
+    /// The coding keys for the Keyed container.
     public enum CodingKeys: CodingKey {
-        
+
+        /// The semantics.
         case semantics
+
+        /// The name.
         case name
+
+        /// The initial state.
         case initialState
+
+        /// The states.
         case states
+
+        /// The transitions.
         case transitions
+
+        /// The attributes.
         case attributes
+
+        /// The meta data.
         case metaData
-        
+
     }
-    
+
+    /// Decoder init.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let semantics = try container.decode(Semantics.self, forKey: .semantics)
@@ -744,7 +1026,8 @@ extension MetaMachine: Codable {
             metaData: metaData
         )
     }
-    
+
+    /// Encoder function.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.semantics, forKey: .semantics)
@@ -754,5 +1037,26 @@ extension MetaMachine: Codable {
         try container.encode(self.attributes, forKey: .attributes)
         try container.encode(self.metaData, forKey: .metaData)
     }
-    
+
 }
+
+/// Add helper for getting the VHDL schema.
+extension MetaMachine {
+
+    /// Access the underlying schema as a ``VHDLSchema``.
+    var vhdlSchema: VHDLSchema? {
+        get {
+            (self.mutator as? SchemaMutator<VHDLSchema>)?.schema
+        }
+        set {
+            guard let newValue = newValue else {
+                return
+            }
+            self.mutator = SchemaMutator(schema: newValue)
+        }
+    }
+
+}
+
+// swiftlint:enable type_body_length
+// swiftlint:enable file_length

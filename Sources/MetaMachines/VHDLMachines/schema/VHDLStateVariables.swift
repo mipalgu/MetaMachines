@@ -5,18 +5,36 @@
 //  Created by Morgan McColl on 28/7/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
+/// The group providing the state variables for a particular state in a VHDL machine.
 struct VHDLStateVariables: GroupProtocol {
-    
-    public typealias Root = MetaMachine
-    
-    let path = CollectionSearchPath(collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0])
-    
-    @EnumeratedProperty(label: "externals", validValues: [])
+
+    /// The root is a ``MetaMachine``.
+    typealias Root = MetaMachine
+
+    /// The search path to the attribute group this ``GroupProtocol`` represents.
+    let path = CollectionSearchPath(
+        collectionPath: MetaMachine.path.states, elementPath: Path(State.self).attributes[0]
+    )
+
+    /// Helper property for getting external variables.
+    var externalValidValues: Set<String>? {
+        guard
+            case AttributeType.block(let attributes) = self.externals.type,
+            case BlockAttributeType.enumerableCollection(let values) = attributes
+        else {
+            return nil
+        }
+        return values
+    }
+
+    /// The external variables used in this states execution.
+    @EnumerableCollectionProperty(label: "externals", validValues: [], validation: { $0.unique() })
     var externals
-    
+
+    /// Any signals local to this state.
     @TableProperty(
         label: "state_signals",
         columns: [
@@ -39,12 +57,14 @@ struct VHDLStateVariables: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
-        ]
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
+        ],
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var stateSignals
-    
+
+    /// Any variables local to this state.
     @TableProperty(
         label: "state_variables",
         columns: [
@@ -53,17 +73,17 @@ struct VHDLStateVariables: GroupProtocol {
                 language: .vhdl,
                 validation:
                     .required()
-                    .greyList(VHDLReservedWords.variableTypes)
+                    .whitelist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
             .line(
                 label: "lower_range",
-                validation: .optional().numeric().minLength(1).maxLength(255)
+                validation: .optional().numeric().maxLength(255)
             ),
             .line(
                 label: "upper_range",
-                validation: .optional().numeric().minLength(1).maxLength(255)
+                validation: .optional().numeric().maxLength(255)
             ),
             .line(
                 label: "name",
@@ -75,10 +95,11 @@ struct VHDLStateVariables: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
-        ]
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
+        ],
+        validation: { $0.unique { $0.map { $0[3] } }.maxLength(128) }
     )
     var stateVariables
-    
+
 }

@@ -5,18 +5,19 @@
 //  Created by Morgan McColl on 7/6/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
+/// The group responsible for defining the signals for a *parameterised* VHDL machine.
 struct VHDLParametersGroup: GroupProtocol {
-  
-    public typealias Root = MetaMachine
-    
+
+    /// The root is a `MetaMachine`.
+    typealias Root = MetaMachine
+
+    /// The path to the group this schema corresponds too.
     let path = MetaMachine.path.attributes[1]
-    
-    @BoolProperty(label: "is_parameterised")
-    var isParameterised
-    
+
+    /// The input signals to the parameterised machine.
     @TableProperty(
         label: "parameter_signals",
         columns: [
@@ -39,12 +40,14 @@ struct VHDLParametersGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
-        ]
+            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
+            .line(label: "comment", validation: .optional().maxLength(128))
+        ],
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var parameters
-    
+
+    /// The signals returned by the parameterised machine.
     @TableProperty(
         label: "returnable_signals",
         columns: [
@@ -56,6 +59,7 @@ struct VHDLParametersGroup: GroupProtocol {
                     .greyList(VHDLReservedWords.signalTypes)
                     .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
+                    .maxLength(64)
             ),
             .line(
                 label: "name",
@@ -67,18 +71,23 @@ struct VHDLParametersGroup: GroupProtocol {
                     .maxLength(255)
                     .blacklist(VHDLReservedWords.allReservedWords)
             ),
-            .expression(label: "value", language: .vhdl),
-            .line(label: "comment")
-        ]
+            .line(label: "comment", validation: .optional().maxLength(128))
+        ],
+        validation: { $0.unique { $0.map { $0[1] } }.maxLength(128) }
     )
     var returns
-    
+
+    /// Whether the machine is parameterised.
+    @BoolProperty(label: "is_parameterised")
+    var isParameterised
+
+    /// The triggers that make the signals available/unavailable when the machine is parameterised.
     @TriggerBuilder<MetaMachine>
-    var triggers: some TriggerProtocol {
+    var triggers: AnyTrigger<MetaMachine> {
         WhenTrue(isParameterised, makeAvailable: parameters)
         WhenTrue(isParameterised, makeAvailable: returns)
         WhenFalse(isParameterised, makeUnavailable: parameters)
         WhenFalse(isParameterised, makeUnavailable: returns)
     }
-    
+
 }

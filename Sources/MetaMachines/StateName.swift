@@ -56,4 +56,5 @@
  *
  */
 
+/// The type of a State's name.
 public typealias StateName = String

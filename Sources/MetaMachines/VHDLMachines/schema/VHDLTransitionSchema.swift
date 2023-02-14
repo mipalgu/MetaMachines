@@ -5,11 +5,13 @@
 //  Created by Morgan McColl on 28/7/21.
 //
 
-import Foundation
 import Attributes
+import Foundation
 
+/// The schema for a VHDL transition.
 struct VHDLTransitionsSchema: SchemaProtocol {
-    
+
+    /// The root is a ``MetaMachine``.
     typealias Root = MetaMachine
-    
+
 }

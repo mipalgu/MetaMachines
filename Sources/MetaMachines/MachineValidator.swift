@@ -56,8 +56,11 @@
  *
  */
 
+/// A protocol for defining types that can validate a machine.
 protocol MachineValidator {
-    
+
+    /// Validate a machine and throw an error if the machine is invalid.
+    /// - Parameter machine: The machine to validate.
     func validate(machine: MetaMachine) throws
-    
+
 }

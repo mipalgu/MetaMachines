@@ -7,8 +7,10 @@
 
 import Foundation
 
-struct VHDLReservedWords {
-    
+/// A list of all reserved words in VHDL.
+enum VHDLReservedWords {
+
+    /// The signal types in VHDL.
     static let signalTypes: Set<String> = [
         "std_logic",
         "std_ulogic",
@@ -17,9 +19,10 @@ struct VHDLReservedWords {
         "std_logic_vector",
         "std_ulogic_vector",
         "bit",
-        "bit_vector",
+        "bit_vector"
     ]
-    
+
+    /// The variable types in VHDL.
     static let variableTypes: Set<String> = [
         "boolean",
         "integer",
@@ -27,7 +30,8 @@ struct VHDLReservedWords {
         "positive",
         "real"
     ]
-    
+
+    /// All the other reserved words in VHDL.
     static let reservedWords: Set<String> = [
         "abs", "access", "after", "alias", "all", "and", "architecture", "array",
         "assert", "attribute", "begin", "block", "body", "buffer", "bus", "case",
@@ -42,9 +46,8 @@ struct VHDLReservedWords {
         "then", "to", "transport", "type", "unaffected", "units", "until", "use",
         "variable", "wait", "when", "while", "with", "xnor", "xor"
     ]
-    
-    static var allReservedWords: Set<String> {
-        signalTypes.union(variableTypes).union(reservedWords)
-    }
-    
+
+    /// All of the reserved words in VHDL.
+    static let allReservedWords: Set<String> = signalTypes.union(variableTypes).union(reservedWords)
+
 }

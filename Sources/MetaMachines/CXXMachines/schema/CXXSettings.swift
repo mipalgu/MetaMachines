@@ -29,7 +29,12 @@ public struct CXXSettings: GroupProtocol {
     }
     
     public mutating func updateSuspendValues(_ validValues: Set<String>) {
-        self.suspendedState.type = .enumerated(validValues: validValues)
+        self._suspendedState = EnumeratedProperty(
+            label: "suspended_state",
+            validValues: validValues
+        ) { state in
+            state.maxLength(255)
+        }
     }
     
 }
