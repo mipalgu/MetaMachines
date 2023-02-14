@@ -60,37 +60,6 @@ import VHDLMachines
 /// Add conversions to MetaMachine types.
 extension VHDLMachines.State {
 
-    /// The `Attributes.AttributeGroup` that represents the action settings for this state.
-    private var actionsGroup: AttributeGroup {
-        AttributeGroup(
-            name: "actions",
-            fields: [
-                Field(name: "action_names", type: .table(columns: [
-                    ("name", .line)
-                ])),
-                Field(name: "action_order", type: .table(columns: [
-                    ("timeslot", .integer),
-                    ("action", .enumerated(validValues: Set(self.actions.keys)))
-                ]))
-            ],
-            attributes: [
-                "action_names": .table(self.actions.keys.sorted().map { [LineAttribute.line($0)] }, columns: [
-                    ("name", .line)
-                ]),
-                "action_order": .table(
-                    self.actionOrder.toLineAttribute(
-                        validValues: Set(self.actions.keys)
-                    ),
-                    columns: [
-                        ("timeslot", .integer),
-                        ("action", .enumerated(validValues: Set(self.actions.keys)))
-                    ]
-                )
-            ],
-            metaData: [:]
-        )
-    }
-
     /// Create a new `VHDLMachines.State` from a ``MetaMachine.State``.
     /// - Parameter state: The ``MetaMachine.State`` to convert.
     public init(state: State) {
@@ -127,14 +96,6 @@ extension VHDLMachines.State {
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
-                ])),
-                Field(name: "state_variables", type: .table(columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("lower_range", .line),
-                    ("upper_range", .line),
-                    ("name", .line),
-                    ("value", .expression(language: .vhdl)),
-                    ("comment", .line)
                 ]))
             ],
             attributes: [
@@ -147,54 +108,11 @@ extension VHDLMachines.State {
                         ("value", .expression(language: .vhdl)),
                         ("comment", .line)
                     ]
-                ),
-                "state_variables": .table(
-                    [],
-                    columns: [
-                        ("type", .expression(language: .vhdl)),
-                        ("lower_range", .line),
-                        ("upper_range", .line),
-                        ("name", .line),
-                        ("value", .expression(language: .vhdl)),
-                        ("comment", .line)
-                    ]
                 )
             ],
             metaData: [:]
         )
-        let actions: Set<String> = ["OnEntry", "OnExit", "Internal", "OnSuspend", "OnResume"]
-        let actionsGroup = AttributeGroup(
-            name: "actions",
-            fields: [
-                Field(name: "action_names", type: .table(columns: [
-                    ("name", .line)
-                ])),
-                Field(name: "action_order", type: .table(columns: [
-                    ("timeslot", .integer),
-                    ("action", .enumerated(validValues: actions))
-                ]))
-            ],
-            attributes: [
-                "action_names": .table(actions.sorted().map { [LineAttribute.line($0)] }, columns: [
-                    ("name", .line)
-                ]),
-                "action_order": .table(
-                    [
-                        [.integer(0), .enumerated("OnResume", validValues: actions)],
-                        [.integer(0), .enumerated("OnSuspend", validValues: actions)],
-                        [.integer(1), .enumerated("OnEntry", validValues: actions)],
-                        [.integer(2), .enumerated("OnExit", validValues: actions)],
-                        [.integer(2), .enumerated("Internal", validValues: actions)]
-                    ],
-                    columns: [
-                        ("timeslot", .integer),
-                        ("action", .enumerated(validValues: actions))
-                    ]
-                )
-            ],
-            metaData: [:]
-        )
-        return [variables, actionsGroup]
+        return [variables]
     }
 
     // swiftlint:enable function_body_length
@@ -204,10 +122,7 @@ extension VHDLMachines.State {
     /// - Parameter machine: The machine this state belongs too.
     /// - Returns: The attributes of this state.
     func attributes(for machine: VHDLMachines.Machine) -> [AttributeGroup] {
-        [
-            variablesGroup(externals: machine.externalSignals.map { $0.name }),
-            actionsGroup
-        ]
+        [variablesGroup(externals: machine.externalSignals.map { $0.name.rawValue })]
     }
 
     /// Create a new `Attributes.AttributeGroup` for the variables of this state.
@@ -225,14 +140,6 @@ extension VHDLMachines.State {
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
-                ])),
-                Field(name: "state_variables", type: .table(columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("lower_range", .line),
-                    ("upper_range", .line),
-                    ("name", .line),
-                    ("value", .expression(language: .vhdl)),
-                    ("comment", .line)
                 ]))
             ],
             attributes: [
@@ -241,17 +148,6 @@ extension VHDLMachines.State {
                     self.signals.map(\.toLineAttribute),
                     columns: [
                         ("type", .expression(language: .vhdl)),
-                        ("name", .line),
-                        ("value", .expression(language: .vhdl)),
-                        ("comment", .line)
-                    ]
-                ),
-                "state_variables": .table(
-                    self.variables.map(\.toLineAttribute),
-                    columns: [
-                        ("type", .expression(language: .vhdl)),
-                        ("lower_range", .line),
-                        ("upper_range", .line),
                         ("name", .line),
                         ("value", .expression(language: .vhdl)),
                         ("comment", .line)

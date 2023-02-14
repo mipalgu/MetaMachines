@@ -19,11 +19,7 @@ enum VHDLReservedWords {
         "std_logic_vector",
         "std_ulogic_vector",
         "bit",
-        "bit_vector"
-    ]
-
-    /// The variable types in VHDL.
-    static let variableTypes: Set<String> = [
+        "bit_vector",
         "boolean",
         "integer",
         "natural",
@@ -48,6 +44,6 @@ enum VHDLReservedWords {
     ]
 
     /// All of the reserved words in VHDL.
-    static let allReservedWords: Set<String> = signalTypes.union(variableTypes).union(reservedWords)
+    static let allReservedWords: Set<String> = signalTypes.union(reservedWords)
 
 }

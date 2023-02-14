@@ -92,77 +92,15 @@ extension State {
         }
     }
 
-    /// Retrieve the VHDL state variables from the states attributes.
-    var vhdlStateVariables: [VHDLMachines.VHDLVariable] {
-        guard
-            let rows = self.attributes.first(where: { $0.name == "variables" })?
-                .attributes["state_variables"]?.tableValue
-        else {
-            return []
-        }
-        return rows.map {
-            guard
-                let lowerRange = Int($0[1].lineValue.trimmingCharacters(in: .whitespaces)),
-                let upperRange = Int($0[2].lineValue.trimmingCharacters(in: .whitespaces))
-            else {
-                return VHDLMachines.VHDLVariable(
-                    type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
-                    name: $0[3].lineValue.trimmingCharacters(in: .whitespaces),
-                    defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces) == "" ? nil :
-                        $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
-                    range: nil,
-                    comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces) == "" ? nil :
-                        $0[5].lineValue.trimmingCharacters(in: .whitespaces)
-                )
-            }
-            return VHDLMachines.VHDLVariable(
-                type: $0[0].expressionValue.trimmingCharacters(in: .whitespaces),
-                name: $0[3].lineValue.trimmingCharacters(in: .whitespaces),
-                defaultValue: $0[4].expressionValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
-                    $0[4].expressionValue.trimmingCharacters(in: .whitespaces),
-                range: (lowerRange, upperRange),
-                comment: $0[5].lineValue.trimmingCharacters(in: .whitespaces).isEmpty ? nil :
-                    $0[5].lineValue.trimmingCharacters(in: .whitespaces)
-            )
-        }
-    }
-
-    /// Retrieve the VHDL action order from the states attributes.
-    var vhdlActionOrder: [[VHDLMachines.ActionName]] {
-        guard
-            let order = self.attributes.first(where: { $0.name == "actions" })?.attributes["action_order"]
-        else {
-            fatalError("Failed to retrieve action attributes.")
-        }
-        if order.tableValue.isEmpty {
-            return [[]]
-        }
-        let maxIndex = order.tableValue.reduce(0) {
-            max($0, $1[0].integerValue)
-        }
-        var actionOrder: [[VHDLMachines.ActionName]] = Array(repeating: [], count: maxIndex + 1)
-        actionOrder.indices.forEach { timeslot in
-            actionOrder[timeslot] = order.tableValue.compactMap { row in
-                if row[0].integerValue == timeslot {
-                    return row[1].enumeratedValue.trimmingCharacters(in: .whitespaces)
-                }
-                return nil
-            }
-        }
-        return actionOrder
-    }
-
     /// Create a new ``State`` from a `VHDLMachines.State`.
     /// - Parameters:
     ///   - state: The `VHDLMachines.State` to convert.
     ///   - machine: The `VHDLMachines.Machine` the state belongs to.
     public init(vhdl state: VHDLMachines.State, in machine: VHDLMachines.Machine) {
-        let actions = state.actionOrder.joined().map {
-            Action(name: $0, implementation: state.actions[$0] ?? "", language: .vhdl)
-        }
         guard let stateIndex = machine.states.firstIndex(where: { $0.name == state.name }) else {
             fatalError("Cannot find state with name: \(state.name).")
         }
+        self.init(name: String, actions: [Action], transitions: [Transition], attributes: [AttributeGroup], metaData: [AttributeGroup])
         self.init(
             name: state.name,
             actions: actions,

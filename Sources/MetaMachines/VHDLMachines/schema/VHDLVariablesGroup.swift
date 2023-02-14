@@ -8,6 +8,7 @@
 import Attributes
 import Foundation
 import VHDLMachines
+import VHDLParsing
 
 /// The group for defining variables and signals that have machine scope. This group also handles the external
 /// variables that the machine is using.
@@ -76,7 +77,7 @@ struct VHDLVariablesGroup: GroupProtocol {
         columns: [
             .enumerated(
                 label: "mode",
-                validValues: Set(VHDLMachines.Mode.allCases.map { $0.rawValue }),
+                validValues: Set(VHDLParsing.Mode.allCases.map { $0.rawValue }),
                 validation: .required()
             ),
             .expression(
@@ -85,7 +86,6 @@ struct VHDLVariablesGroup: GroupProtocol {
                 validation:
                     .required()
                     .greyList(VHDLReservedWords.signalTypes)
-                    .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
             .line(
@@ -103,80 +103,21 @@ struct VHDLVariablesGroup: GroupProtocol {
         ],
         validation: { table in
             table.unique { $0.map { $0[2] } }.maxLength(128)
+            table.validate { (path: ValidationPath<ReadOnlyPath<Attribute, [[LineAttribute]]>>) ->
+                AnyValidator<Attribute> in
+                AnyValidator<Attribute> { attribute throws in
+                    guard !path.path.isNil(attribute) else {
+                        throw ValidationError(message: "Found nil path.", path: path.path)
+                    }
+                    let rows = attribute[keyPath: path.path.keyPath]
+                    try rows.indices.forEach { index in
+                        _ = try PortSignal(externalSignal: path[index], root: attribute)
+                    }
+                }
+            }
         }
     )
     var externalVariables
-
-    /// The generics that generalise the behaviour of the machine. This property directly maps to the generics
-    /// in the entity statement of a VHDL file.
-    @TableProperty(
-        label: "generics",
-        columns: [
-            .expression(
-                label: "type",
-                language: .vhdl,
-                validation:
-                    .required()
-                    .whitelist(VHDLReservedWords.variableTypes)
-                    .blacklist(VHDLReservedWords.signalTypes)
-                    .blacklist(VHDLReservedWords.reservedWords)
-            ),
-            .line(label: "lower_range", validation: .optional().numeric().maxLength(255)),
-            .line(label: "upper_range", validation: .optional().numeric().maxLength(255)),
-            .line(
-                label: "name",
-                validation:
-                    .required()
-                    .alphaunderscore()
-                    .alphaunderscorefirst()
-                    .minLength(1)
-                    .maxLength(255)
-                    .blacklist(VHDLReservedWords.allReservedWords)
-            ),
-            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
-            .line(label: "comment", validation: .optional().maxLength(128))
-        ],
-        validation: { table in
-            table.unique { $0.map { $0[3] } }.maxLength(128)
-        }
-    )
-    var generics
-
-    /// The machine variables defined local to the machine and accessible to every state within the machine.
-    /// Please note that these variables are not true signals, and therefore do not execute asynchronously
-    /// like signals do. They are instead updated immediately with the machines clock without jitter.
-    @TableProperty(
-        label: "machine_variables",
-        columns: [
-            .expression(
-                label: "type",
-                language: .vhdl,
-                validation:
-                    .required()
-                    .whitelist(VHDLReservedWords.variableTypes)
-                    .blacklist(VHDLReservedWords.signalTypes)
-                    .blacklist(VHDLReservedWords.reservedWords)
-            ),
-            .line(label: "lower_range", validation: .optional().numeric().maxLength(255)),
-            .line(label: "upper_range", validation: .optional().numeric().maxLength(255)),
-            .line(
-                label: "name",
-                validation:
-                    .required()
-                    .alphaunderscore()
-                    .alphaunderscorefirst()
-                    .minLength(1)
-                    .maxLength(255)
-                    .blacklist(VHDLReservedWords.allReservedWords)
-            ),
-            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
-            .line(label: "comment", validation: .optional().maxLength(128))
-        ],
-        validation: { table in
-            table.unique { $0.map { $0[3] } }.maxLength(128)
-        }
-    )
-    var machineVariables
 
     /// The machine signals local to the machine and accessible to every state within the machine.
     @TableProperty(
@@ -188,7 +129,6 @@ struct VHDLVariablesGroup: GroupProtocol {
                 validation:
                     .required()
                     .greyList(VHDLReservedWords.signalTypes)
-                    .blacklist(VHDLReservedWords.variableTypes)
                     .blacklist(VHDLReservedWords.reservedWords)
             ),
             .line(

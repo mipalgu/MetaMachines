@@ -135,7 +135,7 @@ extension VHDLMachines.Clock {
     /// Creates `LineAttributes` from a `VHDLMachines.Clock`.
     var toLineAttribute: [LineAttribute] {
         [
-            .line(self.name),
+            .line(self.name.rawValue),
             .integer(Int(self.frequency)),
             .enumerated(
                 self.unit.rawValue,

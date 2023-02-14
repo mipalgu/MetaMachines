@@ -91,36 +91,10 @@ extension Machine {
                         )
                     ),
                     Field(
-                        name: "generics",
-                        type: .table(
-                            columns: [
-                                ("type", .expression(language: .vhdl)),
-                                ("lower_range", .line),
-                                ("upper_range", .line),
-                                ("name", .line),
-                                ("value", .expression(language: .vhdl)),
-                                ("comment", .line)
-                            ]
-                        )
-                    ),
-                    Field(
                         name: "machine_signals",
                         type: .table(
                             columns: [
                                 ("type", .expression(language: .vhdl)),
-                                ("name", .line),
-                                ("value", .expression(language: .vhdl)),
-                                ("comment", .line)
-                            ]
-                        )
-                    ),
-                    Field(
-                        name: "machine_variables",
-                        type: .table(
-                            columns: [
-                                ("type", .expression(language: .vhdl)),
-                                ("lower_range", .line),
-                                ("upper_range", .line),
                                 ("name", .line),
                                 ("value", .expression(language: .vhdl)),
                                 ("comment", .line)
@@ -173,34 +147,6 @@ extension Machine {
                             ("comment", .line)
                         ]
                     ),
-                    "generics": .table(
-                        [
-                            [
-                                .expression("boolean", language: .vhdl),
-                                .line(""),
-                                .line(""),
-                                .line("hasX"),
-                                .expression("true", language: .vhdl),
-                                .line("Bool hasX.")
-                            ],
-                            [
-                                .expression("integer", language: .vhdl),
-                                .line("0"),
-                                .line("255"),
-                                .line("numX"),
-                                .expression("1", language: .vhdl),
-                                .line("Int numX.")
-                            ]
-                        ],
-                        columns: [
-                            ("type", .expression(language: .vhdl)),
-                            ("lower_range", .line),
-                            ("upper_range", .line),
-                            ("name", .line),
-                            ("value", .expression(language: .vhdl)),
-                            ("comment", .line)
-                        ]
-                    ),
                     "machine_signals": .table(
                         [
                             [
@@ -218,34 +164,6 @@ extension Machine {
                         ],
                         columns: [
                             ("type", .expression(language: .vhdl)),
-                            ("name", .line),
-                            ("value", .expression(language: .vhdl)),
-                            ("comment", .line)
-                        ]
-                    ),
-                    "machine_variables": .table(
-                        [
-                            [
-                                .expression("integer", language: .vhdl),
-                                .line("0"),
-                                .line("127"),
-                                .line("numA"),
-                                .expression("0", language: .vhdl),
-                                .line("Int numA.")
-                            ],
-                            [
-                                .expression("integer", language: .vhdl),
-                                .line("0"),
-                                .line("127"),
-                                .line("numB"),
-                                .expression("10", language: .vhdl),
-                                .line("Int numB.")
-                            ]
-                        ],
-                        columns: [
-                            ("type", .expression(language: .vhdl)),
-                            ("lower_range", .line),
-                            ("upper_range", .line),
                             ("name", .line),
                             ("value", .expression(language: .vhdl)),
                             ("comment", .line)
@@ -367,14 +285,6 @@ extension Machine {
                     type: "std_logic", name: "y", mode: .output, defaultValue: "'0'", comment: "Signal y."
                 )
             ],
-            generics: [
-                VHDLVariable(
-                    type: "boolean", name: "hasX", defaultValue: "true", range: nil, comment: "Bool hasX."
-                ),
-                VHDLVariable(
-                    type: "integer", name: "numX", defaultValue: "1", range: (0, 255), comment: "Int numX."
-                )
-            ],
             clocks: [
                 Clock(name: "clk", frequency: 50, unit: .MHz), Clock(name: "clk1", frequency: 1, unit: .GHz)
             ],
@@ -382,14 +292,6 @@ extension Machine {
             dependentMachines: [
                 "Machine2": URL(fileURLWithPath: "Machine2.machine", isDirectory: true),
                 "Machine3": URL(fileURLWithPath: "Machine3.machine", isDirectory: true)
-            ],
-            machineVariables: [
-                VHDLVariable(
-                    type: "integer", name: "numA", defaultValue: "0", range: (0, 127), comment: "Int numA."
-                ),
-                VHDLVariable(
-                    type: "integer", name: "numB", defaultValue: "10", range: (0, 127), comment: "Int numB."
-                )
             ],
             machineSignals: [
                 LocalSignal(type: "std_logic", name: "a", defaultValue: "'0'", comment: "Signal a."),

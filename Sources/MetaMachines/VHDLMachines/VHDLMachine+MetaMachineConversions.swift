@@ -57,6 +57,7 @@
 import Attributes
 import Foundation
 import VHDLMachines
+import VHDLParsing
 
 /// Add conversion properties to create MetaMachine objects.
 extension VHDLMachines.Machine {
@@ -83,24 +84,8 @@ extension VHDLMachines.Machine {
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)
             ])),
-            Field(name: "generics", type: .table(columns: [
-                ("type", .expression(language: .vhdl)),
-                ("lower_range", .line),
-                ("upper_range", .line),
-                ("name", .line),
-                ("value", .expression(language: .vhdl)),
-                ("comment", .line)
-            ])),
             Field(name: "machine_signals", type: .table(columns: [
                 ("type", .expression(language: .vhdl)),
-                ("name", .line),
-                ("value", .expression(language: .vhdl)),
-                ("comment", .line)
-            ])),
-            Field(name: "machine_variables", type: .table(columns: [
-                ("type", .expression(language: .vhdl)),
-                ("lower_range", .line),
-                ("upper_range", .line),
                 ("name", .line),
                 ("value", .expression(language: .vhdl)),
                 ("comment", .line)
@@ -130,32 +115,10 @@ extension VHDLMachines.Machine {
                     ("comment", .line)
                 ]
             ),
-            "generics": .table(
-                self.generics.map(\.toLineAttribute),
-                columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("lower_range", .line),
-                    ("upper_range", .line),
-                    ("name", .line),
-                    ("value", .expression(language: .vhdl)),
-                    ("comment", .line)
-                ]
-            ),
             "machine_signals": .table(
                 self.machineSignals.map(\.toLineAttribute),
                 columns: [
                     ("type", .expression(language: .vhdl)),
-                    ("name", .line),
-                    ("value", .expression(language: .vhdl)),
-                    ("comment", .line)
-                ]
-            ),
-            "machine_variables": .table(
-                self.machineVariables.map(\.toLineAttribute),
-                columns: [
-                    ("type", .expression(language: .vhdl)),
-                    ("lower_range", .line),
-                    ("upper_range", .line),
                     ("name", .line),
                     ("value", .expression(language: .vhdl)),
                     ("comment", .line)
@@ -254,39 +217,54 @@ extension VHDLMachines.Machine {
 
     /// Create a `VHDLMachines.Machine` for the given `MetaMachine`.
     /// - Parameter machine: The meta machine to convert.
-    public init(machine: MetaMachine) {
+    public init?(machine: MetaMachine) {
         // let validator = VHDLMachinesValidator()
         // try validator.validate(machine: machine)
-        let vhdlStates = machine.states.map(VHDLMachines.State.init)
-        let suspendedState = machine.attributes.first { $0.name == "settings" }?
-            .attributes["suspended_state"]?
-            .enumeratedValue
-        let suspendedStateName = (suspendedState?.isEmpty ?? true) ? nil : suspendedState
-        let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex {
-            // swiftlint:disable:next force_unwrapping
-            $0.name == suspendedStateName!
+        // let vhdlStates = machine.states.map(VHDLMachines.State.init)
+        // let suspendedState = machine.attributes.first { $0.name == "settings" }?
+        //     .attributes["suspended_state"]?
+        //     .enumeratedValue
+        // let suspendedStateName = (suspendedState?.isEmpty ?? true) ? nil : suspendedState
+        // let suspendedIndex = suspendedStateName == nil ? nil : vhdlStates.firstIndex {
+        //     // swiftlint:disable:next force_unwrapping
+        //     $0.name == suspendedStateName!
+        // }
+        // // let includes = machine.attributes[2].attributes["includes"]?.codeValue
+        // let portSignalsRaw = machine.attributes[0].attributes["external_signals"]?.tableValue ?? []
+        // let portSignals = portSignalsRaw.map {
+        //     VHDLMachines.PortSignal.init
+        // }
+        guard
+            let onEntry = VariableName(rawValue: "OnEntry"),
+            let onExit = VariableName(rawValue: "OnExit"),
+            let `internal` = VariableName(rawValue: "Internal"),
+            let onSuspend = VariableName(rawValue: "OnSuspend"),
+            let onResume = VariableName(rawValue: "OnResume"),
+            let name = VariableName(rawValue: machine.name)
+        else {
+            return nil
         }
-        self.init(
-            name: machine.name,
-            path: URL(fileURLWithPath: "\(machine.name).machine", isDirectory: true),
-            includes: machine.vhdlIncludes,
-            externalSignals: machine.vhdlExternalSignals,
-            generics: machine.vhdlGenerics,
-            clocks: machine.vhdlClocks,
-            drivingClock: machine.vhdlDrivingClock,
-            dependentMachines: machine.vhdlDependentMachines,
-            machineVariables: machine.vhdlMachineVariables,
-            machineSignals: machine.vhdlMachineSignals,
-            isParameterised: machine.vhdlIsParameterised,
-            parameterSignals: machine.vhdlParameterSignals,
-            returnableSignals: machine.vhdlReturnableSignals,
-            states: machine.states.map(VHDLMachines.State.init),
-            transitions: machine.vhdlTransitions,
-            initialState: (machine.states.firstIndex { machine.initialState == $0.name }) ?? 0,
-            suspendedState: suspendedIndex,
-            architectureHead: machine.vhdlArchitectureHead,
-            architectureBody: machine.vhdlArchitectureBody
-        )
+        // self.init(
+        //     actions: [onEntry, onExit, `internal`, onSuspend, onResume],
+        //     name: name,
+        //     path: URL(fileURLWithPath: "/tmp/\(machine.name).machine", isDirectory: true),
+        //     includes: [],
+        //     externalSignals: [PortSignal],
+        //     clocks: [Clock],
+        //     drivingClock: Int,
+        //     dependentMachines: [VariableName : URL],
+        //     machineSignals: [LocalSignal],
+        //     isParameterised: Bool,
+        //     parameterSignals: [Parameter],
+        //     returnableSignals: [ReturnableVariable],
+        //     states: [State],
+        //     transitions: [Transition],
+        //     initialState: Int,
+        //     suspendedState: Int?,
+        //     architectureHead: [Statement]?,
+        //     architectureBody: AsynchronousBlock?
+        // )
+        return nil
     }
 
 }

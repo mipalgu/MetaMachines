@@ -50,14 +50,6 @@ struct VHDLSchema: MachineSchema {
                 elementPath: Path([LineAttribute].self)[2]
             ),
             CollectionSearchPath(
-                collectionPath: variables.path.attributes["generics"].wrappedValue.tableValue,
-                elementPath: Path([LineAttribute].self)[3]
-            ),
-            CollectionSearchPath(
-                collectionPath: variables.path.attributes["machine_variables"].wrappedValue.tableValue,
-                elementPath: Path([LineAttribute].self)[3]
-            ),
-            CollectionSearchPath(
                 collectionPath: variables.path.attributes["machine_signals"].wrappedValue.tableValue,
                 elementPath: Path([LineAttribute].self)[1]
             ),
@@ -124,16 +116,6 @@ struct VHDLSchema: MachineSchema {
             $0.notEmpty()
         }
         self.stateSchema.variables.$externals.update(validValues: Set(externals))
-        let stateActions = states.first?.actions.map(\.name) ??
-            ["OnEntry", "OnExit", "Internal", "OnSuspend", "OnResume"]
-        self.stateSchema.actions.$actionOrder.update(
-            columns: [
-                .integer(label: "timeslot", validation: .required().between(min: 0, max: 255)),
-                .enumerated(label: "action", validValues: Set(stateActions), validation: .required())
-            ]
-        ) { table in
-            table.notEmpty().maxLength(128)
-        }
     }
 
     /// Create a new `VHDLSchema` with stored data. This initialiser simply sets the stored properties with
@@ -311,17 +293,6 @@ struct VHDLSchema: MachineSchema {
                 CollectionSearchPath(
                     collectionPath: variablePath.attributes["state_signals"].wrappedValue.tableValue,
                     elementPath: Path([LineAttribute].self)[1]
-                ),
-                CollectionSearchPath(
-                    collectionPath: variablePath.attributes["state_variables"].wrappedValue.tableValue,
-                    elementPath: Path([LineAttribute].self)[3]
-                )
-            ]
-        } + stateSchema.actions.path.paths(in: root).flatMap { actionPath in
-            [
-                CollectionSearchPath(
-                    collectionPath: actionPath.attributes["action_names"].wrappedValue.tableValue,
-                    elementPath: Path([LineAttribute].self)[0]
                 )
             ]
         }

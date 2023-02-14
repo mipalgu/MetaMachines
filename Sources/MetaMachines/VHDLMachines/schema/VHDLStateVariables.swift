@@ -64,42 +64,4 @@ struct VHDLStateVariables: GroupProtocol {
     )
     var stateSignals
 
-    /// Any variables local to this state.
-    @TableProperty(
-        label: "state_variables",
-        columns: [
-            .expression(
-                label: "type",
-                language: .vhdl,
-                validation:
-                    .required()
-                    .whitelist(VHDLReservedWords.variableTypes)
-                    .blacklist(VHDLReservedWords.signalTypes)
-                    .blacklist(VHDLReservedWords.reservedWords)
-            ),
-            .line(
-                label: "lower_range",
-                validation: .optional().numeric().maxLength(255)
-            ),
-            .line(
-                label: "upper_range",
-                validation: .optional().numeric().maxLength(255)
-            ),
-            .line(
-                label: "name",
-                validation:
-                    .required()
-                    .alphaunderscore()
-                    .alphaunderscorefirst()
-                    .minLength(1)
-                    .maxLength(255)
-                    .blacklist(VHDLReservedWords.allReservedWords)
-            ),
-            .expression(label: "value", language: .vhdl, validation: .optional().maxLength(128)),
-            .line(label: "comment", validation: .optional().maxLength(128))
-        ],
-        validation: { $0.unique { $0.map { $0[3] } }.maxLength(128) }
-    )
-    var stateVariables
-
 }

@@ -20,8 +20,4 @@ struct VHDLStateSchema: SchemaProtocol {
     @Group
     var variables = VHDLStateVariables()
 
-    /// The actions executed in the state.
-    @Group
-    var actions = VHDLStateActions()
-
 }
